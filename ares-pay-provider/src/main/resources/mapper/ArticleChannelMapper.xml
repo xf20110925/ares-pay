@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ptb.pay.mapper.impl.ArticleChannelMapper" >
+  <resultMap id="BaseResultMap" type="com.ptb.pay.model.ArticleChannel" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="name" property="name" jdbcType="VARCHAR" />
+    <result column="i_id" property="iId" jdbcType="INTEGER" />
+    <result column="pic_url" property="picUrl" jdbcType="VARCHAR" />
+    <result column="background_url" property="backgroundUrl" jdbcType="VARCHAR" />
+    <result column="max_num" property="maxNum" jdbcType="INTEGER" />
+    <result column="plat_type" property="platType" jdbcType="INTEGER" />
+    <result column="add_time" property="addTime" jdbcType="TIMESTAMP" />
+    <result column="recommend_id" property="recommendId" jdbcType="BIGINT" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, name, i_id, pic_url, background_url, max_num, plat_type, add_time, recommend_id
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from article_channel
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from article_channel
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.ptb.pay.model.ArticleChannel" >
+    insert into article_channel (id, name, i_id, 
+      pic_url, background_url, max_num, 
+      plat_type, add_time,
+      recommend_id)
+    values (#{id,jdbcType=INTEGER}, #{name,jdbcType=VARCHAR}, #{iId,jdbcType=INTEGER}, 
+      #{picUrl,jdbcType=VARCHAR}, #{backgroundUrl,jdbcType=VARCHAR}, #{maxNum,jdbcType=INTEGER}, 
+      #{platType,jdbcType=INTEGER}, #{addTime,jdbcType=TIMESTAMP},
+      #{recommendId,jdbcType=BIGINT})
+  </insert>
+  <insert id="insertSelective" parameterType="com.ptb.pay.model.ArticleChannel" >
+    insert into article_channel
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="name != null" >
+        name,
+      </if>
+      <if test="iId != null" >
+        i_id,
+      </if>
+      <if test="picUrl != null" >
+        pic_url,
+      </if>
+      <if test="backgroundUrl != null" >
+        background_url,
+      </if>
+      <if test="maxNum != null" >
+        max_num,
+      </if>
+      <if test="platType != null" >
+        plat_type,
+      </if>
+      <if test="addTime != null" >
+        add_time,
+      </if>
+      <if test="recommendId != null" >
+        recommend_id,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="name != null" >
+        #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="iId != null" >
+        #{iId,jdbcType=INTEGER},
+      </if>
+      <if test="picUrl != null" >
+        #{picUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="backgroundUrl != null" >
+        #{backgroundUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="maxNum != null" >
+        #{maxNum,jdbcType=INTEGER},
+      </if>
+      <if test="platType != null" >
+        #{platType,jdbcType=INTEGER},
+      </if>
+      <if test="addTime != null" >
+        #{addTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="recommendId != null" >
+        #{recommendId,jdbcType=BIGINT},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.ptb.pay.model.ArticleChannel" >
+    update article_channel
+    <set >
+      <if test="name != null" >
+        name = #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="iId != null" >
+        i_id = #{iId,jdbcType=INTEGER},
+      </if>
+      <if test="picUrl != null" >
+        pic_url = #{picUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="backgroundUrl != null" >
+        background_url = #{backgroundUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="maxNum != null" >
+        max_num = #{maxNum,jdbcType=INTEGER},
+      </if>
+      <if test="platType != null" >
+        plat_type = #{platType,jdbcType=INTEGER},
+      </if>
+      <if test="addTime != null" >
+        add_time = #{addTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="recommendId != null" >
+        recommend_id = #{recommendId,jdbcType=BIGINT},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.ptb.pay.model.ArticleChannel" >
+    update article_channel
+    set name = #{name,jdbcType=VARCHAR},
+      i_id = #{iId,jdbcType=INTEGER},
+      pic_url = #{picUrl,jdbcType=VARCHAR},
+      background_url = #{backgroundUrl,jdbcType=VARCHAR},
+      max_num = #{maxNum,jdbcType=INTEGER},
+      plat_type = #{platType,jdbcType=INTEGER},
+      add_time = #{addTime,jdbcType=TIMESTAMP},
+      recommend_id = #{recommendId,jdbcType=BIGINT}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>
