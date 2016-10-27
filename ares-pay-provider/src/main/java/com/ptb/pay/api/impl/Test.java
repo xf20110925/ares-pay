@@ -3,7 +3,9 @@ package com.ptb.pay.api.impl;
 import com.ptb.pay.api.ITestApi;
 import com.ptb.pay.mapper.impl.ArticleChannelMapper;
 import com.ptb.pay.model.ArticleChannel;
+import com.ptb.pay.util.ReturnUtil;
 import com.ptb.pay.util.redis.JedisUtil;
+import com.ptb.pay.vo.response.ResponseVo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +24,7 @@ public class Test implements ITestApi {
     @Autowired
     private ArticleChannelMapper articleChannelMapper;
 
-    public void test(){
+    public ResponseVo<Object> test(){
         List<ArticleChannel> list = articleChannelMapper.selectAll();
         logger.info( "===================={}", list.size());
         for ( ArticleChannel articleChannel : list){
@@ -32,5 +34,6 @@ public class Test implements ITestApi {
         logger.error( "*******************name:{}", articleChannel.getName());
 
         JedisUtil.set( "test", articleChannel.getName());
+        return ReturnUtil.success();
     }
 }
