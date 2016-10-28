@@ -1,8 +1,7 @@
 package com.ptb.pay.api;
 
-import com.ptb.pay.vo.response.ResponseVo;
 
-import javax.xml.ws.Response;
+import com.ptb.common.vo.ResponseVo;
 
 /**
  * Created by zuokui.fu on 2016/10/18.

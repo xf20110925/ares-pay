@@ -1,11 +1,11 @@
 package com.ptb.pay.api.impl;
 
+import com.ptb.common.vo.ResponseVo;
 import com.ptb.pay.api.ITestApi;
 import com.ptb.pay.mapper.impl.ArticleChannelMapper;
 import com.ptb.pay.model.ArticleChannel;
-import com.ptb.pay.util.ReturnUtil;
 import com.ptb.pay.util.redis.JedisUtil;
-import com.ptb.pay.vo.response.ResponseVo;
+import com.ptb.utils.service.ReturnUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,7 +33,6 @@ public class Test implements ITestApi {
         ArticleChannel articleChannel = articleChannelMapper.selectInfoById( 11);
         logger.error( "*******************name:{}", articleChannel.getName());
 
-        JedisUtil.set( "test", articleChannel.getName());
         return ReturnUtil.success();
     }
 }

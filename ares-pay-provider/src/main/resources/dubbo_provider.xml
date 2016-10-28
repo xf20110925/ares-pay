@@ -17,7 +17,6 @@
     <dubbo:service interface="com.ptb.pay.api.ITestApi"
                    ref="testApi"
                    registry="payProvider"
-                   timeout="5000"
                    loadbalance="roundrobin"
                    owner="zuokui.fu"
                    version="1.0" />
