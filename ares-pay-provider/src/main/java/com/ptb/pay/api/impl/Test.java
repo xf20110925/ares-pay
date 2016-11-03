@@ -1,17 +1,17 @@
 package com.ptb.pay.api.impl;
 
-import com.ptb.common.vo.ResponseVo;
-import com.ptb.pay.api.ITestApi;
-import com.ptb.pay.mapper.impl.ArticleChannelMapper;
-import com.ptb.pay.model.ArticleChannel;
-import com.ptb.pay.util.redis.JedisUtil;
-import com.ptb.utils.service.ReturnUtil;
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
+import com.ptb.common.vo.ResponseVo;
+import com.ptb.pay.api.ITestApi;
+import com.ptb.pay.mapper.impl.ArticleChannelMapper;
+import com.ptb.pay.model.ArticleChannel;
+import com.ptb.utils.service.ReturnUtil;
 
 /**
  * Created by zuokui.fu on 2016/10/18.
