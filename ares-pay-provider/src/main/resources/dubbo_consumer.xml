@@ -12,7 +12,7 @@
 	<dubbo:registry address="${dubbo.registry.address}"
 		protocol="zookeeper" id="payProvider" />
 
-	<dubbo:protocol name="dubbo" port="${dubbo.port}"
+	<dubbo:protocol name="dubbo" port="${dubbo.port.pay}"
 		dispather="all" threadpool="cached" threads="5000" />
 
 	<dubbo:reference interface="com.ptb.service.api.ISystemConfigApi"

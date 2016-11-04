@@ -12,6 +12,7 @@ import com.alibaba.fastjson.JSON;
 import com.ptb.common.errorcode.CommonErrorCode;
 import com.ptb.common.vo.ResponseVo;
 import com.ptb.pay.api.IPaymentApi;
+import com.ptb.service.api.IBlockApi;
 import com.ptb.service.api.ISystemConfigApi;
 import com.ptb.utils.service.ReturnUtil;
 
@@ -33,7 +34,7 @@ public class PaymentApiImpl implements IPaymentApi {
 	private static final String SYSTEM_ALOW_PAYMENT = "system.alow.payment";
 
 	@Autowired
-	private ISystemConfigApi systemConfigApi;
+	private IBlockApi blockApi;
 
 	/*
 	 * (non-Javadoc)
@@ -43,7 +44,7 @@ public class PaymentApiImpl implements IPaymentApi {
 	@SuppressWarnings("unchecked")
 	@Override
 	public ResponseVo<List<PaymentVo>> getPaymentList(String deviceType) throws Exception {
-		ResponseVo<String> systemAlowPaymentMethod = systemConfigApi.getConfig(SYSTEM_ALOW_PAYMENT);
+		ResponseVo<String> systemAlowPaymentMethod = blockApi.getBlockValueByCode(SYSTEM_ALOW_PAYMENT);
 		if (!"0".equals(systemAlowPaymentMethod.getCode()) || StringUtils.isBlank(systemAlowPaymentMethod.getData())) {
 			return ReturnUtil.error(CommonErrorCode.COMMMON_ERROR_INERERROR.getCode(),
 					CommonErrorCode.COMMMON_ERROR_INERERROR.getMessage());
