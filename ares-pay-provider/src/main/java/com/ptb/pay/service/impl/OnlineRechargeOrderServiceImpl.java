@@ -1,11 +1,13 @@
 package com.ptb.pay.service.impl;
 
 import com.ptb.common.enums.RechargeOrderNoStatusEnum;
+import com.ptb.pay.mapper.impl.RechargeOrderMapper;
 import com.ptb.pay.model.RechargeOrder;
 import com.ptb.pay.service.IOnlinePaymentService;
 import com.ptb.pay.service.IRechargeOrderService;
 import com.ptb.pay.service.factory.OnlinePaymentServiceFactory;
 import com.ptb.utils.tool.GenerateOrderNoUtil;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import vo.RechargeOrderParamsVO;
@@ -24,6 +26,8 @@ import java.util.Map;
 @Transactional
 public class OnlineRechargeOrderServiceImpl implements IRechargeOrderService{
 
+    @Autowired
+    private RechargeOrderMapper rechargeOrderMapper;
 
     @Override
     public RechargeOrder createRechargeOrder(RechargeOrderParamsVO paramsVO) throws Exception {
@@ -37,6 +41,8 @@ public class OnlineRechargeOrderServiceImpl implements IRechargeOrderService{
         rechargeOrder.setStatus(RechargeOrderNoStatusEnum.unpay.getRechargeOrderNoStatus());
         rechargeOrder.setTotalAmount(paramsVO.getRechargeAmount());
         rechargeOrder.setUserId(paramsVO.getUserId());
+        rechargeOrder.setPayType(paramsVO.getPayType());
+        rechargeOrderMapper.insert(rechargeOrder);
         return rechargeOrder;
     }
 

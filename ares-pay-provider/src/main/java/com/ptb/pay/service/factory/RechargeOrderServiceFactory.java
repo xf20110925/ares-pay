@@ -2,8 +2,7 @@ package com.ptb.pay.service.factory;
 
 import com.ptb.common.enums.PaymentMethodEnum;
 import com.ptb.pay.service.IRechargeOrderService;
-import com.ptb.pay.service.impl.OfflineRechargeOrderServiceImpl;
-import com.ptb.pay.service.impl.OnlineRechargeOrderServiceImpl;
+import com.ptb.pay.system.SpringContextHolder;
 
 /**
  * Description:
@@ -22,8 +21,8 @@ public class RechargeOrderServiceFactory {
      */
     public static IRechargeOrderService createService(int payMethod){
         if (PaymentMethodEnum.online.getPaymentMethod() == payMethod)
-            return new OnlineRechargeOrderServiceImpl();
+            return SpringContextHolder.getBean("onlineRechargeOrderServiceImpl");
         else
-            return new OfflineRechargeOrderServiceImpl();
+            return SpringContextHolder.getBean("offlineRechargeOrderServiceImpl");
     }
 }

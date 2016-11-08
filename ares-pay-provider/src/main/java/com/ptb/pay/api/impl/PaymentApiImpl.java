@@ -4,11 +4,11 @@ import com.alibaba.fastjson.JSON;
 import com.ptb.common.errorcode.CommonErrorCode;
 import com.ptb.common.vo.ResponseVo;
 import com.ptb.pay.api.IPaymentApi;
+import com.ptb.pay.mapper.impl.RechargeOrderMapper;
 import com.ptb.pay.model.RechargeOrder;
 import com.ptb.pay.service.IRechargeOrderService;
 import com.ptb.pay.service.factory.RechargeOrderServiceFactory;
 import com.ptb.service.api.IBlockApi;
-import com.ptb.service.api.ISystemConfigApi;
 import com.ptb.utils.service.ReturnUtil;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -43,7 +43,7 @@ public class PaymentApiImpl implements IPaymentApi {
     private IBlockApi blockApi;
 
     @Autowired
-    private ISystemConfigApi systemConfigApi;
+    private RechargeOrderMapper rechargeOrderMapper;
 
 
     @SuppressWarnings("unchecked")

@@ -2,8 +2,7 @@ package com.ptb.pay.service.factory;
 
 import com.ptb.common.enums.OnlinePaymentTypeEnum;
 import com.ptb.pay.service.IOnlinePaymentService;
-import com.ptb.pay.service.impl.AlipayOnlinePaymentServiceImpl;
-import com.ptb.pay.service.impl.WxpayOnlinePaymentServiceImpl;
+import com.ptb.pay.system.SpringContextHolder;
 
 /**
  * Description: 在线支付方式工厂
@@ -15,9 +14,9 @@ public class OnlinePaymentServiceFactory {
 
     public static IOnlinePaymentService createService(int payType){
         if (OnlinePaymentTypeEnum.ALIPAY.getPaymentTypeId() == payType)
-            return new AlipayOnlinePaymentServiceImpl();
+            return SpringContextHolder.getBean("alipayOnlinePaymentServiceImpl");
         else if (OnlinePaymentTypeEnum.WXPAY.getPaymentTypeId() == payType)
-            return new WxpayOnlinePaymentServiceImpl();
+            return SpringContextHolder.getBean("wxpayOnlinePaymentServiceImpl");
         else
             return null;
     }

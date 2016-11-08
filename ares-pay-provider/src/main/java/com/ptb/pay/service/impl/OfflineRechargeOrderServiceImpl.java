@@ -9,7 +9,7 @@ import com.ptb.service.api.ISystemConfigApi;
 import com.ptb.utils.tool.GenerateOrderNoUtil;
 import org.apache.commons.lang.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import vo.RechargeOrderParamsVO;
@@ -22,7 +22,7 @@ import java.util.*;
  *
  * @version 1.0  2016-11-07 19:45  by wgh（guanhua.wang@pintuibao.cn）创建
  */
-@Service
+@Component
 @Transactional
 public class OfflineRechargeOrderServiceImpl implements IRechargeOrderService {
 

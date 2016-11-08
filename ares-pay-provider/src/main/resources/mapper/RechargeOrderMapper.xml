@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="com.ptb.pay.web.mapper.impl.RechargeOrderMapper" >
-  <resultMap id="BaseResultMap" type="com.ptb.pay.web.model.RechargeOrder" >
+<mapper namespace="com.ptb.pay.mapper.impl.RechargeOrderMapper" >
+  <resultMap id="BaseResultMap" type="com.ptb.pay.model.RechargeOrder" >
     <id column="ptb_recharge_order_id" property="ptbRechargeOrderId" jdbcType="BIGINT" />
     <result column="recharge_order_no" property="rechargeOrderNo" jdbcType="VARCHAR" />
     <result column="pay_type" property="payType" jdbcType="TINYINT" />
@@ -78,7 +78,7 @@
     ptb_recharge_order_id, recharge_order_no, pay_type, user_id, pay_method, total_amount, 
     receipt_amount, processing_amount, create_time, pay_time, status, order_no, verification_code
   </sql>
-  <select id="selectByExample" resultMap="BaseResultMap" parameterType="com.ptb.pay.web.model.RechargeOrderExample" >
+  <select id="selectByExample" resultMap="BaseResultMap" parameterType="com.ptb.pay.model.RechargeOrderExample" >
     select
     <if test="distinct" >
       distinct
@@ -102,13 +102,13 @@
     delete from ptb_recharge_order
     where ptb_recharge_order_id = #{ptbRechargeOrderId,jdbcType=BIGINT}
   </delete>
-  <delete id="deleteByExample" parameterType="com.ptb.pay.web.model.RechargeOrderExample" >
+  <delete id="deleteByExample" parameterType="com.ptb.pay.model.RechargeOrderExample" >
     delete from ptb_recharge_order
     <if test="_parameter != null" >
       <include refid="Example_Where_Clause" />
     </if>
   </delete>
-  <insert id="insert" parameterType="com.ptb.pay.web.model.RechargeOrder" >
+  <insert id="insert" parameterType="com.ptb.pay.model.RechargeOrder" >
     insert into ptb_recharge_order (ptb_recharge_order_id, recharge_order_no, 
       pay_type, user_id, pay_method, 
       total_amount, receipt_amount, processing_amount, 
@@ -120,7 +120,7 @@
       #{createTime,jdbcType=TIMESTAMP}, #{payTime,jdbcType=TIMESTAMP}, #{status,jdbcType=BIT}, 
       #{orderNo,jdbcType=VARCHAR}, #{verificationCode,jdbcType=VARCHAR})
   </insert>
-  <insert id="insertSelective" parameterType="com.ptb.pay.web.model.RechargeOrder" >
+  <insert id="insertSelective" parameterType="com.ptb.pay.model.RechargeOrder" >
     insert into ptb_recharge_order
     <trim prefix="(" suffix=")" suffixOverrides="," >
       <if test="ptbRechargeOrderId != null" >
@@ -271,7 +271,7 @@
       <include refid="Update_By_Example_Where_Clause" />
     </if>
   </update>
-  <update id="updateByPrimaryKeySelective" parameterType="com.ptb.pay.web.model.RechargeOrder" >
+  <update id="updateByPrimaryKeySelective" parameterType="com.ptb.pay.model.RechargeOrder" >
     update ptb_recharge_order
     <set >
       <if test="rechargeOrderNo != null" >
@@ -313,7 +313,7 @@
     </set>
     where ptb_recharge_order_id = #{ptbRechargeOrderId,jdbcType=BIGINT}
   </update>
-  <update id="updateByPrimaryKey" parameterType="com.ptb.pay.web.model.RechargeOrder" >
+  <update id="updateByPrimaryKey" parameterType="com.ptb.pay.model.RechargeOrder" >
     update ptb_recharge_order
     set recharge_order_no = #{rechargeOrderNo,jdbcType=VARCHAR},
       pay_type = #{payType,jdbcType=TINYINT},

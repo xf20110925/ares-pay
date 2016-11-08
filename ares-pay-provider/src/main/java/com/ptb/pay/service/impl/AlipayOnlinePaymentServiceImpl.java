@@ -5,6 +5,7 @@ import com.alipay.api.internal.util.AlipaySignature;
 import com.ptb.common.vo.ResponseVo;
 import com.ptb.pay.service.IOnlinePaymentService;
 import com.ptb.service.api.ISystemConfigApi;
+import com.ptb.utils.tool.ChangeMoneyUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,7 +14,7 @@ import org.springframework.util.CollectionUtils;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -81,7 +82,7 @@ public class AlipayOnlinePaymentServiceImpl implements IOnlinePaymentService{
         }
         Map<String, String> alipayInfo = result.getData();
 
-        Map<String, String> toSignParams = Collections.emptyMap();
+        Map<String, String> toSignParams = new HashMap<String, String>();
         // 签约合作者身份ID
         String orderInfo = "partner=" + "\"" + alipayInfo.get(SYSTEM_CONFIG_ALIPAY_PARTNER) + "\"";
         toSignParams.put("partner", alipayInfo.get(SYSTEM_CONFIG_ALIPAY_PARTNER));
@@ -97,9 +98,11 @@ public class AlipayOnlinePaymentServiceImpl implements IOnlinePaymentService{
         // 商品详情
         orderInfo += "&body=" + "\"" + alipayInfo.get(SYSTEM_CONFIG_ALIPAY_BODY) + "\"";
         toSignParams.put("body", alipayInfo.get(SYSTEM_CONFIG_ALIPAY_BODY));
+
         // 商品金额
-        orderInfo += "&total_fee=" + "\"" + price + "\"";
-        toSignParams.put("total_fee", String.valueOf(price));
+        String totalFeeStr = ChangeMoneyUtil.fromFenToYuan(String.valueOf(price));
+        orderInfo += "&total_fee=" + "\"" + totalFeeStr + "\"";
+        toSignParams.put("total_fee", totalFeeStr);
         // 服务器异步通知页面路径
         orderInfo += "&notify_url=" + "\"" + alipayInfo.get(SYSTEM_CONFIG_ALIPAY_NOTIFYURL) + "\"";
         toSignParams.put("notify_url", alipayInfo.get(SYSTEM_CONFIG_ALIPAY_NOTIFYURL));
@@ -117,7 +120,7 @@ public class AlipayOnlinePaymentServiceImpl implements IOnlinePaymentService{
         toSignParams.put("return_url", alipayInfo.get(SYSTEM_CONFIG_ALIPAY_RETURNURL));
         String sign = null;
         try {
-            sign = AlipaySignature.rsaSign(toSignParams, alipayInfo.get(SYSTEM_CONFIG_ALIPAY_RETURNURL), ALIPAY_SIGN_CHARSET);
+            sign = AlipaySignature.rsaSign(toSignParams, alipayInfo.get(SYSTEM_CONFIG_ALIPAY_PRIVATEKEY), ALIPAY_SIGN_CHARSET);
             /**
              * 仅需对sign 做URL编码
              */
