@@ -14,7 +14,7 @@ import java.util.List;
  * All Rights Reserved.
  * @version 1.0  2016年11月2日 下午6:27:49  by 王冠华（guanhua.wang@pintuibao.cn）创建
  */
-public class PaymentVo implements Serializable{
+public class PaymentVO implements Serializable{
 
 	/**
 	 * 
@@ -23,7 +23,7 @@ public class PaymentVo implements Serializable{
 	
 	private int id;
 	private String name;
-	private List<PaymentVo> children;
+	private List<PaymentVO> children;
 	
 	/**
 	 * @return the id
@@ -52,13 +52,13 @@ public class PaymentVo implements Serializable{
 	/**
 	 * @return the children
 	 */
-	public List<PaymentVo> getChildren() {
+	public List<PaymentVO> getChildren() {
 		return children;
 	}
 	/**
 	 * @param children the children to set
 	 */
-	public void setChildren(List<PaymentVo> children) {
+	public void setChildren(List<PaymentVO> children) {
 		this.children = children;
 	}
 	
