@@ -1,0 +1,56 @@
+package com.ptb.pay.service.impl;
+
+import com.ptb.common.enums.RechargeOrderNoStatusEnum;
+import com.ptb.pay.model.RechargeOrder;
+import com.ptb.pay.service.IOnlinePaymentService;
+import com.ptb.pay.service.IRechargeOrderService;
+import com.ptb.pay.service.factory.OnlinePaymentServiceFactory;
+import com.ptb.utils.tool.GenerateOrderNoUtil;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import vo.RechargeOrderParamsVO;
+
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+
+/**
+ * Description: 线上充值接口
+ * All Rights Reserved.
+ *
+ * @version 1.0  2016-11-07 19:44  by wgh（guanhua.wang@pintuibao.cn）创建
+ */
+@Service
+@Transactional
+public class OnlineRechargeOrderServiceImpl implements IRechargeOrderService{
+
+
+    @Override
+    public RechargeOrder createRechargeOrder(RechargeOrderParamsVO paramsVO) throws Exception {
+
+        Date now = new Date();
+        RechargeOrder rechargeOrder = new RechargeOrder();
+        rechargeOrder.setCreateTime(now);
+        rechargeOrder.setOrderNo(paramsVO.getOrderNo());
+        rechargeOrder.setPayMethod(paramsVO.getPayMethod());
+        rechargeOrder.setRechargeOrderNo(GenerateOrderNoUtil.createRechargeOrderNo(paramsVO.getDeviceType(), paramsVO.getPayMethod()));
+        rechargeOrder.setStatus(RechargeOrderNoStatusEnum.unpay.getRechargeOrderNoStatus());
+        rechargeOrder.setTotalAmount(paramsVO.getRechargeAmount());
+        rechargeOrder.setUserId(paramsVO.getUserId());
+        return rechargeOrder;
+    }
+
+    @Override
+    public Map<String, Object> getReturnData(RechargeOrder rechargeOrder) throws Exception {
+        IOnlinePaymentService onlinePaymentService = OnlinePaymentServiceFactory.createService(rechargeOrder.getPayType());
+        String orderInfo = onlinePaymentService.getPaymentInfo(rechargeOrder.getRechargeOrderNo(), rechargeOrder.getTotalAmount());
+        Map<String, Object> returnData = new HashMap<String, Object>();
+        returnData.put("rechargeOrderNo", rechargeOrder.getRechargeOrderNo());
+        returnData.put("orderInfo", orderInfo);
+        returnData.put("rechargeAmount", rechargeOrder.getTotalAmount());
+        returnData.put("payType", rechargeOrder.getPayType());
+        returnData.put("payMethod", rechargeOrder.getPayMethod());
+        return returnData;
+    }
+
+}

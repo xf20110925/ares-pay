@@ -1,0 +1,332 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ptb.pay.web.mapper.impl.RechargeOrderMapper" >
+  <resultMap id="BaseResultMap" type="com.ptb.pay.web.model.RechargeOrder" >
+    <id column="ptb_recharge_order_id" property="ptbRechargeOrderId" jdbcType="BIGINT" />
+    <result column="recharge_order_no" property="rechargeOrderNo" jdbcType="VARCHAR" />
+    <result column="pay_type" property="payType" jdbcType="TINYINT" />
+    <result column="user_id" property="userId" jdbcType="BIGINT" />
+    <result column="pay_method" property="payMethod" jdbcType="TINYINT" />
+    <result column="total_amount" property="totalAmount" jdbcType="BIGINT" />
+    <result column="receipt_amount" property="receiptAmount" jdbcType="BIGINT" />
+    <result column="processing_amount" property="processingAmount" jdbcType="BIGINT" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="pay_time" property="payTime" jdbcType="TIMESTAMP" />
+    <result column="status" property="status" jdbcType="BIT" />
+    <result column="order_no" property="orderNo" jdbcType="VARCHAR" />
+    <result column="verification_code" property="verificationCode" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Example_Where_Clause" >
+    <where >
+      <foreach collection="oredCriteria" item="criteria" separator="or" >
+        <if test="criteria.valid" >
+          <trim prefix="(" suffix=")" prefixOverrides="and" >
+            <foreach collection="criteria.criteria" item="criterion" >
+              <choose >
+                <when test="criterion.noValue" >
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue" >
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue" >
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue" >
+                  and ${criterion.condition}
+                  <foreach collection="criterion.value" item="listItem" open="(" close=")" separator="," >
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Update_By_Example_Where_Clause" >
+    <where >
+      <foreach collection="example.oredCriteria" item="criteria" separator="or" >
+        <if test="criteria.valid" >
+          <trim prefix="(" suffix=")" prefixOverrides="and" >
+            <foreach collection="criteria.criteria" item="criterion" >
+              <choose >
+                <when test="criterion.noValue" >
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue" >
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue" >
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue" >
+                  and ${criterion.condition}
+                  <foreach collection="criterion.value" item="listItem" open="(" close=")" separator="," >
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List" >
+    ptb_recharge_order_id, recharge_order_no, pay_type, user_id, pay_method, total_amount, 
+    receipt_amount, processing_amount, create_time, pay_time, status, order_no, verification_code
+  </sql>
+  <select id="selectByExample" resultMap="BaseResultMap" parameterType="com.ptb.pay.web.model.RechargeOrderExample" >
+    select
+    <if test="distinct" >
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from ptb_recharge_order
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+  </select>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select 
+    <include refid="Base_Column_List" />
+    from ptb_recharge_order
+    where ptb_recharge_order_id = #{ptbRechargeOrderId,jdbcType=BIGINT}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+    delete from ptb_recharge_order
+    where ptb_recharge_order_id = #{ptbRechargeOrderId,jdbcType=BIGINT}
+  </delete>
+  <delete id="deleteByExample" parameterType="com.ptb.pay.web.model.RechargeOrderExample" >
+    delete from ptb_recharge_order
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+  </delete>
+  <insert id="insert" parameterType="com.ptb.pay.web.model.RechargeOrder" >
+    insert into ptb_recharge_order (ptb_recharge_order_id, recharge_order_no, 
+      pay_type, user_id, pay_method, 
+      total_amount, receipt_amount, processing_amount, 
+      create_time, pay_time, status, 
+      order_no, verification_code)
+    values (#{ptbRechargeOrderId,jdbcType=BIGINT}, #{rechargeOrderNo,jdbcType=VARCHAR}, 
+      #{payType,jdbcType=TINYINT}, #{userId,jdbcType=BIGINT}, #{payMethod,jdbcType=TINYINT}, 
+      #{totalAmount,jdbcType=BIGINT}, #{receiptAmount,jdbcType=BIGINT}, #{processingAmount,jdbcType=BIGINT}, 
+      #{createTime,jdbcType=TIMESTAMP}, #{payTime,jdbcType=TIMESTAMP}, #{status,jdbcType=BIT}, 
+      #{orderNo,jdbcType=VARCHAR}, #{verificationCode,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="com.ptb.pay.web.model.RechargeOrder" >
+    insert into ptb_recharge_order
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="ptbRechargeOrderId != null" >
+        ptb_recharge_order_id,
+      </if>
+      <if test="rechargeOrderNo != null" >
+        recharge_order_no,
+      </if>
+      <if test="payType != null" >
+        pay_type,
+      </if>
+      <if test="userId != null" >
+        user_id,
+      </if>
+      <if test="payMethod != null" >
+        pay_method,
+      </if>
+      <if test="totalAmount != null" >
+        total_amount,
+      </if>
+      <if test="receiptAmount != null" >
+        receipt_amount,
+      </if>
+      <if test="processingAmount != null" >
+        processing_amount,
+      </if>
+      <if test="createTime != null" >
+        create_time,
+      </if>
+      <if test="payTime != null" >
+        pay_time,
+      </if>
+      <if test="status != null" >
+        status,
+      </if>
+      <if test="orderNo != null" >
+        order_no,
+      </if>
+      <if test="verificationCode != null" >
+        verification_code,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="ptbRechargeOrderId != null" >
+        #{ptbRechargeOrderId,jdbcType=BIGINT},
+      </if>
+      <if test="rechargeOrderNo != null" >
+        #{rechargeOrderNo,jdbcType=VARCHAR},
+      </if>
+      <if test="payType != null" >
+        #{payType,jdbcType=TINYINT},
+      </if>
+      <if test="userId != null" >
+        #{userId,jdbcType=BIGINT},
+      </if>
+      <if test="payMethod != null" >
+        #{payMethod,jdbcType=TINYINT},
+      </if>
+      <if test="totalAmount != null" >
+        #{totalAmount,jdbcType=BIGINT},
+      </if>
+      <if test="receiptAmount != null" >
+        #{receiptAmount,jdbcType=BIGINT},
+      </if>
+      <if test="processingAmount != null" >
+        #{processingAmount,jdbcType=BIGINT},
+      </if>
+      <if test="createTime != null" >
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="payTime != null" >
+        #{payTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="status != null" >
+        #{status,jdbcType=BIT},
+      </if>
+      <if test="orderNo != null" >
+        #{orderNo,jdbcType=VARCHAR},
+      </if>
+      <if test="verificationCode != null" >
+        #{verificationCode,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByExampleSelective" parameterType="map" >
+    update ptb_recharge_order
+    <set >
+      <if test="record.ptbRechargeOrderId != null" >
+        ptb_recharge_order_id = #{record.ptbRechargeOrderId,jdbcType=BIGINT},
+      </if>
+      <if test="record.rechargeOrderNo != null" >
+        recharge_order_no = #{record.rechargeOrderNo,jdbcType=VARCHAR},
+      </if>
+      <if test="record.payType != null" >
+        pay_type = #{record.payType,jdbcType=TINYINT},
+      </if>
+      <if test="record.userId != null" >
+        user_id = #{record.userId,jdbcType=BIGINT},
+      </if>
+      <if test="record.payMethod != null" >
+        pay_method = #{record.payMethod,jdbcType=TINYINT},
+      </if>
+      <if test="record.totalAmount != null" >
+        total_amount = #{record.totalAmount,jdbcType=BIGINT},
+      </if>
+      <if test="record.receiptAmount != null" >
+        receipt_amount = #{record.receiptAmount,jdbcType=BIGINT},
+      </if>
+      <if test="record.processingAmount != null" >
+        processing_amount = #{record.processingAmount,jdbcType=BIGINT},
+      </if>
+      <if test="record.createTime != null" >
+        create_time = #{record.createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="record.payTime != null" >
+        pay_time = #{record.payTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="record.status != null" >
+        status = #{record.status,jdbcType=BIT},
+      </if>
+      <if test="record.orderNo != null" >
+        order_no = #{record.orderNo,jdbcType=VARCHAR},
+      </if>
+      <if test="record.verificationCode != null" >
+        verification_code = #{record.verificationCode,jdbcType=VARCHAR},
+      </if>
+    </set>
+    <if test="_parameter != null" >
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map" >
+    update ptb_recharge_order
+    set ptb_recharge_order_id = #{record.ptbRechargeOrderId,jdbcType=BIGINT},
+      recharge_order_no = #{record.rechargeOrderNo,jdbcType=VARCHAR},
+      pay_type = #{record.payType,jdbcType=TINYINT},
+      user_id = #{record.userId,jdbcType=BIGINT},
+      pay_method = #{record.payMethod,jdbcType=TINYINT},
+      total_amount = #{record.totalAmount,jdbcType=BIGINT},
+      receipt_amount = #{record.receiptAmount,jdbcType=BIGINT},
+      processing_amount = #{record.processingAmount,jdbcType=BIGINT},
+      create_time = #{record.createTime,jdbcType=TIMESTAMP},
+      pay_time = #{record.payTime,jdbcType=TIMESTAMP},
+      status = #{record.status,jdbcType=BIT},
+      order_no = #{record.orderNo,jdbcType=VARCHAR},
+      verification_code = #{record.verificationCode,jdbcType=VARCHAR}
+    <if test="_parameter != null" >
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByPrimaryKeySelective" parameterType="com.ptb.pay.web.model.RechargeOrder" >
+    update ptb_recharge_order
+    <set >
+      <if test="rechargeOrderNo != null" >
+        recharge_order_no = #{rechargeOrderNo,jdbcType=VARCHAR},
+      </if>
+      <if test="payType != null" >
+        pay_type = #{payType,jdbcType=TINYINT},
+      </if>
+      <if test="userId != null" >
+        user_id = #{userId,jdbcType=BIGINT},
+      </if>
+      <if test="payMethod != null" >
+        pay_method = #{payMethod,jdbcType=TINYINT},
+      </if>
+      <if test="totalAmount != null" >
+        total_amount = #{totalAmount,jdbcType=BIGINT},
+      </if>
+      <if test="receiptAmount != null" >
+        receipt_amount = #{receiptAmount,jdbcType=BIGINT},
+      </if>
+      <if test="processingAmount != null" >
+        processing_amount = #{processingAmount,jdbcType=BIGINT},
+      </if>
+      <if test="createTime != null" >
+        create_time = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="payTime != null" >
+        pay_time = #{payTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="status != null" >
+        status = #{status,jdbcType=BIT},
+      </if>
+      <if test="orderNo != null" >
+        order_no = #{orderNo,jdbcType=VARCHAR},
+      </if>
+      <if test="verificationCode != null" >
+        verification_code = #{verificationCode,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where ptb_recharge_order_id = #{ptbRechargeOrderId,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.ptb.pay.web.model.RechargeOrder" >
+    update ptb_recharge_order
+    set recharge_order_no = #{rechargeOrderNo,jdbcType=VARCHAR},
+      pay_type = #{payType,jdbcType=TINYINT},
+      user_id = #{userId,jdbcType=BIGINT},
+      pay_method = #{payMethod,jdbcType=TINYINT},
+      total_amount = #{totalAmount,jdbcType=BIGINT},
+      receipt_amount = #{receiptAmount,jdbcType=BIGINT},
+      processing_amount = #{processingAmount,jdbcType=BIGINT},
+      create_time = #{createTime,jdbcType=TIMESTAMP},
+      pay_time = #{payTime,jdbcType=TIMESTAMP},
+      status = #{status,jdbcType=BIT},
+      order_no = #{orderNo,jdbcType=VARCHAR},
+      verification_code = #{verificationCode,jdbcType=VARCHAR}
+    where ptb_recharge_order_id = #{ptbRechargeOrderId,jdbcType=BIGINT}
+  </update>
+</mapper>

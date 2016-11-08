@@ -1,10 +1,11 @@
 package com.ptb.pay.api;
 
-import java.util.List;
-
 import com.ptb.common.vo.ResponseVo;
+import vo.PaymentVO;
+import vo.RechargeOrderParamsVO;
 
-import vo.PaymentVo;
+import java.util.List;
+import java.util.Map;
 
 /**
  * 支付api Description: All Rights Reserved.
@@ -21,5 +22,15 @@ public interface IPaymentApi {
 	 * @return
 	 * @throws Exception
 	 */
-	public ResponseVo<List<PaymentVo>> getPaymentList(String deviceType) throws Exception;
+	ResponseVo<List<PaymentVO>> getPaymentList(String deviceType) throws Exception;
+
+	/**
+	 * 创建充值单
+	 * Description:
+	 * All Rights Reserved.
+	 * @param
+	 * @return
+	 * @version 1.0  2016-11-07 19:29 by wgh（guanhua.wang@pintuibao.cn）创建
+	 */
+	ResponseVo<Map<String, Object>> createRechargeOrder(RechargeOrderParamsVO paramsVO) throws Exception;
 }

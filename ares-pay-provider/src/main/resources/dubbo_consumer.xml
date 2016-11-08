@@ -5,7 +5,9 @@
 	 http://code.alibabatech.com/schema/dubbo	http://code.alibabatech.com/schema/dubbo/dubbo.xsd"
 	default-lazy-init="false" default-autowire="byName">
 
-	<description>dubbo consumer配置</description>
+	<description>dubbo consumer配置</descript
+
+			ion>
 
 	<dubbo:application name="ptb-pay" />
 
