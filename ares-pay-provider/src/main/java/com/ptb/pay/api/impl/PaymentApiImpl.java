@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import vo.CheckPayResultVO;
+import vo.OnlinePaymentNotifyVO;
 import vo.PaymentVO;
 import vo.RechargeOrderParamsVO;
 
@@ -80,6 +81,17 @@ public class PaymentApiImpl implements IPaymentApi {
         IOnlinePaymentService onlinePaymentService = OnlinePaymentServiceFactory.createService(paramsVO.getPayType());
         CheckPayResultVO resultVO = onlinePaymentService.checkPayResult(paramsVO.getPayResult());
         return ReturnUtil.success(resultVO);
+    }
+
+    @Override
+    public ResponseVo onlinePaymentNotify(OnlinePaymentNotifyVO notifyVO) throws Exception {
+        IOnlinePaymentService onlinePaymentService = OnlinePaymentServiceFactory.createService(notifyVO.getPayType());
+        boolean result = onlinePaymentService.notifyPayResult(notifyVO.getParams());
+        if(result){
+            return ReturnUtil.success();
+        }
+        return ReturnUtil.error(CommonErrorCode.COMMMON_ERROR_INERERROR.getCode(),
+                CommonErrorCode.COMMMON_ERROR_INERERROR.getMessage());
     }
 
 }

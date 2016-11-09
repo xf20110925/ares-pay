@@ -42,6 +42,7 @@ public class OnlineRechargeOrderServiceImpl implements IRechargeOrderService{
         rechargeOrder.setTotalAmount(paramsVO.getRechargeAmount());
         rechargeOrder.setUserId(paramsVO.getUserId());
         rechargeOrder.setPayType(paramsVO.getPayType());
+        rechargeOrder.setDeviceType(paramsVO.getDeviceType());
         rechargeOrderMapper.insert(rechargeOrder);
         return rechargeOrder;
     }

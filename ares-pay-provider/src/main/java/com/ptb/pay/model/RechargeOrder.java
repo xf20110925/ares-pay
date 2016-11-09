@@ -7,11 +7,11 @@ public class RechargeOrder {
 
     private String rechargeOrderNo;
 
-    private int payType;
+    private Integer payType;
 
     private Long userId;
 
-    private int payMethod;
+    private Integer payMethod;
 
     private Long totalAmount;
 
@@ -23,11 +23,13 @@ public class RechargeOrder {
 
     private Date payTime;
 
-    private int status;
+    private Integer status;
 
     private String orderNo;
 
     private String verificationCode;
+
+    private String deviceType;
 
     public Long getPtbRechargeOrderId() {
         return ptbRechargeOrderId;
@@ -45,11 +47,11 @@ public class RechargeOrder {
         this.rechargeOrderNo = rechargeOrderNo == null ? null : rechargeOrderNo.trim();
     }
 
-    public int getPayType() {
+    public Integer getPayType() {
         return payType;
     }
 
-    public void setPayType(int payType) {
+    public void setPayType(Integer payType) {
         this.payType = payType;
     }
 
@@ -61,11 +63,11 @@ public class RechargeOrder {
         this.userId = userId;
     }
 
-    public int getPayMethod() {
+    public Integer getPayMethod() {
         return payMethod;
     }
 
-    public void setPayMethod(int payMethod) {
+    public void setPayMethod(Integer payMethod) {
         this.payMethod = payMethod;
     }
 
@@ -109,11 +111,11 @@ public class RechargeOrder {
         this.payTime = payTime;
     }
 
-    public int getStatus() {
+    public Integer getStatus() {
         return status;
     }
 
-    public void setStatus(int status) {
+    public void setStatus(Integer status) {
         this.status = status;
     }
 
@@ -131,5 +133,13 @@ public class RechargeOrder {
 
     public void setVerificationCode(String verificationCode) {
         this.verificationCode = verificationCode == null ? null : verificationCode.trim();
+    }
+
+    public String getDeviceType() {
+        return deviceType;
+    }
+
+    public void setDeviceType(String deviceType) {
+        this.deviceType = deviceType == null ? null : deviceType.trim();
     }
 }

@@ -4,11 +4,9 @@ import com.ptb.pay.mapper.MyMapper;
 import com.ptb.pay.model.RechargeOrder;
 import com.ptb.pay.model.RechargeOrderExample;
 import org.apache.ibatis.annotations.Param;
-import org.springframework.stereotype.Component;
 
 import java.util.List;
 
-@Component
 public interface RechargeOrderMapper extends MyMapper<RechargeOrder> {
     int deleteByExample(RechargeOrderExample example);
 

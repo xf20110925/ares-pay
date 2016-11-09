@@ -2,6 +2,8 @@ package com.ptb.pay.service;
 
 import vo.CheckPayResultVO;
 
+import java.util.Map;
+
 /**
  * Description:
  * All Rights Reserved.
@@ -27,4 +29,13 @@ public interface IOnlinePaymentService {
      * @version 1.0  2016-11-09 10:15 by wgh（guanhua.wang@pintuibao.cn）创建
      */
     CheckPayResultVO checkPayResult(String payResult) throws Exception;
+
+    /**
+     * Description: 异步通知支付结果
+     * All Rights Reserved.
+     * @param
+     * @return
+     * @version 1.0  2016-11-09 17:36 by wgh（guanhua.wang@pintuibao.cn）创建
+     */
+    boolean notifyPayResult(Map<String, String> params) throws Exception;
 }

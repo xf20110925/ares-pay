@@ -3,6 +3,8 @@ package com.ptb.pay.service.impl;
 import com.ptb.pay.service.IOnlinePaymentService;
 import vo.CheckPayResultVO;
 
+import java.util.Map;
+
 /**
  * Description: 微信支付相关接口
  * All Rights Reserved.
@@ -19,5 +21,10 @@ public class WxpayOnlinePaymentServiceImpl implements IOnlinePaymentService{
     @Override
     public CheckPayResultVO checkPayResult(String payResult) throws Exception {
         return null;
+    }
+
+    @Override
+    public boolean notifyPayResult(Map<String, String> params) throws Exception {
+        return false;
     }
 }

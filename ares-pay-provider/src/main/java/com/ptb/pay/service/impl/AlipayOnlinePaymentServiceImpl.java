@@ -1,14 +1,21 @@
 package com.ptb.pay.service.impl;
 
+import com.alibaba.dubbo.rpc.RpcContext;
 import com.alibaba.fastjson.JSONObject;
 import com.alipay.api.AlipayApiException;
 import com.alipay.api.internal.util.AlipaySignature;
+import com.ptb.account.api.IAccountApi;
+import com.ptb.account.vo.PtbAccountVo;
+import com.ptb.account.vo.param.AccountRechargeParam;
+import com.ptb.common.enums.DeviceTypeEnum;
+import com.ptb.common.enums.PlatformEnum;
 import com.ptb.common.vo.ResponseVo;
 import com.ptb.pay.mapper.impl.RechargeOrderMapper;
 import com.ptb.pay.model.RechargeOrder;
 import com.ptb.pay.model.RechargeOrderExample;
 import com.ptb.pay.service.IOnlinePaymentService;
 import com.ptb.service.api.ISystemConfigApi;
+import com.ptb.utils.encrypt.SignUtil;
 import com.ptb.utils.tool.ChangeMoneyUtil;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -21,10 +28,7 @@ import vo.CheckPayResultVO;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Description:支付宝相关接口
@@ -88,6 +92,9 @@ public class AlipayOnlinePaymentServiceImpl implements IOnlinePaymentService {
 
     @Autowired
     private RechargeOrderMapper rechargeOrderMapper;
+
+    @Autowired
+    private IAccountApi accountApi;
 
     @Override
     public String getPaymentInfo(String rechargeOrderNo, Long price) throws Exception {
@@ -181,7 +188,7 @@ public class AlipayOnlinePaymentServiceImpl implements IOnlinePaymentService {
                 resultVO.setPayResult(false);
                 return resultVO;
             }
-            return checkPayResponse(signContent);
+            return checkPayResponse(JSONObject.parseObject(signContent, Map.class));
         } catch (Exception e) {
             e.printStackTrace();
             LOGGER.error("支付宝签名验证失败：" + payResult);
@@ -198,19 +205,19 @@ public class AlipayOnlinePaymentServiceImpl implements IOnlinePaymentService {
      * {"code":"10000","msg":"Success","total_amount":"9.00","app_id":"2014072300007148","trade_no":"2014112400001000340011111118","seller_id":"2088111111116894","out_trade_no":"70501111111S001111119"}
      * Description:
      * All Rights Reserved.
+     *
      * @param
      * @return
      * @version 1.0  2016-11-09 11:59 by wgh（guanhua.wang@pintuibao.cn）创建
      */
-    public CheckPayResultVO checkPayResponse(String payResponseStr) throws Exception {
+    public CheckPayResultVO checkPayResponse(Map<String, String> params) throws Exception {
         boolean checkResult = true;
         CheckPayResultVO resultVO = new CheckPayResultVO();
 
-        JSONObject payResponse = JSONObject.parseObject(payResponseStr);
-        String rechargeOrderNo = payResponse.getString("trade_no");
-        String rechargeAmount = payResponse.getString("total_amount");
-        String sellerId = payResponse.getString("seller_id");
-        String appId = payResponse.getString("app_id");
+        String rechargeOrderNo = params.get("trade_no");
+        String rechargeAmount = params.get("total_amount");
+        String sellerId = params.get("seller_id");
+        String appId = params.get("app_id");
 
         RechargeOrderExample example = new RechargeOrderExample();
         example.createCriteria().andRechargeOrderNoEqualTo(rechargeOrderNo);
@@ -226,12 +233,12 @@ public class AlipayOnlinePaymentServiceImpl implements IOnlinePaymentService {
         }
         //验证sellerId
         String ourSellerId = systemConfigApi.getConfig(SYSTEM_CONFIG_ALIPAY_PARTNER).getData();
-        if(!sellerId.equals(ourSellerId)){
+        if (!sellerId.equals(ourSellerId)) {
             checkResult = false;
         }
         //验证APPID
         String ourAppId = systemConfigApi.getConfig(SYSTEM_CONFIG_ALIPAY_APPID).getData();
-        if(!appId.equals(ourAppId)){
+        if (!appId.equals(ourAppId)) {
             checkResult = false;
         }
 
@@ -240,4 +247,54 @@ public class AlipayOnlinePaymentServiceImpl implements IOnlinePaymentService {
         resultVO.setRechargeOderNo(rechargeOrderNo);
         return resultVO;
     }
+
+    @Override
+    public boolean notifyPayResult(Map<String, String> params) throws Exception {
+        String rechargeOrderNo = params.get("out_trade_no");
+        String tradeStatus = params.get("trade_status");
+        if ("TRADE_FINISHED".equals(tradeStatus) || "TRADE_SUCCESS".equals(tradeStatus)) {
+            String publickKey = systemConfigApi.getConfig(SYSTEM_CONFIG_ALIPAY_PUBLICKEY).getData();
+            boolean checkResult = AlipaySignature.rsaCheckV1(params, publickKey,ALIPAY_SIGN_CHARSET);
+            if(checkResult){
+                CheckPayResultVO resultVO = checkPayResponse(params);
+                if(!resultVO.isPayResult()){
+                    return false;
+                }
+
+                RechargeOrderExample example = new RechargeOrderExample();
+                example.createCriteria().andRechargeOrderNoEqualTo(rechargeOrderNo);
+                List<RechargeOrder> rechargeOrders = rechargeOrderMapper.selectByExample(example);
+                //验证订单号
+                if (CollectionUtils.isEmpty(rechargeOrders)) {
+                    checkResult = false;
+                }
+
+                try {
+                    RechargeOrder rechargeOrder = rechargeOrders.get(0);
+                    AccountRechargeParam rechargeParam = new AccountRechargeParam();
+                    rechargeParam.setDeviceType(DeviceTypeEnum.android);
+                    rechargeParam.setMoney(rechargeOrder.getTotalAmount());
+                    rechargeParam.setUserId(rechargeOrder.getUserId());
+                    rechargeParam.setPayType(rechargeOrder.getPayType());
+                    rechargeParam.setPayMethod(rechargeOrder.getPayMethod());
+                    rechargeParam.setPlatformNo(PlatformEnum.xiaomi);
+                    TreeMap toSign = JSONObject.parseObject(JSONObject.toJSONString(rechargeParam), TreeMap.class);
+                    String sign = SignUtil.getSignKey(toSign);
+                    RpcContext.getContext().setAttachment("key", sign);
+                    ResponseVo<PtbAccountVo> repsonseVO = accountApi.recharge(rechargeParam);
+                    if(!"0".equals(repsonseVO.getCode())) {
+                        //todo 放入消息队列
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    //todo 放入消息队列
+                    LOGGER.error("支付宝充值失败，放入消息队列重试,params:" + JSONObject.toJSONString(params));
+                }
+            }
+            return true;
+        } else {
+            return false;
+        }
+    }
+
 }

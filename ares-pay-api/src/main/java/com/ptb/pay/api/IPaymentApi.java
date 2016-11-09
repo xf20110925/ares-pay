@@ -2,6 +2,7 @@ package com.ptb.pay.api;
 
 import com.ptb.common.vo.ResponseVo;
 import vo.CheckPayResultVO;
+import vo.OnlinePaymentNotifyVO;
 import vo.PaymentVO;
 import vo.RechargeOrderParamsVO;
 
@@ -54,6 +55,6 @@ public interface IPaymentApi {
      * @return
      * @version 1.0  2016-11-09 17:16 by wgh（guanhua.wang@pintuibao.cn）创建
      */
-    public ResponseVo onlinePaymentNotify() throws Exception;
+    public ResponseVo onlinePaymentNotify(OnlinePaymentNotifyVO notifyVO) throws Exception;
 }
 

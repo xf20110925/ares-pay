@@ -65,6 +65,7 @@ public class OfflineRechargeOrderServiceImpl implements IRechargeOrderService {
         rechargeOrder.setTotalAmount(paramsVO.getRechargeAmount());
         rechargeOrder.setVerificationCode(RandomStringUtils.randomNumeric(6));
         rechargeOrder.setUserId(paramsVO.getUserId());
+        rechargeOrder.setDeviceType(paramsVO.getDeviceType());
         rechargeOrderMapper.insert(rechargeOrder);
         return rechargeOrder;
     }

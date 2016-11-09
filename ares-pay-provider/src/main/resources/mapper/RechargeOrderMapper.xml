@@ -15,6 +15,7 @@
     <result column="status" property="status" jdbcType="BIT" />
     <result column="order_no" property="orderNo" jdbcType="VARCHAR" />
     <result column="verification_code" property="verificationCode" jdbcType="VARCHAR" />
+    <result column="device_type" property="deviceType" jdbcType="VARCHAR" />
   </resultMap>
   <sql id="Example_Where_Clause" >
     <where >
@@ -76,7 +77,8 @@
   </sql>
   <sql id="Base_Column_List" >
     ptb_recharge_order_id, recharge_order_no, pay_type, user_id, pay_method, total_amount, 
-    receipt_amount, processing_amount, create_time, pay_time, status, order_no, verification_code
+    receipt_amount, processing_amount, create_time, pay_time, status, order_no, verification_code, 
+    device_type
   </sql>
   <select id="selectByExample" resultMap="BaseResultMap" parameterType="com.ptb.pay.model.RechargeOrderExample" >
     select
@@ -113,12 +115,14 @@
       pay_type, user_id, pay_method, 
       total_amount, receipt_amount, processing_amount, 
       create_time, pay_time, status, 
-      order_no, verification_code)
+      order_no, verification_code, device_type
+      )
     values (#{ptbRechargeOrderId,jdbcType=BIGINT}, #{rechargeOrderNo,jdbcType=VARCHAR}, 
       #{payType,jdbcType=TINYINT}, #{userId,jdbcType=BIGINT}, #{payMethod,jdbcType=TINYINT}, 
       #{totalAmount,jdbcType=BIGINT}, #{receiptAmount,jdbcType=BIGINT}, #{processingAmount,jdbcType=BIGINT}, 
       #{createTime,jdbcType=TIMESTAMP}, #{payTime,jdbcType=TIMESTAMP}, #{status,jdbcType=BIT}, 
-      #{orderNo,jdbcType=VARCHAR}, #{verificationCode,jdbcType=VARCHAR})
+      #{orderNo,jdbcType=VARCHAR}, #{verificationCode,jdbcType=VARCHAR}, #{deviceType,jdbcType=VARCHAR}
+      )
   </insert>
   <insert id="insertSelective" parameterType="com.ptb.pay.model.RechargeOrder" >
     insert into ptb_recharge_order
@@ -162,6 +166,9 @@
       <if test="verificationCode != null" >
         verification_code,
       </if>
+      <if test="deviceType != null" >
+        device_type,
+      </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides="," >
       <if test="ptbRechargeOrderId != null" >
@@ -202,6 +209,9 @@
       </if>
       <if test="verificationCode != null" >
         #{verificationCode,jdbcType=VARCHAR},
+      </if>
+      <if test="deviceType != null" >
+        #{deviceType,jdbcType=VARCHAR},
       </if>
     </trim>
   </insert>
@@ -247,6 +257,9 @@
       <if test="record.verificationCode != null" >
         verification_code = #{record.verificationCode,jdbcType=VARCHAR},
       </if>
+      <if test="record.deviceType != null" >
+        device_type = #{record.deviceType,jdbcType=VARCHAR},
+      </if>
     </set>
     <if test="_parameter != null" >
       <include refid="Update_By_Example_Where_Clause" />
@@ -266,7 +279,8 @@
       pay_time = #{record.payTime,jdbcType=TIMESTAMP},
       status = #{record.status,jdbcType=BIT},
       order_no = #{record.orderNo,jdbcType=VARCHAR},
-      verification_code = #{record.verificationCode,jdbcType=VARCHAR}
+      verification_code = #{record.verificationCode,jdbcType=VARCHAR},
+      device_type = #{record.deviceType,jdbcType=VARCHAR}
     <if test="_parameter != null" >
       <include refid="Update_By_Example_Where_Clause" />
     </if>
@@ -310,6 +324,9 @@
       <if test="verificationCode != null" >
         verification_code = #{verificationCode,jdbcType=VARCHAR},
       </if>
+      <if test="deviceType != null" >
+        device_type = #{deviceType,jdbcType=VARCHAR},
+      </if>
     </set>
     where ptb_recharge_order_id = #{ptbRechargeOrderId,jdbcType=BIGINT}
   </update>
@@ -326,7 +343,8 @@
       pay_time = #{payTime,jdbcType=TIMESTAMP},
       status = #{status,jdbcType=BIT},
       order_no = #{orderNo,jdbcType=VARCHAR},
-      verification_code = #{verificationCode,jdbcType=VARCHAR}
+      verification_code = #{verificationCode,jdbcType=VARCHAR},
+      device_type = #{deviceType,jdbcType=VARCHAR}
     where ptb_recharge_order_id = #{ptbRechargeOrderId,jdbcType=BIGINT}
   </update>
 </mapper>
