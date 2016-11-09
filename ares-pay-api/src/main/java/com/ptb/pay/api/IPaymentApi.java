@@ -1,6 +1,7 @@
 package com.ptb.pay.api;
 
 import com.ptb.common.vo.ResponseVo;
+import vo.CheckPayResultVO;
 import vo.PaymentVO;
 import vo.RechargeOrderParamsVO;
 
@@ -41,5 +42,5 @@ public interface IPaymentApi {
 	 * @return
 	 * @version 1.0  2016-11-09 10:11 by wgh（guanhua.wang@pintuibao.cn）创建
 	 */
-	ResponseVo<Map<String, Object>> checkOnlinePayResult(RechargeOrderParamsVO paramsVO) throws Exception;
+	ResponseVo<CheckPayResultVO> checkOnlinePayResult(RechargeOrderParamsVO paramsVO) throws Exception;
 }

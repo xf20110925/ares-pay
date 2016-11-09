@@ -1,5 +1,7 @@
 package com.ptb.pay.service;
 
+import vo.CheckPayResultVO;
+
 /**
  * Description:
  * All Rights Reserved.
@@ -18,11 +20,11 @@ public interface IOnlinePaymentService {
     String getPaymentInfo(String rechargeOrderNo, Long price) throws Exception;
 
     /**
-     * Description:
+     * Description: 校验线上支付结果
      * All Rights Reserved.
      * @param
      * @return
      * @version 1.0  2016-11-09 10:15 by wgh（guanhua.wang@pintuibao.cn）创建
      */
-    boolean checkPayResult(String payResult) throws Exception;
+    CheckPayResultVO checkPayResult(String payResult) throws Exception;
 }

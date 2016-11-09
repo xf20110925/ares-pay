@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
+import vo.CheckPayResultVO;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -163,26 +164,29 @@ public class AlipayOnlinePaymentServiceImpl implements IOnlinePaymentService {
     }
 
     @Override
-    public boolean checkPayResult(String payResult) throws Exception {
+    public CheckPayResultVO checkPayResult(String payResult) throws Exception {
+        CheckPayResultVO resultVO = new CheckPayResultVO();
         if (StringUtils.isBlank(payResult)) {
-            return false;
+            resultVO.setPayResult(false);
+            return resultVO;
         }
-        boolean checkResult = false;
         try {
             JSONObject result = JSONObject.parseObject(payResult);
             String signContent = result.getString("alipay_trade_app_pay_response");
             String sign = result.getString("sign");
 
             String publickKey = systemConfigApi.getConfig(SYSTEM_CONFIG_ALIPAY_PUBLICKEY).getData();
-            checkResult = AlipaySignature.rsaCheckContent(signContent, sign, publickKey, ALIPAY_SIGN_CHARSET);
+            boolean checkResult = AlipaySignature.rsaCheckContent(signContent, sign, publickKey, ALIPAY_SIGN_CHARSET);
             if (!checkResult) {
-                return checkResult;
+                resultVO.setPayResult(false);
+                return resultVO;
             }
             return checkPayResponse(signContent);
         } catch (Exception e) {
             e.printStackTrace();
             LOGGER.error("支付宝签名验证失败：" + payResult);
-            return checkResult;
+            resultVO.setPayResult(false);
+            return resultVO;
         }
     }
 
@@ -198,8 +202,10 @@ public class AlipayOnlinePaymentServiceImpl implements IOnlinePaymentService {
      * @return
      * @version 1.0  2016-11-09 11:59 by wgh（guanhua.wang@pintuibao.cn）创建
      */
-    public boolean checkPayResponse(String payResponseStr) throws Exception {
-        boolean checkResult = false;
+    public CheckPayResultVO checkPayResponse(String payResponseStr) throws Exception {
+        boolean checkResult = true;
+        CheckPayResultVO resultVO = new CheckPayResultVO();
+
         JSONObject payResponse = JSONObject.parseObject(payResponseStr);
         String rechargeOrderNo = payResponse.getString("trade_no");
         String rechargeAmount = payResponse.getString("total_amount");
@@ -211,25 +217,27 @@ public class AlipayOnlinePaymentServiceImpl implements IOnlinePaymentService {
         List<RechargeOrder> rechargeOrders = rechargeOrderMapper.selectByExample(example);
         //验证订单号
         if (CollectionUtils.isEmpty(rechargeOrders)) {
-            return checkResult;
+            checkResult = false;
         }
         RechargeOrder rechargeOrder = rechargeOrders.get(0);
         //验证金额
         if (!ChangeMoneyUtil.fromYuanToFen(rechargeAmount).equals(String.valueOf(rechargeOrder.getTotalAmount()))) {
-            return checkResult;
+            checkResult = false;
         }
         //验证sellerId
         String ourSellerId = systemConfigApi.getConfig(SYSTEM_CONFIG_ALIPAY_PARTNER).getData();
         if(!sellerId.equals(ourSellerId)){
-            return checkResult;
+            checkResult = false;
         }
         //验证APPID
         String ourAppId = systemConfigApi.getConfig(SYSTEM_CONFIG_ALIPAY_APPID).getData();
         if(!appId.equals(ourAppId)){
-            return checkResult;
+            checkResult = false;
         }
 
-        checkResult = true;
-        return checkResult;
+        resultVO.setPayResult(checkResult);
+        resultVO.setRechargeAmount(Long.valueOf(ChangeMoneyUtil.fromYuanToFen(rechargeAmount)));
+        resultVO.setRechargeOderNo(rechargeOrderNo);
+        return resultVO;
     }
 }

@@ -18,6 +18,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import vo.CheckPayResultVO;
 import vo.PaymentVO;
 import vo.RechargeOrderParamsVO;
 
@@ -75,10 +76,10 @@ public class PaymentApiImpl implements IPaymentApi {
     }
 
     @Override
-    public ResponseVo<Map<String, Object>> checkOnlinePayResult(RechargeOrderParamsVO paramsVO) throws Exception {
+    public ResponseVo<CheckPayResultVO> checkOnlinePayResult(RechargeOrderParamsVO paramsVO) throws Exception {
         IOnlinePaymentService onlinePaymentService = OnlinePaymentServiceFactory.createService(paramsVO.getPayType());
-
-        return null;
+        CheckPayResultVO resultVO = onlinePaymentService.checkPayResult(paramsVO.getPayResult());
+        return ReturnUtil.success(resultVO);
     }
 
 }
