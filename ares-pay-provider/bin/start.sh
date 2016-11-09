@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 source /etc/profile
 HOME=$(cd "$(dirname "$0")/../"; pwd)
-CONFIG_FILE_HOME=/opt/ptbconf/payment
+CONFIG_FILE_HOME=/opt/ptbconf/ares-pay
 cd $HOME
 jars=$(ls $HOME/|grep .jar)
 libjar=`ls libs | grep .jar | awk '{jar=jar"'"libs/"'"$1":"} END {print jar}'`
