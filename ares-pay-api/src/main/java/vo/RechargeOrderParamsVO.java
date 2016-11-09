@@ -17,6 +17,15 @@ public class RechargeOrderParamsVO implements Serializable{
     private String orderNo;
     private String deviceType;
     private Long userId;
+    private String payResult;
+
+    public String getPayResult() {
+        return payResult;
+    }
+
+    public void setPayResult(String payResult) {
+        this.payResult = payResult;
+    }
 
     public String getDeviceType() {
         return deviceType;

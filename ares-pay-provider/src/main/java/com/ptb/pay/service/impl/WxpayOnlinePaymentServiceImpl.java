@@ -11,7 +11,12 @@ import com.ptb.pay.service.IOnlinePaymentService;
 public class WxpayOnlinePaymentServiceImpl implements IOnlinePaymentService{
 
     @Override
-    public String getPaymentInfo(String rechargeOrderNo, Long price) {
+    public String getPaymentInfo(String rechargeOrderNo, Long price) throws Exception{
         return null;
+    }
+
+    @Override
+    public boolean checkPayResult(String payResult) throws Exception {
+        return false;
     }
 }

@@ -15,5 +15,14 @@ public interface IOnlinePaymentService {
      * @return
      * @version 1.0  2016-11-08 13:10 by wgh（guanhua.wang@pintuibao.cn）创建
      */
-    String getPaymentInfo(String rechargeOrderNo, Long price);
+    String getPaymentInfo(String rechargeOrderNo, Long price) throws Exception;
+
+    /**
+     * Description:
+     * All Rights Reserved.
+     * @param
+     * @return
+     * @version 1.0  2016-11-09 10:15 by wgh（guanhua.wang@pintuibao.cn）创建
+     */
+    boolean checkPayResult(String payResult) throws Exception;
 }

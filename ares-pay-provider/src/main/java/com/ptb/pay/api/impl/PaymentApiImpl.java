@@ -6,7 +6,9 @@ import com.ptb.common.vo.ResponseVo;
 import com.ptb.pay.api.IPaymentApi;
 import com.ptb.pay.mapper.impl.RechargeOrderMapper;
 import com.ptb.pay.model.RechargeOrder;
+import com.ptb.pay.service.IOnlinePaymentService;
 import com.ptb.pay.service.IRechargeOrderService;
+import com.ptb.pay.service.factory.OnlinePaymentServiceFactory;
 import com.ptb.pay.service.factory.RechargeOrderServiceFactory;
 import com.ptb.service.api.IBlockApi;
 import com.ptb.utils.service.ReturnUtil;
@@ -70,6 +72,13 @@ public class PaymentApiImpl implements IPaymentApi {
         IRechargeOrderService rechargeOrderService = RechargeOrderServiceFactory.createService(paramsVO.getPayMethod());
         RechargeOrder rechargeOrder = rechargeOrderService.createRechargeOrder(paramsVO);
         return ReturnUtil.success(rechargeOrderService.getReturnData(rechargeOrder));
+    }
+
+    @Override
+    public ResponseVo<Map<String, Object>> checkOnlinePayResult(RechargeOrderParamsVO paramsVO) throws Exception {
+        IOnlinePaymentService onlinePaymentService = OnlinePaymentServiceFactory.createService(paramsVO.getPayType());
+
+        return null;
     }
 
 }

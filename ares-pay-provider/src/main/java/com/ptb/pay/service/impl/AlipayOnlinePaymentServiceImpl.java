@@ -1,11 +1,18 @@
 package com.ptb.pay.service.impl;
 
+import com.alibaba.fastjson.JSONObject;
 import com.alipay.api.AlipayApiException;
 import com.alipay.api.internal.util.AlipaySignature;
 import com.ptb.common.vo.ResponseVo;
+import com.ptb.pay.mapper.impl.RechargeOrderMapper;
+import com.ptb.pay.model.RechargeOrder;
+import com.ptb.pay.model.RechargeOrderExample;
 import com.ptb.pay.service.IOnlinePaymentService;
 import com.ptb.service.api.ISystemConfigApi;
 import com.ptb.utils.tool.ChangeMoneyUtil;
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,12 +33,17 @@ import java.util.Map;
  */
 @Service
 @Transactional
-public class AlipayOnlinePaymentServiceImpl implements IOnlinePaymentService{
+public class AlipayOnlinePaymentServiceImpl implements IOnlinePaymentService {
 
     /**
      * 支付宝分配的合作方ID
      */
     private static final String SYSTEM_CONFIG_ALIPAY_PARTNER = "alipay.partner";
+
+    /**
+     * 支付宝分配的APP_ID
+     */
+    private static final String SYSTEM_CONFIG_ALIPAY_APPID = "alipay.appid";
 
     /**
      * 支付时显示的商品标题
@@ -54,20 +66,30 @@ public class AlipayOnlinePaymentServiceImpl implements IOnlinePaymentService{
     private static final String SYSTEM_CONFIG_ALIPAY_RETURNURL = "alipay.returnurl";
 
     /**
-     *  私钥
+     * 私钥
      */
     private static final String SYSTEM_CONFIG_ALIPAY_PRIVATEKEY = "alipay.privateKey";
 
     /**
-     *  签名字符集
+     * 支付宝提供的公钥，用来验签的，跟上面的私钥不是一对
+     */
+    private static final String SYSTEM_CONFIG_ALIPAY_PUBLICKEY = "alipay.publicKey";
+
+    /**
+     * 签名字符集
      */
     private static final String ALIPAY_SIGN_CHARSET = "UTF-8";
+
+    private static Logger LOGGER = LoggerFactory.getLogger(AlipayOnlinePaymentServiceImpl.class);
 
     @Autowired
     private ISystemConfigApi systemConfigApi;
 
+    @Autowired
+    private RechargeOrderMapper rechargeOrderMapper;
+
     @Override
-    public String getPaymentInfo(String rechargeOrderNo, Long price) {
+    public String getPaymentInfo(String rechargeOrderNo, Long price) throws Exception {
 
         List<String> params = new ArrayList<String>();
         params.add(SYSTEM_CONFIG_ALIPAY_PARTNER);
@@ -127,8 +149,10 @@ public class AlipayOnlinePaymentServiceImpl implements IOnlinePaymentService{
             sign = URLEncoder.encode(sign, ALIPAY_SIGN_CHARSET);
         } catch (AlipayApiException e) {
             e.printStackTrace();
+            LOGGER.error("支付宝签名失败", e);
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
+            LOGGER.error("支付宝签名encode失败", e);
         }
 
         /**
@@ -138,4 +162,74 @@ public class AlipayOnlinePaymentServiceImpl implements IOnlinePaymentService{
         return payInfo;
     }
 
+    @Override
+    public boolean checkPayResult(String payResult) throws Exception {
+        if (StringUtils.isBlank(payResult)) {
+            return false;
+        }
+        boolean checkResult = false;
+        try {
+            JSONObject result = JSONObject.parseObject(payResult);
+            String signContent = result.getString("alipay_trade_app_pay_response");
+            String sign = result.getString("sign");
+
+            String publickKey = systemConfigApi.getConfig(SYSTEM_CONFIG_ALIPAY_PUBLICKEY).getData();
+            checkResult = AlipaySignature.rsaCheckContent(signContent, sign, publickKey, ALIPAY_SIGN_CHARSET);
+            if (!checkResult) {
+                return checkResult;
+            }
+            return checkPayResponse(signContent);
+        } catch (Exception e) {
+            e.printStackTrace();
+            LOGGER.error("支付宝签名验证失败：" + payResult);
+            return checkResult;
+        }
+    }
+
+    /**
+     * 1、商户需要验证该通知数据中的out_trade_no是否为商户系统中创建的订单号；
+     * 2、判断total_amount是否确实为该订单的实际金额（即商户订单创建时的金额）；
+     * 3、校验通知中的seller_id（或者seller_email) 是否为out_trade_no这笔单据对应的操作方（有的时候，一个商户可能有多个seller_id/seller_email）；
+     * 4、验证app_id是否为该商户本身。上述1、2、3、4有任何一个验证不通过，则表明同步校验结果是无效的，只有全部验证通过后，才可以认定买家付款成功。
+     * {"code":"10000","msg":"Success","total_amount":"9.00","app_id":"2014072300007148","trade_no":"2014112400001000340011111118","seller_id":"2088111111116894","out_trade_no":"70501111111S001111119"}
+     * Description:
+     * All Rights Reserved.
+     * @param
+     * @return
+     * @version 1.0  2016-11-09 11:59 by wgh（guanhua.wang@pintuibao.cn）创建
+     */
+    public boolean checkPayResponse(String payResponseStr) throws Exception {
+        boolean checkResult = false;
+        JSONObject payResponse = JSONObject.parseObject(payResponseStr);
+        String rechargeOrderNo = payResponse.getString("trade_no");
+        String rechargeAmount = payResponse.getString("total_amount");
+        String sellerId = payResponse.getString("seller_id");
+        String appId = payResponse.getString("app_id");
+
+        RechargeOrderExample example = new RechargeOrderExample();
+        example.createCriteria().andRechargeOrderNoEqualTo(rechargeOrderNo);
+        List<RechargeOrder> rechargeOrders = rechargeOrderMapper.selectByExample(example);
+        //验证订单号
+        if (CollectionUtils.isEmpty(rechargeOrders)) {
+            return checkResult;
+        }
+        RechargeOrder rechargeOrder = rechargeOrders.get(0);
+        //验证金额
+        if (!ChangeMoneyUtil.fromYuanToFen(rechargeAmount).equals(String.valueOf(rechargeOrder.getTotalAmount()))) {
+            return checkResult;
+        }
+        //验证sellerId
+        String ourSellerId = systemConfigApi.getConfig(SYSTEM_CONFIG_ALIPAY_PARTNER).getData();
+        if(!sellerId.equals(ourSellerId)){
+            return checkResult;
+        }
+        //验证APPID
+        String ourAppId = systemConfigApi.getConfig(SYSTEM_CONFIG_ALIPAY_APPID).getData();
+        if(!appId.equals(ourAppId)){
+            return checkResult;
+        }
+
+        checkResult = true;
+        return checkResult;
+    }
 }

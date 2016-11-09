@@ -33,4 +33,13 @@ public interface IPaymentApi {
 	 * @version 1.0  2016-11-07 19:29 by wgh（guanhua.wang@pintuibao.cn）创建
 	 */
 	ResponseVo<Map<String, Object>> createRechargeOrder(RechargeOrderParamsVO paramsVO) throws Exception;
+
+	/**
+	 * Description: 校验在线支付结果，如果成功直接充值
+	 * All Rights Reserved.
+	 * @param
+	 * @return
+	 * @version 1.0  2016-11-09 10:11 by wgh（guanhua.wang@pintuibao.cn）创建
+	 */
+	ResponseVo<Map<String, Object>> checkOnlinePayResult(RechargeOrderParamsVO paramsVO) throws Exception;
 }
