@@ -30,6 +30,9 @@ import org.apache.ibatis.session.SqlSessionFactory;
 import org.mybatis.spring.SqlSessionFactoryBean;
 import org.mybatis.spring.SqlSessionTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceBuilder;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
@@ -56,10 +59,12 @@ public class MyBatisConfig implements TransactionManagementConfigurer {
     @Autowired
     DataSource dataSource;
 
-//    @Bean(name = "dataSource")
-//    public DataSource getDataSource(){
-//        return new DruidDataSource();
-//    }
+    @Bean(name = "dataSource")
+    @Qualifier("dataSource")
+    @ConfigurationProperties(prefix="spring.datasource.pay")
+    public DataSource getDataSource() {
+        return DataSourceBuilder.create().build();
+    }
 
     @Bean(name = "sqlSessionFactory")
     public SqlSessionFactory sqlSessionFactoryBean() {
