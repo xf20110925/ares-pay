@@ -133,8 +133,8 @@ public class AlipayOnlinePaymentServiceImpl implements IOnlinePaymentService {
         orderInfo += "&_input_charset=\"utf-8\"";
         toSignParams.put("_input_charset", "utf-8");
         // 支付宝处理完请求后，当前页面跳转到商户指定页面的路径，可空
-        orderInfo += "&return_url=\"" + alipayConfig.getReturnUrl() + "\"";
-        toSignParams.put("return_url", alipayConfig.getReturnUrl());
+//        orderInfo += "&return_url=\"" + alipayConfig.getReturnUrl() + "\"";
+//        toSignParams.put("return_url", alipayConfig.getReturnUrl());
         String sign = null;
         try {
             sign = AlipaySignature.rsaSign(toSignParams, alipayConfig.getPrivateKey(), alipayConfig.getCharset());
@@ -337,5 +337,17 @@ public class AlipayOnlinePaymentServiceImpl implements IOnlinePaymentService {
             alipayConfig.setPublicKey(alipayInfo.get(SYSTEM_CONFIG_ALIPAY_PUBLICKEY));
         }
         return alipayConfig;
+    }
+
+    public static void main(String[] args) {
+        String str= "a=123";
+        String privateKey = "MIICdQIBADANBgkqhkiG9w0BAQEFAASCAl8wggJbAgEAAoGBAMmkRvUqD8SFv65qQB+RbnT+Bt5GGS1oEqNR3phTkx6f0+mMcRysvTNtuFxgU/iCL3WLiV9GFQVcS4GGM+XyyRK4cxQAzA2Nxz+a0H4zeuJgZsCyCs0Izwg+nyjz5RYAS8zEVqGAGjA1mxGYkrsHzs5SLf9PK0VbVqC9CoY1QKJLAgMBAAECgYAZPeNUFWvb4hJYtxxH12DIbHRXptbIBFsw7rK6xtuH3eIdPmN6f3U/1uBZUAWy+jkOseUEdDV1clRRZodgpb/dywx/rcmvCT0XR5M88GpLPfz+mGVUIpc3l7kLWCcRb+GB8Y5oGqesX+twMJNMwmD9adN1SDWyGWVpuo7FBGLDoQJBAPNoHWCz4pCcXvJMUQOMRHvJXKE/8BQjEUFmyH/up/8V6y+wi4I8uQVvWbHfYrxJSs73bFFa+08RS8J0Ab7i/+8CQQDUEv3LHSKI9XCNOkTJ2wf6k0Mx/wUmPo6M3WoGzBEsbh3lhPUhsc9SYGNGU5GIoJsD31rVh5LYPL8y/WFKT+dlAkBPju9TRVi/pazPC6zLORTFVSrGtexV2KRyORM95ZbZpKNrwgvHdOuQ4DV0EyzlmBswjOTFrrRHwsJ9e4d6ih3XAkAVCXE9hb1YQqiQidgrAdwvwg3nVrnHCmuPk6Mh23pUovO6Qc8jMYU0UbVnU4DbQbs+zhgvmEw7wQLiZvoQqg51AkBcct0bJoq56xuY3vIG12jdVlV2Q2RrnGXGrHY6tJQWvEFYk2ZN4sGIU2onTJxuhrpywk8rlrLtrprrrxKkYbPL";
+        try {
+            System.out.println(AlipaySignature.rsaSign(str,privateKey ,"GBK"));
+//            String publicKey = "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDJpEb1Kg/Ehb+uakAfkW50/gbeRhktaBKjUd6YU5Men9PpjHEcrL0zbbhcYFP4gi91i4lfRhUFXEuBhjPl8skSuHMUAMwNjcc/mtB+M3riYGbAsgrNCM8IPp8o8+UWAEvMxFahgBowNZsRmJK7B87OUi3/TytFW1agvQqGNUCiSwIDAQAB";
+//            System.out.println(AlipaySignature.rsaDecrypt("EzI3QgZI2E24uEu9dInkLn4pBy+u5ejRVjyR2qlVRNwIykXJA0FM2JU3DP3r1XQRaZLk+BbIdrPGma5jyuw2CRM/aOo4U7vCzDn+5xXUt8sI8NHI1NxcfWend91p0Kw89Tk+z4rvuvbgrc9MwyXXOFRzD1H3YDOs6ckcfPbpl24=",publicKey,"utf-8"));
+        } catch (AlipayApiException e) {
+            e.printStackTrace();
+        }
     }
 }
