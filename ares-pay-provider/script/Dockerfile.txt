@@ -4,7 +4,7 @@ FROM centos-6.8-base-custom:latest
 MAINTAINER   wandapeng "dapeng.wan@pintuibao.cn"
 ###########发布相关端口##########
 EXPOSE 22
-#EXPOSE 8080
+EXPOSE 20882
 ###########安装##########
 RUN mkdir -p /opt/ares-pay-provider/logs/
 COPY libs/ /opt/ares-pay-provider/libs/
