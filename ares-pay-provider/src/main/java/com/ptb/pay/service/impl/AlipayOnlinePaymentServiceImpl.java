@@ -10,6 +10,7 @@ import com.ptb.account.vo.param.AccountRechargeParam;
 import com.ptb.common.enums.DeviceTypeEnum;
 import com.ptb.common.enums.PlatformEnum;
 import com.ptb.common.vo.ResponseVo;
+import com.ptb.pay.conf.payment.AlipayConfig;
 import com.ptb.pay.mapper.impl.RechargeOrderMapper;
 import com.ptb.pay.model.RechargeOrder;
 import com.ptb.pay.model.RechargeOrderExample;
@@ -80,10 +81,7 @@ public class AlipayOnlinePaymentServiceImpl implements IOnlinePaymentService {
      */
     private static final String SYSTEM_CONFIG_ALIPAY_PUBLICKEY = "alipay.publicKey";
 
-    /**
-     * 签名字符集
-     */
-    private static final String ALIPAY_SIGN_CHARSET = "UTF-8";
+    private static AlipayConfig alipayConfig;
 
     private static Logger LOGGER = LoggerFactory.getLogger(AlipayOnlinePaymentServiceImpl.class);
 
@@ -99,43 +97,31 @@ public class AlipayOnlinePaymentServiceImpl implements IOnlinePaymentService {
     @Override
     public String getPaymentInfo(String rechargeOrderNo, Long price) throws Exception {
 
-        List<String> params = new ArrayList<String>();
-        params.add(SYSTEM_CONFIG_ALIPAY_PARTNER);
-        params.add(SYSTEM_CONFIG_ALIPAY_SUBJECT);
-        params.add(SYSTEM_CONFIG_ALIPAY_BODY);
-        params.add(SYSTEM_CONFIG_ALIPAY_NOTIFYURL);
-        params.add(SYSTEM_CONFIG_ALIPAY_RETURNURL);
-        params.add(SYSTEM_CONFIG_ALIPAY_PRIVATEKEY);
-        ResponseVo<Map<String, String>> result = systemConfigApi.getConfigs(params);
-        if (result == null || CollectionUtils.isEmpty(result.getData())) {
-            return null;
-        }
-        Map<String, String> alipayInfo = result.getData();
-
+        AlipayConfig alipayConfig = getAlipayConfig();
         Map<String, String> toSignParams = new HashMap<String, String>();
         // 签约合作者身份ID
-        String orderInfo = "partner=" + "\"" + alipayInfo.get(SYSTEM_CONFIG_ALIPAY_PARTNER) + "\"";
-        toSignParams.put("partner", alipayInfo.get(SYSTEM_CONFIG_ALIPAY_PARTNER));
+        String orderInfo = "partner=" + "\"" + alipayConfig.getPartner() + "\"";
+        toSignParams.put("partner", alipayConfig.getPartner());
         // 签约卖家支付宝账号
-        orderInfo += "&seller_id=" + "\"" + alipayInfo.get(SYSTEM_CONFIG_ALIPAY_PARTNER) + "\"";
-        toSignParams.put("seller_id", alipayInfo.get(SYSTEM_CONFIG_ALIPAY_PARTNER));
+        orderInfo += "&seller_id=" + "\"" + alipayConfig.getSellerId() + "\"";
+        toSignParams.put("seller_id", alipayConfig.getSellerId());
         // 商户网站唯一订单号
         orderInfo += "&out_trade_no=" + "\"" + rechargeOrderNo + "\"";
         toSignParams.put("out_trade_no", rechargeOrderNo);
         // 商品名称
-        orderInfo += "&subject=" + "\"" + alipayInfo.get(SYSTEM_CONFIG_ALIPAY_SUBJECT) + "\"";
-        toSignParams.put("subject", alipayInfo.get(SYSTEM_CONFIG_ALIPAY_SUBJECT));
+        orderInfo += "&subject=" + "\"" + alipayConfig.getSubject() + "\"";
+        toSignParams.put("subject", alipayConfig.getSubject());
         // 商品详情
-        orderInfo += "&body=" + "\"" + alipayInfo.get(SYSTEM_CONFIG_ALIPAY_BODY) + "\"";
-        toSignParams.put("body", alipayInfo.get(SYSTEM_CONFIG_ALIPAY_BODY));
+        orderInfo += "&body=" + "\"" + alipayConfig.getBody() + "\"";
+        toSignParams.put("body", alipayConfig.getBody());
 
         // 商品金额
         String totalFeeStr = ChangeMoneyUtil.fromFenToYuan(String.valueOf(price));
         orderInfo += "&total_fee=" + "\"" + totalFeeStr + "\"";
         toSignParams.put("total_fee", totalFeeStr);
         // 服务器异步通知页面路径
-        orderInfo += "&notify_url=" + "\"" + alipayInfo.get(SYSTEM_CONFIG_ALIPAY_NOTIFYURL) + "\"";
-        toSignParams.put("notify_url", alipayInfo.get(SYSTEM_CONFIG_ALIPAY_NOTIFYURL));
+        orderInfo += "&notify_url=" + "\"" + alipayConfig.getNotifyUrl() + "\"";
+        toSignParams.put("notify_url", alipayConfig.getNotifyUrl());
         // 服务接口名称， 固定值
         orderInfo += "&service=\"mobile.securitypay.pay\"";
         toSignParams.put("service", "mobile.securitypay.pay");
@@ -146,15 +132,15 @@ public class AlipayOnlinePaymentServiceImpl implements IOnlinePaymentService {
         orderInfo += "&_input_charset=\"utf-8\"";
         toSignParams.put("_input_charset", "utf-8");
         // 支付宝处理完请求后，当前页面跳转到商户指定页面的路径，可空
-        orderInfo += "&return_url=\"" + alipayInfo.get(SYSTEM_CONFIG_ALIPAY_RETURNURL) + "\"";
-        toSignParams.put("return_url", alipayInfo.get(SYSTEM_CONFIG_ALIPAY_RETURNURL));
+        orderInfo += "&return_url=\"" + alipayConfig.getReturnUrl() + "\"";
+        toSignParams.put("return_url", alipayConfig.getReturnUrl());
         String sign = null;
         try {
-            sign = AlipaySignature.rsaSign(toSignParams, alipayInfo.get(SYSTEM_CONFIG_ALIPAY_PRIVATEKEY), ALIPAY_SIGN_CHARSET);
+            sign = AlipaySignature.rsaSign(toSignParams, alipayConfig.getPrivateKey(), alipayConfig.getCharset());
             /**
              * 仅需对sign 做URL编码
              */
-            sign = URLEncoder.encode(sign, ALIPAY_SIGN_CHARSET);
+            sign = URLEncoder.encode(sign, alipayConfig.getCharset());
         } catch (AlipayApiException e) {
             e.printStackTrace();
             LOGGER.error("支付宝签名失败", e);
@@ -181,9 +167,9 @@ public class AlipayOnlinePaymentServiceImpl implements IOnlinePaymentService {
             JSONObject result = JSONObject.parseObject(payResult);
             String signContent = result.getString("alipay_trade_app_pay_response");
             String sign = result.getString("sign");
-
-            String publickKey = systemConfigApi.getConfig(SYSTEM_CONFIG_ALIPAY_PUBLICKEY).getData();
-            boolean checkResult = AlipaySignature.rsaCheckContent(signContent, sign, publickKey, ALIPAY_SIGN_CHARSET);
+            AlipayConfig alipayConfig = getAlipayConfig();
+            String publickKey = alipayConfig.getPublicKey();
+            boolean checkResult = AlipaySignature.rsaCheckContent(signContent, sign, publickKey, alipayConfig.getCharset());
             if (!checkResult) {
                 resultVO.setPayResult(false);
                 return resultVO;
@@ -225,21 +211,30 @@ public class AlipayOnlinePaymentServiceImpl implements IOnlinePaymentService {
         //验证订单号
         if (CollectionUtils.isEmpty(rechargeOrders)) {
             checkResult = false;
+            resultVO.setPayResult(checkResult);
+            return resultVO;
         }
         RechargeOrder rechargeOrder = rechargeOrders.get(0);
         //验证金额
         if (!ChangeMoneyUtil.fromYuanToFen(rechargeAmount).equals(String.valueOf(rechargeOrder.getTotalAmount()))) {
             checkResult = false;
+            resultVO.setPayResult(checkResult);
+            return resultVO;
         }
+        AlipayConfig alipayConfig = getAlipayConfig();
         //验证sellerId
-        String ourSellerId = systemConfigApi.getConfig(SYSTEM_CONFIG_ALIPAY_PARTNER).getData();
+        String ourSellerId = alipayConfig.getSellerId();
         if (!sellerId.equals(ourSellerId)) {
             checkResult = false;
+            resultVO.setPayResult(checkResult);
+            return resultVO;
         }
         //验证APPID
-        String ourAppId = systemConfigApi.getConfig(SYSTEM_CONFIG_ALIPAY_APPID).getData();
+        String ourAppId = alipayConfig.getAppId();
         if (!appId.equals(ourAppId)) {
             checkResult = false;
+            resultVO.setPayResult(checkResult);
+            return resultVO;
         }
 
         resultVO.setPayResult(checkResult);
@@ -253,12 +248,14 @@ public class AlipayOnlinePaymentServiceImpl implements IOnlinePaymentService {
         String rechargeOrderNo = params.get("out_trade_no");
         String tradeStatus = params.get("trade_status");
         if ("TRADE_FINISHED".equals(tradeStatus) || "TRADE_SUCCESS".equals(tradeStatus)) {
-            String publickKey = systemConfigApi.getConfig(SYSTEM_CONFIG_ALIPAY_PUBLICKEY).getData();
-            boolean checkResult = AlipaySignature.rsaCheckV1(params, publickKey,ALIPAY_SIGN_CHARSET);
-            if(checkResult){
+            AlipayConfig alipayConfig = getAlipayConfig();
+            String publickKey = alipayConfig.getPublicKey();
+            boolean checkResult = AlipaySignature.rsaCheckV1(params, publickKey, alipayConfig.getCharset());
+            if (checkResult) {
                 CheckPayResultVO resultVO = checkPayResponse(params);
-                if(!resultVO.isPayResult()){
-                    return false;
+                if (!resultVO.isPayResult()) {
+                    checkResult = false;
+                    return checkResult;
                 }
 
                 RechargeOrderExample example = new RechargeOrderExample();
@@ -267,22 +264,25 @@ public class AlipayOnlinePaymentServiceImpl implements IOnlinePaymentService {
                 //验证订单号
                 if (CollectionUtils.isEmpty(rechargeOrders)) {
                     checkResult = false;
+                    return checkResult;
                 }
 
                 try {
                     RechargeOrder rechargeOrder = rechargeOrders.get(0);
                     AccountRechargeParam rechargeParam = new AccountRechargeParam();
-                    rechargeParam.setDeviceType(DeviceTypeEnum.android);
+                    rechargeParam.setDeviceType(DeviceTypeEnum.getDeviceTypeEnum(rechargeOrder.getDeviceType()));
                     rechargeParam.setMoney(rechargeOrder.getTotalAmount());
                     rechargeParam.setUserId(rechargeOrder.getUserId());
                     rechargeParam.setPayType(rechargeOrder.getPayType());
                     rechargeParam.setPayMethod(rechargeOrder.getPayMethod());
                     rechargeParam.setPlatformNo(PlatformEnum.xiaomi);
+                    //隐式加密
                     TreeMap toSign = JSONObject.parseObject(JSONObject.toJSONString(rechargeParam), TreeMap.class);
                     String sign = SignUtil.getSignKey(toSign);
                     RpcContext.getContext().setAttachment("key", sign);
+
                     ResponseVo<PtbAccountVo> repsonseVO = accountApi.recharge(rechargeParam);
-                    if(!"0".equals(repsonseVO.getCode())) {
+                    if (!"0".equals(repsonseVO.getCode())) {
                         //todo 放入消息队列
                     }
                 } catch (Exception e) {
@@ -291,10 +291,46 @@ public class AlipayOnlinePaymentServiceImpl implements IOnlinePaymentService {
                     LOGGER.error("支付宝充值失败，放入消息队列重试,params:" + JSONObject.toJSONString(params));
                 }
             }
-            return true;
+            return checkResult;
         } else {
             return false;
         }
     }
 
+    /**
+     * Description: 获取支付宝配置信息
+     * All Rights Reserved.
+     * @param
+     * @return
+     * @version 1.0  2016-11-09 23:10 by wgh（guanhua.wang@pintuibao.cn）创建
+     */
+    public AlipayConfig getAlipayConfig(){
+        if(alipayConfig == null){
+            alipayConfig = new AlipayConfig();
+            List<String> params = new ArrayList<String>();
+            params.add(SYSTEM_CONFIG_ALIPAY_APPID);
+            params.add(SYSTEM_CONFIG_ALIPAY_PARTNER);
+            params.add(SYSTEM_CONFIG_ALIPAY_SUBJECT);
+            params.add(SYSTEM_CONFIG_ALIPAY_BODY);
+            params.add(SYSTEM_CONFIG_ALIPAY_NOTIFYURL);
+            params.add(SYSTEM_CONFIG_ALIPAY_RETURNURL);
+            params.add(SYSTEM_CONFIG_ALIPAY_PRIVATEKEY);
+            params.add(SYSTEM_CONFIG_ALIPAY_PUBLICKEY);
+            ResponseVo<Map<String, String>> result = systemConfigApi.getConfigs(params);
+            if (result == null || CollectionUtils.isEmpty(result.getData())) {
+                return null;
+            }
+            Map<String, String> alipayInfo = result.getData();
+            alipayConfig.setAppId(alipayInfo.get(SYSTEM_CONFIG_ALIPAY_APPID));
+            alipayConfig.setPartner(alipayInfo.get(SYSTEM_CONFIG_ALIPAY_PARTNER));
+            alipayConfig.setSellerId(alipayInfo.get(SYSTEM_CONFIG_ALIPAY_PARTNER));
+            alipayConfig.setSubject(alipayInfo.get(SYSTEM_CONFIG_ALIPAY_SUBJECT));
+            alipayConfig.setBody(alipayInfo.get(SYSTEM_CONFIG_ALIPAY_BODY));
+            alipayConfig.setNotifyUrl(alipayInfo.get(SYSTEM_CONFIG_ALIPAY_NOTIFYURL));
+            alipayConfig.setReturnUrl(alipayInfo.get(SYSTEM_CONFIG_ALIPAY_RETURNURL));
+            alipayConfig.setPrivateKey(alipayInfo.get(SYSTEM_CONFIG_ALIPAY_PRIVATEKEY));
+            alipayConfig.setPublicKey(alipayInfo.get(SYSTEM_CONFIG_ALIPAY_PUBLICKEY));
+        }
+        return alipayConfig;
+    }
 }
