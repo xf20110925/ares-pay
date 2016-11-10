@@ -11,4 +11,8 @@
 		ref="paymentApi" registry="payProvider" loadbalance="roundrobin"
 		owner="wgh" version="1.0" />
 
+	<dubbo:service interface="com.ptb.pay.api.IRechargeOrderApi"
+				   ref="rechargeOrderApi" registry="payProvider" loadbalance="roundrobin"
+				   owner="wgh" version="1.0" />
+
 </beans>
