@@ -1,0 +1,21 @@
+#version: 1.0.1
+
+FROM centos-6.8-base-custom:latest
+MAINTAINER   wandapeng "dapeng.wan@pintuibao.cn"
+###########发布相关端口##########
+EXPOSE 22
+#EXPOSE 8080
+###########安装##########
+RUN mkdir -p /opt/ares-pay-provider/logs/
+COPY libs/ /opt/ares-pay-provider/libs/
+COPY config/ /opt/ares-pay-provider/config/
+COPY bin/ /opt/ares-pay-provider/bin/
+RUN chmod 755 /opt/ares-pay-provider/bin/*
+COPY ares-pay-provider.jar /opt/ares-pay-provider/
+WORKDIR /opt/ares-pay-provider/
+###########创建数据卷目录##########
+VOLUME    /opt/ /var/log/
+###########配置服务自启动##########
+COPY run.sh  /deploy/scripts/
+RUN chmod 755 /deploy/scripts/*.sh
+ENTRYPOINT ["/deploy/scripts/run.sh"]
