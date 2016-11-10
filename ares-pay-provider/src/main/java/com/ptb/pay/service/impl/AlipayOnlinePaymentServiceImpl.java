@@ -101,37 +101,39 @@ public class AlipayOnlinePaymentServiceImpl implements IOnlinePaymentService {
         AlipayConfig alipayConfig = getAlipayConfig();
         Map<String, String> toSignParams = new HashMap<String, String>();
         // 签约合作者身份ID
-        String orderInfo = "partner=" + "\"" + alipayConfig.getPartner() + "\"";
+        String orderInfo = "";
+//                String orderInfo = "partner=" + "\"" + alipayConfig.getPartner() + "\"";
         toSignParams.put("partner", alipayConfig.getPartner());
         // 签约卖家支付宝账号
-        orderInfo += "&seller_id=" + "\"" + alipayConfig.getSellerId() + "\"";
+//        orderInfo += "&seller_id=" + "\"" + alipayConfig.getSellerId() + "\"";
         toSignParams.put("seller_id", alipayConfig.getSellerId());
         // 商户网站唯一订单号
-        orderInfo += "&out_trade_no=" + "\"" + rechargeOrderNo + "\"";
+//        orderInfo += "&out_trade_no=" + "\"" + rechargeOrderNo + "\"";
         toSignParams.put("out_trade_no", rechargeOrderNo);
         // 商品名称
-        orderInfo += "&subject=" + "\"" + alipayConfig.getSubject() + "\"";
+//        orderInfo += "&subject=" + "\"" + alipayConfig.getSubject() + "\"";
         toSignParams.put("subject", alipayConfig.getSubject());
         // 商品详情
-        orderInfo += "&body=" + "\"" + alipayConfig.getBody() + "\"";
+//        orderInfo += "&body=" + "\"" + alipayConfig.getBody() + "\"";
         toSignParams.put("body", alipayConfig.getBody());
 
         // 商品金额
         String totalFeeStr = ChangeMoneyUtil.fromFenToYuan(String.valueOf(price));
-        orderInfo += "&total_fee=" + "\"" + totalFeeStr + "\"";
+//        orderInfo += "&total_fee=" + "\"" + totalFeeStr + "\"";
         toSignParams.put("total_fee", totalFeeStr);
         // 服务器异步通知页面路径
-        orderInfo += "&notify_url=" + "\"" + alipayConfig.getNotifyUrl() + "\"";
+//        orderInfo += "&notify_url=" + "\"" + alipayConfig.getNotifyUrl() + "\"";
         toSignParams.put("notify_url", alipayConfig.getNotifyUrl());
         // 服务接口名称， 固定值
-        orderInfo += "&service=\"mobile.securitypay.pay\"";
+//        orderInfo += "&service=\"mobile.securitypay.pay\"";
         toSignParams.put("service", "mobile.securitypay.pay");
         // 支付类型， 固定值
-        orderInfo += "&payment_type=\"1\"";
+//        orderInfo += "&payment_type=\"1\"";
         toSignParams.put("payment_type", "1");
         // 参数编码， 固定值
-        orderInfo += "&_input_charset=\"utf-8\"";
+//        orderInfo += "&_input_charset=\"utf-8\"";
         toSignParams.put("_input_charset", "utf-8");
+        orderInfo = AlipaySignature.getSignCheckContentV1(toSignParams);
         // 支付宝处理完请求后，当前页面跳转到商户指定页面的路径，可空
 //        orderInfo += "&return_url=\"" + alipayConfig.getReturnUrl() + "\"";
 //        toSignParams.put("return_url", alipayConfig.getReturnUrl());
@@ -153,7 +155,7 @@ public class AlipayOnlinePaymentServiceImpl implements IOnlinePaymentService {
         /**
          * 完整的符合支付宝参数规范的订单信息
          */
-        final String payInfo = orderInfo + "&sign=\"" + sign + "\"&sign_type=\"RSA\"";
+        final String payInfo = orderInfo + "&sign=" + sign + "&sign_type=RSA";
         return payInfo;
     }
 
