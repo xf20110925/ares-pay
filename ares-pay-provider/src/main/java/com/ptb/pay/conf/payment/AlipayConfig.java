@@ -18,6 +18,42 @@ public class AlipayConfig {
     private String privateKey;
     private String publicKey;
     private String charset = "UTF-8";
+    private String version = "1.0";
+    private String method = "alipay.trade.app.pay";
+    private String signType = "RSA";
+    private String productCode = "QUICK_MSECURITY_PAY";
+
+    public String getVersion() {
+        return version;
+    }
+
+    public void setVersion(String version) {
+        this.version = version;
+    }
+
+    public String getMethod() {
+        return method;
+    }
+
+    public void setMethod(String method) {
+        this.method = method;
+    }
+
+    public String getSignType() {
+        return signType;
+    }
+
+    public void setSignType(String signType) {
+        this.signType = signType;
+    }
+
+    public String getProductCode() {
+        return productCode;
+    }
+
+    public void setProductCode(String productCode) {
+        this.productCode = productCode;
+    }
 
     public String getAppId() {
         return appId;

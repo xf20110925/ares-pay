@@ -20,6 +20,7 @@ import com.ptb.service.api.ISystemConfigApi;
 import com.ptb.utils.encrypt.SignUtil;
 import com.ptb.utils.tool.ChangeMoneyUtil;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.time.DateFormatUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,7 +51,7 @@ public class AlipayOnlinePaymentServiceImpl implements IOnlinePaymentService {
     /**
      * 支付宝分配的APP_ID
      */
-    private static final String SYSTEM_CONFIG_ALIPAY_APPID = "alipay.appid";
+    private static final String SYSTEM_CONFIG_ALIPAY_APPID = "alipay.appId";
 
     /**
      * 支付时显示的商品标题
@@ -100,50 +101,35 @@ public class AlipayOnlinePaymentServiceImpl implements IOnlinePaymentService {
 
         AlipayConfig alipayConfig = getAlipayConfig();
         Map<String, String> toSignParams = new HashMap<String, String>();
-        // 签约合作者身份ID
-        String orderInfo = "";
-//                String orderInfo = "partner=" + "\"" + alipayConfig.getPartner() + "\"";
-        toSignParams.put("partner", alipayConfig.getPartner());
-        // 签约卖家支付宝账号
-//        orderInfo += "&seller_id=" + "\"" + alipayConfig.getSellerId() + "\"";
-        toSignParams.put("seller_id", alipayConfig.getSellerId());
-        // 商户网站唯一订单号
-//        orderInfo += "&out_trade_no=" + "\"" + rechargeOrderNo + "\"";
-        toSignParams.put("out_trade_no", rechargeOrderNo);
-        // 商品名称
-//        orderInfo += "&subject=" + "\"" + alipayConfig.getSubject() + "\"";
-        toSignParams.put("subject", alipayConfig.getSubject());
-        // 商品详情
-//        orderInfo += "&body=" + "\"" + alipayConfig.getBody() + "\"";
-        toSignParams.put("body", alipayConfig.getBody());
+        toSignParams.put("app_id", alipayConfig.getAppId());
 
-        // 商品金额
-        String totalFeeStr = ChangeMoneyUtil.fromFenToYuan(String.valueOf(price));
-//        orderInfo += "&total_fee=" + "\"" + totalFeeStr + "\"";
-        toSignParams.put("total_fee", totalFeeStr);
-        // 服务器异步通知页面路径
-//        orderInfo += "&notify_url=" + "\"" + alipayConfig.getNotifyUrl() + "\"";
+        Map<String, String> bizContent = new HashMap<String, String>();
+        bizContent.put("subject", alipayConfig.getSubject());
+        bizContent.put("out_trade_no", rechargeOrderNo);
+        bizContent.put("total_amount", ChangeMoneyUtil.fromFenToYuan(String.valueOf(price)));
+        bizContent.put("product_code", alipayConfig.getProductCode());
+        toSignParams.put("biz_content", JSONObject.toJSONString(bizContent));
+
         toSignParams.put("notify_url", alipayConfig.getNotifyUrl());
-        // 服务接口名称， 固定值
-//        orderInfo += "&service=\"mobile.securitypay.pay\"";
-        toSignParams.put("service", "mobile.securitypay.pay");
-        // 支付类型， 固定值
-//        orderInfo += "&payment_type=\"1\"";
-        toSignParams.put("payment_type", "1");
-        // 参数编码， 固定值
-//        orderInfo += "&_input_charset=\"utf-8\"";
-        toSignParams.put("_input_charset", "utf-8");
-        orderInfo = AlipaySignature.getSignCheckContentV1(toSignParams);
-        // 支付宝处理完请求后，当前页面跳转到商户指定页面的路径，可空
-//        orderInfo += "&return_url=\"" + alipayConfig.getReturnUrl() + "\"";
-//        toSignParams.put("return_url", alipayConfig.getReturnUrl());
+        toSignParams.put("charset", alipayConfig.getCharset());
+        toSignParams.put("method", alipayConfig.getMethod());
+        toSignParams.put("sign_type", alipayConfig.getSignType());
+        toSignParams.put("timestamp", DateFormatUtils.format(new Date(), "yyyy-MM-dd HH:mm:ss"));
+        toSignParams.put("version", alipayConfig.getVersion());
+
         String sign = null;
+        /**
+         * 完整的符合支付宝参数规范的订单信息
+         */
+        String payInfo = null;
         try {
             sign = AlipaySignature.rsaSign(toSignParams, alipayConfig.getPrivateKey(), alipayConfig.getCharset());
-            /**
-             * 仅需对sign 做URL编码
-             */
+            for (String key : toSignParams.keySet()) {
+                toSignParams.put(key, URLEncoder.encode(toSignParams.get(key), alipayConfig.getCharset()));
+            }
             sign = URLEncoder.encode(sign, alipayConfig.getCharset());
+            String orderInfo = AlipaySignature.getSignCheckContentV2(toSignParams);
+            payInfo = orderInfo + "&sign=" + sign;
         } catch (AlipayApiException e) {
             e.printStackTrace();
             LOGGER.error("支付宝签名失败", e);
@@ -152,10 +138,7 @@ public class AlipayOnlinePaymentServiceImpl implements IOnlinePaymentService {
             LOGGER.error("支付宝签名encode失败", e);
         }
 
-        /**
-         * 完整的符合支付宝参数规范的订单信息
-         */
-        final String payInfo = orderInfo + "&sign=" + sign + "&sign_type=RSA";
+
         return payInfo;
     }
 
@@ -203,7 +186,7 @@ public class AlipayOnlinePaymentServiceImpl implements IOnlinePaymentService {
         boolean checkResult = true;
         CheckPayResultVO resultVO = new CheckPayResultVO();
 
-        String rechargeOrderNo = params.get("trade_no");
+        String rechargeOrderNo = params.get("out_trade_no");
         String rechargeAmount = params.get("total_amount");
         String sellerId = params.get("seller_id");
         String appId = params.get("app_id");
@@ -218,8 +201,9 @@ public class AlipayOnlinePaymentServiceImpl implements IOnlinePaymentService {
             return resultVO;
         }
         RechargeOrder rechargeOrder = rechargeOrders.get(0);
+        System.out.println(ChangeMoneyUtil.fromFenToYuan(String.valueOf(rechargeOrder.getTotalAmount())));
         //验证金额
-        if (!ChangeMoneyUtil.fromYuanToFen(rechargeAmount).equals(String.valueOf(rechargeOrder.getTotalAmount()))) {
+        if (!String.valueOf(rechargeAmount).equals(ChangeMoneyUtil.fromFenToYuan(String.valueOf(rechargeOrder.getTotalAmount())))) {
             checkResult = false;
             resultVO.setPayResult(checkResult);
             return resultVO;
@@ -241,7 +225,7 @@ public class AlipayOnlinePaymentServiceImpl implements IOnlinePaymentService {
         }
 
         resultVO.setPayResult(checkResult);
-        resultVO.setRechargeAmount(Long.valueOf(ChangeMoneyUtil.fromYuanToFen(rechargeAmount)));
+        resultVO.setRechargeAmount(rechargeOrder.getTotalAmount());
         resultVO.setRechargeOderNo(rechargeOrderNo);
         return resultVO;
     }
@@ -279,6 +263,7 @@ public class AlipayOnlinePaymentServiceImpl implements IOnlinePaymentService {
                     rechargeParam.setPayType(rechargeOrder.getPayType());
                     rechargeParam.setPayMethod(rechargeOrder.getPayMethod());
                     rechargeParam.setPlatformNo(PlatformEnum.xiaomi);
+                    rechargeParam.setOrderNo(rechargeOrderNo);
                     //隐式加密
                     TreeMap toSign = JSONObject.parseObject(JSONObject.toJSONString(rechargeParam), TreeMap.class);
                     String sign = SignUtil.getSignKey(toSign);
@@ -342,14 +327,10 @@ public class AlipayOnlinePaymentServiceImpl implements IOnlinePaymentService {
     }
 
     public static void main(String[] args) {
-        String str= "a=123";
-        String privateKey = "MIICdQIBADANBgkqhkiG9w0BAQEFAASCAl8wggJbAgEAAoGBAMmkRvUqD8SFv65qQB+RbnT+Bt5GGS1oEqNR3phTkx6f0+mMcRysvTNtuFxgU/iCL3WLiV9GFQVcS4GGM+XyyRK4cxQAzA2Nxz+a0H4zeuJgZsCyCs0Izwg+nyjz5RYAS8zEVqGAGjA1mxGYkrsHzs5SLf9PK0VbVqC9CoY1QKJLAgMBAAECgYAZPeNUFWvb4hJYtxxH12DIbHRXptbIBFsw7rK6xtuH3eIdPmN6f3U/1uBZUAWy+jkOseUEdDV1clRRZodgpb/dywx/rcmvCT0XR5M88GpLPfz+mGVUIpc3l7kLWCcRb+GB8Y5oGqesX+twMJNMwmD9adN1SDWyGWVpuo7FBGLDoQJBAPNoHWCz4pCcXvJMUQOMRHvJXKE/8BQjEUFmyH/up/8V6y+wi4I8uQVvWbHfYrxJSs73bFFa+08RS8J0Ab7i/+8CQQDUEv3LHSKI9XCNOkTJ2wf6k0Mx/wUmPo6M3WoGzBEsbh3lhPUhsc9SYGNGU5GIoJsD31rVh5LYPL8y/WFKT+dlAkBPju9TRVi/pazPC6zLORTFVSrGtexV2KRyORM95ZbZpKNrwgvHdOuQ4DV0EyzlmBswjOTFrrRHwsJ9e4d6ih3XAkAVCXE9hb1YQqiQidgrAdwvwg3nVrnHCmuPk6Mh23pUovO6Qc8jMYU0UbVnU4DbQbs+zhgvmEw7wQLiZvoQqg51AkBcct0bJoq56xuY3vIG12jdVlV2Q2RrnGXGrHY6tJQWvEFYk2ZN4sGIU2onTJxuhrpywk8rlrLtrprrrxKkYbPL";
-        try {
-            System.out.println(AlipaySignature.rsaSign(str,privateKey ,"GBK"));
-//            String publicKey = "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDJpEb1Kg/Ehb+uakAfkW50/gbeRhktaBKjUd6YU5Men9PpjHEcrL0zbbhcYFP4gi91i4lfRhUFXEuBhjPl8skSuHMUAMwNjcc/mtB+M3riYGbAsgrNCM8IPp8o8+UWAEvMxFahgBowNZsRmJK7B87OUi3/TytFW1agvQqGNUCiSwIDAQAB";
-//            System.out.println(AlipaySignature.rsaDecrypt("EzI3QgZI2E24uEu9dInkLn4pBy+u5ejRVjyR2qlVRNwIykXJA0FM2JU3DP3r1XQRaZLk+BbIdrPGma5jyuw2CRM/aOo4U7vCzDn+5xXUt8sI8NHI1NxcfWend91p0Kw89Tk+z4rvuvbgrc9MwyXXOFRzD1H3YDOs6ckcfPbpl24=",publicKey,"utf-8"));
-        } catch (AlipayApiException e) {
-            e.printStackTrace();
-        }
+//        String str= "{\"gmt_create\" : \"2016-11-10 18:24:06\",\"buyer_email\" : \"15010251107\",\"notify_time\" : \"2016-11-10 18:33:21\",\"gmt_payment\" : \"2016-11-10 18:24:08\",\"seller_email\" : \"dayu@pintuibao.cn\",\"quantity\" : \"1\",\"subject\" : \"xiaomirecharge\",\"use_coupon\" : \"N\",\"sign\" : \"MJUoLUcQYhaAPTcET0ck81q5hzXLn08d+iLEpBRiwRUc+w1BXQzNRewLxzBwIs2x8Xq0xLkH/0Fw/euh/ze1UtzeN6BE0+2bG6GCNLBZ4xMiS+mzR0z3I3OmLnUoO2wf4YxYDKN/HbofuQWVwYwJ8QapgN1jS0C8ycWVOdhexVY=\",\"discount\" : \"0.00\",\"body\" : \"xiaomirecharge\",\"buyer_id\" : \"2088302225948663\",\"notify_id\" : \"41161136f0efd054149e9c7ef90404el3e\",\"notify_type\" : \"trade_status_sync\",\"payment_type\" : \"1\",\"out_trade_no\" : \"CZIS1611101823000009\",\"price\" : \"0.01\",\"trade_status\" : \"TRADE_SUCCESS\",\"total_fee\" : \"0.01\",\"trade_no\" : \"2016111021001004660257913006\",\"sign_type\" : \"RSA\",\"seller_id\" : \"2088421215991288\",\"is_total_fee_adjust\" : \"N\"}";
+//        Map map = JSONObject.parseObject(str, Map.class);
+//        String content = AlipaySignature.getSignCheckContentV2(map);
+//        System.out.println(content);
+        System.out.println(Integer.valueOf("1.00"));
     }
 }
