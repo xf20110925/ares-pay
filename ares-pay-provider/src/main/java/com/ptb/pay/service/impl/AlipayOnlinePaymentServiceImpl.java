@@ -9,6 +9,7 @@ import com.ptb.account.vo.PtbAccountVo;
 import com.ptb.account.vo.param.AccountRechargeParam;
 import com.ptb.common.enums.DeviceTypeEnum;
 import com.ptb.common.enums.PlatformEnum;
+import com.ptb.common.enums.RechargeOrderStatusEnum;
 import com.ptb.common.vo.ResponseVo;
 import com.ptb.pay.conf.payment.AlipayConfig;
 import com.ptb.pay.mapper.impl.RechargeOrderMapper;
@@ -285,6 +286,10 @@ public class AlipayOnlinePaymentServiceImpl implements IOnlinePaymentService {
                     if (!"0".equals(repsonseVO.getCode())) {
                         //todo 放入消息队列
                     }
+
+                    rechargeOrder.setStatus(RechargeOrderStatusEnum.paid.getRechargeOrderStatus());
+                    rechargeOrder.setPayTime(new Date());
+                    rechargeOrderMapper.updateByPrimaryKey(rechargeOrder);
                 } catch (Exception e) {
                     e.printStackTrace();
                     //todo 放入消息队列

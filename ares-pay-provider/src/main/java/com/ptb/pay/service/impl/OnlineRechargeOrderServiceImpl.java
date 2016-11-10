@@ -1,6 +1,6 @@
 package com.ptb.pay.service.impl;
 
-import com.ptb.common.enums.RechargeOrderNoStatusEnum;
+import com.ptb.common.enums.RechargeOrderStatusEnum;
 import com.ptb.pay.mapper.impl.RechargeOrderMapper;
 import com.ptb.pay.model.RechargeOrder;
 import com.ptb.pay.service.IOnlinePaymentService;
@@ -38,7 +38,7 @@ public class OnlineRechargeOrderServiceImpl implements IRechargeOrderService{
         rechargeOrder.setOrderNo(paramsVO.getOrderNo());
         rechargeOrder.setPayMethod(paramsVO.getPayMethod());
         rechargeOrder.setRechargeOrderNo(GenerateOrderNoUtil.createRechargeOrderNo(paramsVO.getDeviceType(), paramsVO.getPayMethod()));
-        rechargeOrder.setStatus(RechargeOrderNoStatusEnum.unpay.getRechargeOrderNoStatus());
+        rechargeOrder.setStatus(RechargeOrderStatusEnum.unpay.getRechargeOrderStatus());
         rechargeOrder.setTotalAmount(paramsVO.getRechargeAmount());
         rechargeOrder.setUserId(paramsVO.getUserId());
         rechargeOrder.setPayType(paramsVO.getPayType());

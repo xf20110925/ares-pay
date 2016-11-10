@@ -7,7 +7,7 @@
 
 	<description>dubbo consumer配置</description>
 
-	<dubbo:application name="ptb-pay" />
+	<dubbo:application name="ares-pay" />
 
 	<dubbo:registry address="${dubbo.registry.address}"
 		protocol="zookeeper" id="payProvider" />
@@ -23,4 +23,8 @@
 		id="blockApi" registry="payProvider" loadbalance="roundrobin" owner="wgh"
 		version="1.0" />
 
+	<!-- 虚拟账户相关服务 -->
+	<dubbo:reference interface="com.ptb.account.api.IAccountApi"
+					 id="accountApi" owner="zuokui.fu" version="1.0" protocol="dubbo"
+					 retries="0" />
 </beans>
