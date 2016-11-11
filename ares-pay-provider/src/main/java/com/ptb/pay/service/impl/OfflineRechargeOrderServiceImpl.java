@@ -2,6 +2,7 @@ package com.ptb.pay.service.impl;
 
 import com.ptb.common.enums.RechargeOrderStatusEnum;
 import com.ptb.common.vo.ResponseVo;
+import com.ptb.pay.conf.payment.OfflinePaymentConfig;
 import com.ptb.pay.mapper.impl.RechargeOrderMapper;
 import com.ptb.pay.model.RechargeOrder;
 import com.ptb.pay.service.IRechargeOrderService;
@@ -11,7 +12,6 @@ import org.apache.commons.lang.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
 import vo.RechargeOrderParamsVO;
 
 import java.util.*;
@@ -46,6 +46,10 @@ public class OfflineRechargeOrderServiceImpl implements IRechargeOrderService {
      */
     private static final String SYSTEM_CONFIG_OPENACCOUNT_USERNUM = "offline.recharge.openAccountUserNum";
 
+    /**
+     * 线下充值方式
+     */
+    private static OfflinePaymentConfig OFFLINE_PAYMENT_CONFIG;
 
     @Autowired
     private RechargeOrderMapper rechargeOrderMapper;
@@ -78,34 +82,42 @@ public class OfflineRechargeOrderServiceImpl implements IRechargeOrderService {
         returnData.put("verificationCode", rechargeOrder.getVerificationCode());
         returnData.put("rechargeAmount", rechargeOrder.getTotalAmount());
         returnData.put("payMethod", rechargeOrder.getPayMethod());
-        Map<String, String> returnMap = getOpenBankInfo();
-        if(returnMap != null){
-            returnData.put("bankName", returnMap.get(SYSTEM_CONFIG_BANKNAME));
-            returnData.put("openAccountBankName", returnMap.get(SYSTEM_CONFIG_OPENACCOUNT_BANKNAME));
-            returnData.put("openAccountUserName", returnMap.get(SYSTEM_CONFIG_OPENACCOUNT_USERNAME));
-            returnData.put("openAccountUserNum", returnMap.get(SYSTEM_CONFIG_OPENACCOUNT_USERNUM));
+        OfflinePaymentConfig offlinePaymentConfig = getOfflinePaymentConfig();
+        if(offlinePaymentConfig != null){
+            returnData.put("bankName", offlinePaymentConfig.getBankName());
+            returnData.put("openAccountBankName", offlinePaymentConfig.getOpenAccountBankName());
+            returnData.put("openAccountUserName", offlinePaymentConfig.getOpenAccountUserName());
+            returnData.put("openAccountUserNum", offlinePaymentConfig.getOpenAccountUserNum());
         }
         return returnData;
     }
 
     /**
-     * Description: 获取我方开户行信息
+     * Description: 获取线下充值方式信息
      * All Rights Reserved.
      * @param
      * @return
      * @version 1.0  2016-11-08 11:17 by wgh（guanhua.wang@pintuibao.cn）创建
      */
-    public Map<String, String> getOpenBankInfo() {
-        List<String> params = new ArrayList<String>();
-        params.add(SYSTEM_CONFIG_BANKNAME);
-        params.add(SYSTEM_CONFIG_OPENACCOUNT_BANKNAME);
-        params.add(SYSTEM_CONFIG_OPENACCOUNT_USERNAME);
-        params.add(SYSTEM_CONFIG_OPENACCOUNT_USERNUM);
-        ResponseVo<Map<String, String>> result = systemConfigApi.getConfigs(params);
-        if (result != null && !CollectionUtils.isEmpty(result.getData())) {
-            return result.getData();
+    public OfflinePaymentConfig getOfflinePaymentConfig() {
+        if(OFFLINE_PAYMENT_CONFIG == null){
+            OFFLINE_PAYMENT_CONFIG = new OfflinePaymentConfig();
+            List<String> params = new ArrayList<String>();
+            params.add(SYSTEM_CONFIG_BANKNAME);
+            params.add(SYSTEM_CONFIG_OPENACCOUNT_BANKNAME);
+            params.add(SYSTEM_CONFIG_OPENACCOUNT_USERNAME);
+            params.add(SYSTEM_CONFIG_OPENACCOUNT_USERNUM);
+            ResponseVo<Map<String, String>> result = systemConfigApi.getConfigs(params);
+            if(result == null || !"0".equals(result.getCode())){
+                return null;
+            }
+            Map<String, String> returnData = result.getData();
+            OFFLINE_PAYMENT_CONFIG.setBankName(returnData.get(SYSTEM_CONFIG_BANKNAME));
+            OFFLINE_PAYMENT_CONFIG.setOpenAccountBankName(returnData.get(SYSTEM_CONFIG_OPENACCOUNT_BANKNAME));
+            OFFLINE_PAYMENT_CONFIG.setOpenAccountUserName(returnData.get(SYSTEM_CONFIG_OPENACCOUNT_USERNAME));
+            OFFLINE_PAYMENT_CONFIG.setOpenAccountUserNum(returnData.get(SYSTEM_CONFIG_OPENACCOUNT_USERNUM));
         }
-        return null;
+        return  OFFLINE_PAYMENT_CONFIG;
     }
 
 }
