@@ -7,19 +7,19 @@ import java.util.Date;
  * Description: 充值订单VO
  * All Rights Reserved.
  *
- * @version 1.0  2016-11-07 18:35  by wgh（guanhua.wang@pintuibao.cn）创建
+ * @version 1.0  2016-11-07 18:35  by wgh（guanhua.wang@pIntegeruibao.cn）创建
  */
 public class RechargeOrderVO implements Serializable{
 
     private static final long serialVersionUID = -2720046974034786258L;
     private Long orderId;
     private Long rechargeAmount;
-    private int payMethod;
-    private int payType;
+    private Integer payMethod;
+    private Integer payType;
     private String rechargeOrderNo;
     private String deviceType;
     private Long userId;
-    private int status;
+    private Integer status;
     private Date createTime;
     private Date payTime;
     private String verificationCode;
@@ -44,19 +44,19 @@ public class RechargeOrderVO implements Serializable{
         this.rechargeAmount = rechargeAmount;
     }
 
-    public int getPayMethod() {
+    public Integer getPayMethod() {
         return payMethod;
     }
 
-    public void setPayMethod(int payMethod) {
+    public void setPayMethod(Integer payMethod) {
         this.payMethod = payMethod;
     }
 
-    public int getPayType() {
+    public Integer getPayType() {
         return payType;
     }
 
-    public void setPayType(int payType) {
+    public void setPayType(Integer payType) {
         this.payType = payType;
     }
 
@@ -84,11 +84,11 @@ public class RechargeOrderVO implements Serializable{
         this.userId = userId;
     }
 
-    public int getStatus() {
+    public Integer getStatus() {
         return status;
     }
 
-    public void setStatus(int status) {
+    public void setStatus(Integer status) {
         this.status = status;
     }
 
