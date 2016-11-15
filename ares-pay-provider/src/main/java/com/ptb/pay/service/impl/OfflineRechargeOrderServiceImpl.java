@@ -65,7 +65,7 @@ public class OfflineRechargeOrderServiceImpl implements IRechargeOrderService {
         rechargeOrder.setOrderNo(paramsVO.getOrderNo());
         rechargeOrder.setPayMethod(paramsVO.getPayMethod());
         rechargeOrder.setRechargeOrderNo(GenerateOrderNoUtil.createRechargeOrderNo(paramsVO.getDeviceType(), paramsVO.getPayMethod()));
-        rechargeOrder.setStatus(RechargeOrderStatusEnum.unpay.getRechargeOrderStatus());
+        rechargeOrder.setStatus(RechargeOrderStatusEnum.review.getRechargeOrderStatus());
         rechargeOrder.setTotalAmount(paramsVO.getRechargeAmount());
         rechargeOrder.setVerificationCode(RandomStringUtils.randomNumeric(6));
         rechargeOrder.setUserId(paramsVO.getUserId());
