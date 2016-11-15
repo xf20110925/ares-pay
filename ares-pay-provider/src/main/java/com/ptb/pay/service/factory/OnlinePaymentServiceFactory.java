@@ -1,7 +1,7 @@
 package com.ptb.pay.service.factory;
 
 import com.ptb.common.enums.OnlinePaymentTypeEnum;
-import com.ptb.pay.service.IOnlinePaymentService;
+import com.ptb.pay.service.interfaces.IOnlinePaymentService;
 import com.ptb.pay.system.SpringContextHolder;
 
 /**

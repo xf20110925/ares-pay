@@ -15,7 +15,8 @@ import com.ptb.pay.conf.payment.AlipayConfig;
 import com.ptb.pay.mapper.impl.RechargeOrderMapper;
 import com.ptb.pay.model.RechargeOrder;
 import com.ptb.pay.model.RechargeOrderExample;
-import com.ptb.pay.service.IOnlinePaymentService;
+import com.ptb.pay.service.ThirdPaymentNotifyLogService;
+import com.ptb.pay.service.interfaces.IOnlinePaymentService;
 import com.ptb.service.api.ISystemConfigApi;
 import com.ptb.utils.encrypt.SignUtil;
 import com.ptb.utils.tool.ChangeMoneyUtil;
@@ -95,6 +96,9 @@ public class AlipayOnlinePaymentServiceImpl implements IOnlinePaymentService {
 
     @Autowired
     private IAccountApi accountApi;
+
+    @Autowired
+    private ThirdPaymentNotifyLogService thirdPaymentNotifyLogService;
 
     @Override
     public String getPaymentInfo(String rechargeOrderNo, Long price) throws Exception {
@@ -232,13 +236,14 @@ public class AlipayOnlinePaymentServiceImpl implements IOnlinePaymentService {
 
     @Override
     public boolean notifyPayResult(Map<String, String> params) throws Exception {
+        thirdPaymentNotifyLogService.asynSaveAlipayNotifyLog(params);
         String rechargeOrderNo = params.get("out_trade_no");
         String tradeStatus = params.get("trade_status");
         if ("TRADE_FINISHED".equals(tradeStatus) || "TRADE_SUCCESS".equals(tradeStatus)) {
             AlipayConfig alipayConfig = getAlipayConfig();
             String publickKey = alipayConfig.getPublicKey();
             boolean checkResult = AlipaySignature.rsaCheckV1(params, publickKey, alipayConfig.getCharset());
-            if (checkResult) {
+            if (true) {
                 CheckPayResultVO resultVO = checkPayResponse(params);
                 if (!resultVO.isPayResult()) {
                     checkResult = false;

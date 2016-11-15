@@ -5,7 +5,7 @@ import com.ptb.common.vo.ResponseVo;
 import com.ptb.pay.conf.payment.OfflinePaymentConfig;
 import com.ptb.pay.mapper.impl.RechargeOrderMapper;
 import com.ptb.pay.model.RechargeOrder;
-import com.ptb.pay.service.IRechargeOrderService;
+import com.ptb.pay.service.interfaces.IRechargeOrderService;
 import com.ptb.service.api.ISystemConfigApi;
 import com.ptb.utils.tool.GenerateOrderNoUtil;
 import org.apache.commons.lang.RandomStringUtils;

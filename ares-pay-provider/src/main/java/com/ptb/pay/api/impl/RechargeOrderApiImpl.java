@@ -6,7 +6,7 @@ import com.ptb.pay.api.IRechargeOrderApi;
 import com.ptb.pay.mapper.impl.RechargeOrderMapper;
 import com.ptb.pay.model.RechargeOrder;
 import com.ptb.pay.model.RechargeOrderExample;
-import com.ptb.pay.service.IRechargeOrderService;
+import com.ptb.pay.service.interfaces.IRechargeOrderService;
 import com.ptb.pay.service.factory.RechargeOrderServiceFactory;
 import com.ptb.utils.service.ReturnUtil;
 import org.slf4j.Logger;
@@ -22,7 +22,9 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Created by zuokui.fu on 2016/10/18.
+ * Description: 充值订单API实现
+ * All Rights Reserved.
+ * @version 1.0  2016-11-15 10:35 by wgh（guanhua.wang@pintuibao.cn）创建
  */
 @Component("rechargeOrderApi")
 public class RechargeOrderApiImpl implements IRechargeOrderApi {

@@ -6,8 +6,8 @@ import com.ptb.common.vo.ResponseVo;
 import com.ptb.pay.api.IPaymentApi;
 import com.ptb.pay.mapper.impl.RechargeOrderMapper;
 import com.ptb.pay.model.RechargeOrder;
-import com.ptb.pay.service.IOnlinePaymentService;
-import com.ptb.pay.service.IRechargeOrderService;
+import com.ptb.pay.service.interfaces.IOnlinePaymentService;
+import com.ptb.pay.service.interfaces.IRechargeOrderService;
 import com.ptb.pay.service.factory.OnlinePaymentServiceFactory;
 import com.ptb.pay.service.factory.RechargeOrderServiceFactory;
 import com.ptb.service.api.IBlockApi;
@@ -27,8 +27,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 支付api Description: All Rights Reserved.
- *
+ * Description: 支付api
+ * All Rights Reserved.
  * @version 1.0 2016年11月2日 下午6:06:54 by 王冠华（guanhua.wang@pintuibao.cn）创建
  */
 @Component("paymentApi")

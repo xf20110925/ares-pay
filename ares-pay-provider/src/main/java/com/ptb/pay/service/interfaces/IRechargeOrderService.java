@@ -1,4 +1,4 @@
-package com.ptb.pay.service;
+package com.ptb.pay.service.interfaces;
 
 import com.ptb.pay.model.RechargeOrder;
 import vo.RechargeOrderParamsVO;

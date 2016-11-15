@@ -1,7 +1,7 @@
 package com.ptb.pay.service.factory;
 
 import com.ptb.common.enums.PaymentMethodEnum;
-import com.ptb.pay.service.IRechargeOrderService;
+import com.ptb.pay.service.interfaces.IRechargeOrderService;
 import com.ptb.pay.system.SpringContextHolder;
 
 /**
