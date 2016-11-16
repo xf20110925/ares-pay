@@ -1,6 +1,6 @@
 package com.ptb.pay.service.interfaces;
 
-import vo.CheckPayResultVO;
+import com.ptb.pay.vo.CheckPayResultVO;
 
 import java.util.Map;
 

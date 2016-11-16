@@ -10,7 +10,7 @@ import com.ptb.utils.tool.GenerateOrderNoUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import vo.RechargeOrderParamsVO;
+import com.ptb.pay.vo.RechargeOrderParamsVO;
 
 import java.util.Date;
 import java.util.HashMap;

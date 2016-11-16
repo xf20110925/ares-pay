@@ -1,7 +1,7 @@
 package com.ptb.pay.service.interfaces;
 
 import com.ptb.pay.model.RechargeOrder;
-import vo.RechargeOrderParamsVO;
+import com.ptb.pay.vo.RechargeOrderParamsVO;
 
 import java.util.Map;
 
