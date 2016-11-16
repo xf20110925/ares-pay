@@ -12,7 +12,7 @@ import org.apache.commons.lang.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-import vo.RechargeOrderParamsVO;
+import com.ptb.pay.vo.RechargeOrderParamsVO;
 
 import java.util.*;
 

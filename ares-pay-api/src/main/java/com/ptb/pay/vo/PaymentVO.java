@@ -3,7 +3,7 @@
  * All Rights Reserved.
  * @version 1.0  2016年11月2日 下午6:27:49  by 王冠华（guanhua.wang@pintuibao.cn）创建
  */
-package vo;
+package com.ptb.pay.vo;
 
 import java.io.Serializable;
 import java.util.List;

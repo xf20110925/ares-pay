@@ -15,8 +15,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
-import vo.RechargeOrderParamsVO;
-import vo.RechargeOrderVO;
+import com.ptb.pay.vo.RechargeOrderParamsVO;
+import com.ptb.pay.vo.RechargeOrderVO;
 
 import java.util.ArrayList;
 import java.util.List;

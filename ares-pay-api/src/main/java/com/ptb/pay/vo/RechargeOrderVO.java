@@ -1,4 +1,4 @@
-package vo;
+package com.ptb.pay.vo;
 
 import java.io.Serializable;
 import java.util.Date;

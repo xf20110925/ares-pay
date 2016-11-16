@@ -1,8 +1,8 @@
 package com.ptb.pay.api;
 
 import com.ptb.common.vo.ResponseVo;
-import vo.RechargeOrderParamsVO;
-import vo.RechargeOrderVO;
+import com.ptb.pay.vo.RechargeOrderParamsVO;
+import com.ptb.pay.vo.RechargeOrderVO;
 
 import java.util.List;
 import java.util.Map;

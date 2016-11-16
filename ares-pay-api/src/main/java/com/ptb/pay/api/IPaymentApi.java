@@ -1,10 +1,10 @@
 package com.ptb.pay.api;
 
 import com.ptb.common.vo.ResponseVo;
-import vo.CheckPayResultVO;
-import vo.OnlinePaymentNotifyVO;
-import vo.PaymentVO;
-import vo.RechargeOrderParamsVO;
+import com.ptb.pay.vo.CheckPayResultVO;
+import com.ptb.pay.vo.OnlinePaymentNotifyVO;
+import com.ptb.pay.vo.PaymentVO;
+import com.ptb.pay.vo.RechargeOrderParamsVO;
 
 import java.util.List;
 import java.util.Map;

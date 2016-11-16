@@ -1,7 +1,7 @@
 package com.ptb.pay.service.impl;
 
 import com.ptb.pay.service.interfaces.IOnlinePaymentService;
-import vo.CheckPayResultVO;
+import com.ptb.pay.vo.CheckPayResultVO;
 
 import java.util.Map;
 

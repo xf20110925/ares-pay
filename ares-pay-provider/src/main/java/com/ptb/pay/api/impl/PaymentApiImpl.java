@@ -18,10 +18,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-import vo.CheckPayResultVO;
-import vo.OnlinePaymentNotifyVO;
-import vo.PaymentVO;
-import vo.RechargeOrderParamsVO;
+import com.ptb.pay.vo.CheckPayResultVO;
+import com.ptb.pay.vo.OnlinePaymentNotifyVO;
+import com.ptb.pay.vo.PaymentVO;
+import com.ptb.pay.vo.RechargeOrderParamsVO;
 
 import java.util.List;
 import java.util.Map;
