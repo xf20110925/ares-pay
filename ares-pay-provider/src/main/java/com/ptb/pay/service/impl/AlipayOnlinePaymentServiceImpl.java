@@ -15,6 +15,8 @@ import com.ptb.pay.conf.payment.AlipayConfig;
 import com.ptb.pay.mapper.impl.RechargeOrderMapper;
 import com.ptb.pay.model.RechargeOrder;
 import com.ptb.pay.model.RechargeOrderExample;
+import com.ptb.pay.model.vo.AccountRechargeParamMessageVO;
+import com.ptb.pay.service.BusService;
 import com.ptb.pay.service.ThirdPaymentNotifyLogService;
 import com.ptb.pay.service.interfaces.IOnlinePaymentService;
 import com.ptb.service.api.ISystemConfigApi;
@@ -99,6 +101,9 @@ public class AlipayOnlinePaymentServiceImpl implements IOnlinePaymentService {
 
     @Autowired
     private ThirdPaymentNotifyLogService thirdPaymentNotifyLogService;
+
+    @Autowired
+    private BusService busService;
 
     @Override
     public String getPaymentInfo(String rechargeOrderNo, Long price) throws Exception {
@@ -243,7 +248,7 @@ public class AlipayOnlinePaymentServiceImpl implements IOnlinePaymentService {
             AlipayConfig alipayConfig = getAlipayConfig();
             String publickKey = alipayConfig.getPublicKey();
             boolean checkResult = AlipaySignature.rsaCheckV1(params, publickKey, alipayConfig.getCharset());
-            if (true) {
+            if (checkResult) {
                 CheckPayResultVO resultVO = checkPayResponse(params);
                 if (!resultVO.isPayResult()) {
                     checkResult = false;
@@ -259,9 +264,9 @@ public class AlipayOnlinePaymentServiceImpl implements IOnlinePaymentService {
                     return checkResult;
                 }
 
+                RechargeOrder rechargeOrder = rechargeOrders.get(0);
+                AccountRechargeParam rechargeParam = new AccountRechargeParam();
                 try {
-                    RechargeOrder rechargeOrder = rechargeOrders.get(0);
-                    AccountRechargeParam rechargeParam = new AccountRechargeParam();
                     rechargeParam.setDeviceType(DeviceTypeEnum.getDeviceTypeEnum(rechargeOrder.getDeviceType()));
                     rechargeParam.setMoney(rechargeOrder.getTotalAmount());
                     rechargeParam.setUserId(rechargeOrder.getUserId());
@@ -275,23 +280,37 @@ public class AlipayOnlinePaymentServiceImpl implements IOnlinePaymentService {
                     RpcContext.getContext().setAttachment("key", sign);
 
                     ResponseVo<PtbAccountVo> repsonseVO = accountApi.recharge(rechargeParam);
-                    if (!"0".equals(repsonseVO.getCode())) {
-                        //todo 放入消息队列
+                    if (repsonseVO == null || !"0".equals(repsonseVO.getCode())) {
+                        sendRetryMessage(rechargeParam);
                     }
-
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    sendRetryMessage(rechargeParam);
+                    LOGGER.error("支付宝充值失败，放入消息队列重试,params:" + JSONObject.toJSONString(params));
+                }finally {
                     rechargeOrder.setStatus(RechargeOrderStatusEnum.paid.getRechargeOrderStatus());
                     rechargeOrder.setPayTime(new Date());
                     rechargeOrderMapper.updateByPrimaryKey(rechargeOrder);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    //todo 放入消息队列
-                    LOGGER.error("支付宝充值失败，放入消息队列重试,params:" + JSONObject.toJSONString(params));
                 }
             }
             return checkResult;
         } else {
             return false;
         }
+    }
+
+    /**
+     * Description: 发送重试消息
+     * All Rights Reserved.
+     * @param 
+     * @return 
+     * @version 1.0  2016-11-16 17:07 by wgh（guanhua.wang@pintuibao.cn）创建
+     */ 
+    private void sendRetryMessage(AccountRechargeParam rechargeParam){
+        AccountRechargeParamMessageVO messageVO = new AccountRechargeParamMessageVO();
+        messageVO.setAccountRechargeParam(rechargeParam);
+        LOGGER.info("发送重试充值消息：" + JSONObject.toJSONString(messageVO));
+        busService.sendAccountRechargeRetryMessage(messageVO);
     }
 
     /**
