@@ -18,7 +18,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import java.util.TreeMap;
 
@@ -47,7 +46,7 @@ public class BusService {
 
     private static Logger LOGGER = LoggerFactory.getLogger(BusService.class);
 
-    @PostConstruct
+//    @PostConstruct
     private void initBus(){
         LOGGER.info("init bus start.............");
         bus = new KafkaBus(MESSAGE_RECHARGE_ERROR_RETRY_TOPIC);
