@@ -281,11 +281,11 @@ public class AlipayOnlinePaymentServiceImpl implements IOnlinePaymentService {
 
                     ResponseVo<PtbAccountVo> repsonseVO = accountApi.recharge(rechargeParam);
                     if (repsonseVO == null || !"0".equals(repsonseVO.getCode())) {
-//                        sendRetryMessage(rechargeParam);
+                        sendRetryMessage(rechargeParam);
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
-//                    sendRetryMessage(rechargeParam);
+                    sendRetryMessage(rechargeParam);
                     LOGGER.error("支付宝充值失败，放入消息队列重试,params:" + JSONObject.toJSONString(params));
                 }finally {
                     rechargeOrder.setStatus(RechargeOrderStatusEnum.paid.getRechargeOrderStatus());
