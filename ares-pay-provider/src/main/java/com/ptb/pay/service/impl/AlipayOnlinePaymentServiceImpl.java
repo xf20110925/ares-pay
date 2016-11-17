@@ -210,7 +210,6 @@ public class AlipayOnlinePaymentServiceImpl implements IOnlinePaymentService {
             return resultVO;
         }
         RechargeOrder rechargeOrder = rechargeOrders.get(0);
-        System.out.println(ChangeMoneyUtil.fromFenToYuan(String.valueOf(rechargeOrder.getTotalAmount())));
         //验证金额
         if (!String.valueOf(rechargeAmount).equals(ChangeMoneyUtil.fromFenToYuan(String.valueOf(rechargeOrder.getTotalAmount())))) {
             checkResult = false;

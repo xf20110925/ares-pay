@@ -50,11 +50,11 @@ public class RechargeOrderApiImpl implements IRechargeOrderApi {
         }
 
         RechargeOrderExample example = new RechargeOrderExample();
-        example.createCriteria().andUserIdEqualTo(userId);
+
         List<Integer> status = new ArrayList<Integer>();
         status.add(RechargeOrderStatusEnum.paid.getRechargeOrderStatus());
         status.add(RechargeOrderStatusEnum.review.getRechargeOrderStatus());
-        example.createCriteria().andStatusIn(status);
+        example.createCriteria().andUserIdEqualTo(userId).andStatusIn(status);
         example.setOrderByClause("create_time desc");
         List<RechargeOrder> orders = rechargeOrderMapper.selectByExample(example);
         List<RechargeOrderVO> returnData = new ArrayList<RechargeOrderVO>();
