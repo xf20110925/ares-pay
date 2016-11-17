@@ -10,6 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by zuokui.fu on 2016/11/16.
@@ -20,6 +22,42 @@ public class OrderServiceImpl implements IOrderService {
     private OrderMapper orderMapper;
     @Autowired
     private OrderLogMapper orderLogMapper;
+
+    private static Map<String, Object> salerOrderStatusMap = new HashMap<>();
+    private static Map<String, Object> buyerOrderStatusMap = new HashMap<>();
+
+    static {
+        Map<String, Object> map =  new HashMap();map.put( "button", "6");   map.put( "desc", "等待买家付款");salerOrderStatusMap.put( "000", map);
+        Map<String, Object> map1 = new HashMap();map1.put( "button", null);map1.put( "desc", "关闭交易");salerOrderStatusMap.put( "305", map1);
+        Map<String, Object> map2 = new HashMap();map2.put( "button", "8"); map2.put( "desc", "进行中");salerOrderStatusMap.put( "101", map2);
+        Map<String, Object> map3 = new HashMap();map3.put( "button", "7"); map3.put( "desc", "买家申请退款");salerOrderStatusMap.put( "102", map3);
+        Map<String, Object> map4 = new HashMap();map4.put( "button", null);map4.put( "desc", "退款成功");salerOrderStatusMap.put( "322", map4);
+        Map<String, Object> map5 = new HashMap();map5.put( "button", null);map5.put( "desc", "等待买家确认完成");salerOrderStatusMap.put( "111", map5);
+        Map<String, Object> map6 = new HashMap();map6.put( "button", "7"); map6.put( "desc", "买家申请退款");salerOrderStatusMap.put( "112", map6);
+        Map<String, Object> map7 = new HashMap();map7.put( "button", null);map7.put( "desc", "已完成");salerOrderStatusMap.put( "213", map7);
+        Map<String, Object> map8 = new HashMap();map8.put( "button", "8"); map8.put( "desc", "进行中");salerOrderStatusMap.put( "104", map8);
+        Map<String, Object> map9 = new HashMap();map9.put( "button", null);map9.put( "desc", "等待买家确认完成");salerOrderStatusMap.put( "114", map9);
+
+        Map<String, Object> m =  new HashMap(); m.put( "button", "1,2");  m.put( "desc", "等待买家付款");buyerOrderStatusMap.put( "000", m);
+        Map<String, Object> m1 = new HashMap();m1.put( "button", null);  m1.put( "desc", "关闭交易");buyerOrderStatusMap.put( "305", m1);
+        Map<String, Object> m2 = new HashMap();m2.put( "button", "3");   m2.put( "desc", "进行中");buyerOrderStatusMap.put( "101", m2);
+        Map<String, Object> m3 = new HashMap();m3.put( "button", "4");   m3.put( "desc", "已申请退款");buyerOrderStatusMap.put( "102", m3);
+        Map<String, Object> m4 = new HashMap();m4.put( "button", null);  m4.put( "desc", "退款成功");buyerOrderStatusMap.put( "322", m4);
+        Map<String, Object> m5 = new HashMap();m5.put( "button", "3,5"); m5.put( "desc", "卖家已投放完成");buyerOrderStatusMap.put( "111", m5);
+        Map<String, Object> m6 = new HashMap();m6.put( "button", "4");   m6.put( "desc", "已申请退款");buyerOrderStatusMap.put( "112", m6);
+        Map<String, Object> m7 = new HashMap();m7.put( "button", null);  m7.put( "desc", "已完成");buyerOrderStatusMap.put( "213", m7);
+        Map<String, Object> m8 = new HashMap();m8.put( "button", "3");   m8.put( "desc", "进行中");buyerOrderStatusMap.put( "104", m8);
+        Map<String, Object> m9 = new HashMap();m9.put( "button", "3,5"); m9.put( "desc", "卖家已投放完成");buyerOrderStatusMap.put( "114", m9);
+
+    }
+
+    public Map<String, Object> getSalerOrderStatus( String multiOrderStatus){
+        return (Map<String, Object>)salerOrderStatusMap.get( multiOrderStatus);
+    }
+
+    public Map<String, Object> getBuyerOrderStatus( String multiOrderStatus){
+        return (Map<String, Object>)buyerOrderStatusMap.get( multiOrderStatus);
+    }
 
     @Override
     public boolean checkOrderStatus( OrderActionEnum orderAction, int orderStatus, int salerStatus, int buyerStatus) {
