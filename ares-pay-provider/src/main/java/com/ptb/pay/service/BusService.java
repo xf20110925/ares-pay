@@ -33,8 +33,6 @@ public class BusService {
 
     private static final String MESSAGE_SRC = "ares-pay";
 
-    private static final String MESSAGE_RECHARGE_ERROR_RETRY_DEST = "recharge_error_retry";
-
     private static final String MESSAGE_RECHARGE_ERROR_RETRY_TOPIC = "payment_recharge_error_retry.topic";
 
     /**
@@ -93,7 +91,7 @@ public class BusService {
             LOGGER.error("重试次数超过阀值，发送邮件触发人工处理！ message:" + message);
         } else {
             messageVO.setSendTimes(messageVO.getSendTimes() + 1);
-            bus.send(new Message(MESSAGE_SRC, MESSAGE_RECHARGE_ERROR_RETRY_DEST, 0, "1.0.0", message));
+            bus.send(new Message(MESSAGE_SRC, MESSAGE_RECHARGE_ERROR_RETRY_TOPIC, 0, "1.0.0", message));
         }
     }
 
