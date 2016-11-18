@@ -97,4 +97,9 @@ public class OrderApiImpl implements IOrderApi {
             throw e;
         }
     }
+
+    @Override
+    public ResponseVo buyerPayment(long userId, String orderId, String plyPassword) {
+        return null;
+    }
 }
