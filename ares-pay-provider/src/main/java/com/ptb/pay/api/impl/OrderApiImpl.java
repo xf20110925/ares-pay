@@ -173,4 +173,34 @@ public class OrderApiImpl implements IOrderApi {
             throw e;
         }
     }
+
+    @Override
+    public ResponseVo refund(Long userId, Long orderId, String deviceType) throws Exception {
+        logger.info( "买家申请退款。userId:{} orderId:{}", userId, orderId);
+        try {
+            //参数校验
+            if (!ParamUtil.checkParams(userId,orderId)){
+                return ReturnUtil.error(ErrorCode.PAY_API_COMMMON_1001.getCode(), ErrorCode.PAY_API_COMMMON_1001.getMessage());
+            }
+            //检查订单状态
+            Order order = orderMapper.selectByPrimaryKey(orderId);
+            if (order.getBuyerId().longValue() != userId.longValue()) {
+                //买家ID与订单中的买家ID不符
+                return ReturnUtil.error(ErrorCode.ORDER_API_5004.getCode(), ErrorCode.ORDER_API_5004.getMessage());
+            }
+            if (!orderService.checkOrderStatus(OrderActionEnum.BUYER_APPLY_REFUND, order.getOrderStatus(), order.getSellerStatus(), order.getBuyerStatus())) {
+                //订单状态有误
+                return ReturnUtil.error(ErrorCode.ORDER_API_5002.getCode(), ErrorCode.ORDER_API_5002.getMessage());
+            }
+            //更新订单状态、并新增订单日志记录
+            orderService.updateStaterefund(orderId,userId, order.getOrderNo());
+            Order resultOrder = orderMapper.selectByPrimaryKey(orderId);
+            return ReturnUtil.success( orderService.getBuyerOrderStatus( resultOrder.getOrderNo()+resultOrder.getSellerStatus()+resultOrder.getBuyerStatus()));
+        }catch (Exception e){
+            logger.error( "买家申请退款接口调用失败。error message: {}", e.getMessage());
+            throw e;
+        }
+
+
+    }
 }
