@@ -20,6 +20,7 @@ import com.ptb.utils.tool.ParamUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,6 +29,7 @@ import java.util.TreeMap;
 /**
  * Created by zuokui.fu on 2016/11/16.
  */
+@Component("orderApi")
 public class OrderApiImpl implements IOrderApi {
 
     private static final Logger logger = LoggerFactory.getLogger( OrderApiImpl.class);
