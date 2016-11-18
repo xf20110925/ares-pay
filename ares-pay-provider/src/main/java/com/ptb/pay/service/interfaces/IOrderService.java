@@ -58,5 +58,15 @@ public interface IOrderService {
     void updateStatusBuyerPayment(Long ptbOrderId,Long userId,String orderNo) throws Exception;
 
 
+     /**
+     * 买家申请退款
+     * @param ptbOrderId
+     * @param userId
+     * @param orderNo
+     * @throws Exception
+     */
+    void updateStaterefund(Long ptbOrderId,Long userId,String orderNo)throws Exception;
+
+
 
 }
