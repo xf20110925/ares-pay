@@ -32,7 +32,7 @@ public interface IOrderApi {
      * @param plyPassword
      * @return
      */
-    ResponseVo buyerPayment(long userId, String orderId,String plyPassword);
+    ResponseVo buyerPayment(Long userId, Long orderId,String plyPassword,String deviceType)throws  Exception;
 
 
 }

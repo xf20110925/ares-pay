@@ -41,6 +41,13 @@ public interface IOrderService {
      */
     public Map<String, Object> getBuyerOrderStatus( String multiOrderStatus);
 
+    /**
+     * 买家付款更新订单状态
+     * @param userId
+     * @param orderNo
+     */
+    void updateStatusBuyerPayment(Long ptbOrderId,Long userId,String orderNo) throws Exception;
+
 
 
 }
