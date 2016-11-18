@@ -42,6 +42,7 @@ public class ProductApiImpl implements IProductApi {
             try {
                 product = ConvertProductUtil.convertProductVOToProduct(productVO);
                 productMapper.insertReturnId(product);
+                return ReturnUtil.success(ConvertProductUtil.convertProductToProductVO(product));
             }catch (DuplicateKeyException ignored){
             }catch (Exception ee){
                 ee.printStackTrace();
@@ -132,13 +133,10 @@ public class ProductApiImpl implements IProductApi {
         return ReturnUtil.success(num[0]);
     }
 
-    public ResponseVo<Integer> getUserProductNum(long userId, int status){
-        int num = 0;
-        if(status == ProductState.PRODUCT_ON_OFF_SELL.getStatus()){
-            num = productMapper.selectNumByUid(userId);
-        }else{
-            num = productMapper.selectNumByUidAndType(userId, status);
-        }
+    @SuppressWarnings("unchecked")
+    @Override
+    public ResponseVo<Integer> getUserProductNum(long userId){
+        int num = productMapper.selectNumByUid(userId);
         return ReturnUtil.success(num);
     }
 }
