@@ -1,5 +1,7 @@
 package com.ptb.pay.model;
 
+import com.ptb.utils.db.Page;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -8,6 +10,8 @@ public class RechargeOrderExample {
     protected String orderByClause;
 
     protected boolean distinct;
+
+    private Page page;
 
     protected List<Criteria> oredCriteria;
 
@@ -62,6 +66,14 @@ public class RechargeOrderExample {
         oredCriteria.clear();
         orderByClause = null;
         distinct = false;
+    }
+
+    public Page getPage() {
+        return page;
+    }
+
+    public void setPage(Page page) {
+        this.page = page;
     }
 
     protected abstract static class GeneratedCriteria {

@@ -3,7 +3,8 @@
 FROM centos-6.8-base-custom:latest
 MAINTAINER   wandapeng "dapeng.wan@pintuibao.cn"
 ###########配置服务自启动##########
-COPY run.sh  /deploy/scripts/
+COPY run.sh send-weixin-info.sh /deploy/scripts/
+RUN ln -s /deploy/scripts/send-weixin-info.sh /usr/bin/send-wx
 RUN chmod 755 /deploy/scripts/*.sh
 ENTRYPOINT ["/deploy/scripts/run.sh"]
 ###########发布相关端口##########

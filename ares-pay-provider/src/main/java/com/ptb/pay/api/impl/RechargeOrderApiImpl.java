@@ -9,6 +9,7 @@ import com.ptb.pay.model.RechargeOrder;
 import com.ptb.pay.model.RechargeOrderExample;
 import com.ptb.pay.service.interfaces.IRechargeOrderService;
 import com.ptb.pay.service.factory.RechargeOrderServiceFactory;
+import com.ptb.utils.db.Page;
 import com.ptb.utils.service.ReturnUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,18 +45,27 @@ public class RechargeOrderApiImpl implements IRechargeOrderApi {
 
     @Override
     public ResponseVo<List<RechargeOrderVO>> getRechargeOrderList(Long userId) throws Exception {
+        return getRechargeOrderList(userId, 0, 10000);
+    }
+
+    @Override
+    public ResponseVo<List<RechargeOrderVO>> getRechargeOrderList(Long userId, int start, int end) throws Exception {
         if(userId == null){
             return ReturnUtil.error(CommonErrorCode.COMMMON_ERROR_ARGSERROR.getCode(),
                     CommonErrorCode.COMMMON_ERROR_ARGSERROR.getMessage());
         }
 
         RechargeOrderExample example = new RechargeOrderExample();
-        example.createCriteria().andUserIdEqualTo(userId);
+
         List<Integer> status = new ArrayList<Integer>();
         status.add(RechargeOrderStatusEnum.paid.getRechargeOrderStatus());
         status.add(RechargeOrderStatusEnum.review.getRechargeOrderStatus());
-        example.createCriteria().andStatusIn(status);
+        example.createCriteria().andUserIdEqualTo(userId).andStatusIn(status);
         example.setOrderByClause("create_time desc");
+        Page page = new Page();
+        page.setLimit(start);
+        page.setLimit(end - start);
+        example.setPage(page);
         List<RechargeOrder> orders = rechargeOrderMapper.selectByExample(example);
         List<RechargeOrderVO> returnData = new ArrayList<RechargeOrderVO>();
         if(CollectionUtils.isEmpty(orders)){

@@ -10,17 +10,18 @@ public interface IOrderApi {
 
     /**
      * 买家取消申请退款
-     * @param orderNo 订单编号
+     * @param orderId 订单主键
      * @return
      */
-    ResponseVo cancelApplyRefund( String orderNo);
+    ResponseVo cancelApplyRefund( Long orderId);
 
     /**
      * 卖家同意退款
-     * @param orderNo 订单编号
+     * @param salerId 卖家用户编号
+     * @param orderId 订单主键
      * @param money 退款金额
      * @param deviceType 设备类型
      * @return
      */
-    ResponseVo agreeRefund( String orderNo, Long money, String deviceType);
+    ResponseVo agreeRefund( Long salerId, Long orderId, Long money, String deviceType) throws Exception;
 }

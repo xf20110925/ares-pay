@@ -11,6 +11,7 @@ import com.ptb.gaia.bus.kafka.KafkaBus;
 import com.ptb.gaia.bus.message.Message;
 import com.ptb.pay.model.vo.AccountRechargeParamMessageVO;
 import com.ptb.utils.encrypt.SignUtil;
+import com.ptb.utils.tool.ShellUtil;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import java.util.TreeMap;
 
@@ -46,29 +48,32 @@ public class BusService {
 
     private static Logger LOGGER = LoggerFactory.getLogger(BusService.class);
 
-//    @PostConstruct
-    private void initBus(){
+    @PostConstruct
+    private void initBus() {
         LOGGER.info("init bus start.............");
         bus = new KafkaBus(MESSAGE_RECHARGE_ERROR_RETRY_TOPIC);
         bus.start(false, 1);
         bus.addRecvListener((bus1, recvBus, message) -> {
             String jsonStr = new String(message);
-            LOGGER.info("recieve message :" + message);
-            if(StringUtils.isNotBlank(jsonStr)){
-                AccountRechargeParamMessageVO messageVO = JSONObject.parseObject(jsonStr, AccountRechargeParamMessageVO.class);
+            LOGGER.info("recieve message :" + jsonStr);
+            if (StringUtils.isNotBlank(jsonStr)) {
+                Message msg = JSONObject.parseObject(jsonStr, Message.class);
+                AccountRechargeParamMessageVO messageVO = JSONObject.toJavaObject((JSONObject) msg.getBody(), AccountRechargeParamMessageVO.class);
                 AccountRechargeParam rechargeParam = messageVO.getAccountRechargeParam();
-                try {
-                    //隐式加密
-                    TreeMap toSign = JSONObject.parseObject(JSONObject.toJSONString(rechargeParam), TreeMap.class);
-                    String sign = SignUtil.getSignKey(toSign);
-                    RpcContext.getContext().setAttachment("key", sign);
-                    ResponseVo<PtbAccountVo> repsonseVO = accountApi.recharge(rechargeParam);
-                    if (repsonseVO == null || !"0".equals(repsonseVO.getCode())) {
+                if (rechargeParam != null) {
+                    try {
+                        //隐式加密
+                        TreeMap toSign = JSONObject.parseObject(JSONObject.toJSONString(rechargeParam), TreeMap.class);
+                        String sign = SignUtil.getSignKey(toSign);
+                        RpcContext.getContext().setAttachment("key", sign);
+                        ResponseVo<PtbAccountVo> repsonseVO = accountApi.recharge(rechargeParam);
+                        if (repsonseVO == null || !"0".equals(repsonseVO.getCode())) {
+                            sendAccountRechargeRetryMessage(messageVO);
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
                         sendAccountRechargeRetryMessage(messageVO);
                     }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    sendAccountRechargeRetryMessage(messageVO);
                 }
             }
         });
@@ -78,24 +83,30 @@ public class BusService {
     /**
      * Description: 充值失败发送消息重试
      * All Rights Reserved.
+     *
      * @param
-     * @return 
+     * @return
      * @version 1.0  2016-11-16 16:56 by wgh（guanhua.wang@pintuibao.cn）创建
      */
     @Async
     public void sendAccountRechargeRetryMessage(AccountRechargeParamMessageVO messageVO) {
-        String message = JSONObject.toJSONString(messageVO);
-        if(messageVO.getSendTimes() >= MESSAGE_RETRY_MAX_TIMES){
-           //todo 发送邮件，触发人工处理
-            LOGGER.error("重试次数超过阀值，发送邮件触发人工处理！ message:" + message);
+        if (messageVO.getSendTimes() >= MESSAGE_RETRY_MAX_TIMES) {
+            LOGGER.error("重试次数超过阀值，发送微信报警触发人工处理！ message:" + JSONObject.toJSONString(messageVO));
+            ShellUtil.sendWeixinAlarm("充值失败", "充值失败,速处理！订单号：" + messageVO.getAccountRechargeParam().getOrderNo());
         } else {
-            messageVO.setSendTimes(messageVO.getSendTimes() + 1);
-            bus.send(new Message(MESSAGE_SRC, MESSAGE_RECHARGE_ERROR_RETRY_TOPIC, 0, "1.0.0", message));
+            int sendTimes = messageVO.getSendTimes();
+            try {
+                Thread.sleep(sendTimes * 1000L);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            messageVO.setSendTimes(sendTimes + 1);
+            bus.send(new Message(MESSAGE_SRC, MESSAGE_RECHARGE_ERROR_RETRY_TOPIC, 0, "1.0.0", messageVO));
         }
     }
 
     @PreDestroy
-    private void destroyBus(){
+    private void destroyBus() {
         bus.showdown();
     }
 }
