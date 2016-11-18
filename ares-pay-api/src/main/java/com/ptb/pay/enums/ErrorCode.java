@@ -10,8 +10,10 @@ public enum ErrorCode {
     PAY_API_COMMMON_1001( "1001", "必填参数有空值"),
     PAY_API_COMMMON_1002( "1002", "金额不正确"),
 
-    //订单相关错误码
-    ORDER_API_5001( "5001", ""),
+    //订单相关错误码5000-5999
+    ORDER_API_5001( "5001", "登录用户ID与订单中的卖家ID不符"),
+    ORDER_API_5002( "5002", "订单状态不正确"),
+    ORDER_API_5003( "5003", "退款金额不正确"),
     ;
 
     private String code;

@@ -59,14 +59,17 @@ public class OrderApiImpl implements IOrderApi {
             //检查订单状态
             Order order = orderMapper.selectByPrimaryKey(orderId);
             if (order.getSellerId().longValue() != salerId.longValue()) {
-                //TODO 卖家ID有误
+                //卖家ID与订单中的卖家ID不符
+                return ReturnUtil.error(ErrorCode.ORDER_API_5001.getCode(), ErrorCode.ORDER_API_5001.getMessage());
             }
             if (!orderService.checkOrderStatus(OrderActionEnum.SALER_AGREE_REFUND, order.getOrderStatus(), order.getSellerStatus(), order.getBuyerStatus())) {
-                //TODO 订单状态有误
+                //订单状态有误
+                return ReturnUtil.error(ErrorCode.ORDER_API_5002.getCode(), ErrorCode.ORDER_API_5002.getMessage());
             }
             //检查订单应付款金额
             if (money.longValue() != order.getPayablePrice()) {
-                //TODO 退款金额有误
+                //退款金额有误
+                return ReturnUtil.error(ErrorCode.ORDER_API_5003.getCode(), ErrorCode.ORDER_API_5003.getMessage());
             }
             //更新订单状态、新增订单日志记录
             orderService.updateStatusForArgeeRefund( orderId, salerId, order.getOrderNo());
