@@ -2,6 +2,8 @@ package com.ptb.pay.api;
 
 import com.ptb.common.vo.ResponseVo;
 
+import java.util.Map;
+
 /**
  * 订单相关的接口服务
  * Created by zuokui.fu on 2016/11/16.
@@ -13,7 +15,7 @@ public interface IOrderApi {
      * @param orderId 订单主键
      * @return
      */
-    ResponseVo cancelApplyRefund( Long orderId);
+    ResponseVo<Map<String,Object>> cancelApplyRefund( Long buyerId, Long orderId) throws Exception;
 
     /**
      * 卖家同意退款
@@ -23,7 +25,7 @@ public interface IOrderApi {
      * @param deviceType 设备类型
      * @return
      */
-    ResponseVo agreeRefund( Long salerId, Long orderId, Long money, String deviceType) throws Exception;
+    ResponseVo<Map<String,Object>> agreeRefund(Long salerId, Long orderId, Long money, String deviceType) throws Exception;
 
     /**
      * 买家付款
