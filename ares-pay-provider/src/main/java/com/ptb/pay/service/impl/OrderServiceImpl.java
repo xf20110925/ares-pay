@@ -51,10 +51,20 @@ public class OrderServiceImpl implements IOrderService {
 
     }
 
+    /**
+     * 根据订单状态获取客户端展示的卖家按钮及文案
+     * @param multiOrderStatus 订单状态+卖家状态+买家状态 eg: 买家已付款，订单状态、卖家状态、买家状态分别为：1、0、1，则参数为：101
+     * @return
+     */
     public Map<String, Object> getSalerOrderStatus( String multiOrderStatus){
         return (Map<String, Object>)salerOrderStatusMap.get( multiOrderStatus);
     }
 
+    /**
+     * 根据订单状态获取客户端展示的买家按钮及文案
+     * @param multiOrderStatus 订单状态+卖家状态+买家状态 eg: 买家已付款，订单状态、卖家状态、买家状态分别为：1、0、1，则参数为：101
+     * @return
+     */
     public Map<String, Object> getBuyerOrderStatus( String multiOrderStatus){
         return (Map<String, Object>)buyerOrderStatusMap.get( multiOrderStatus);
     }
