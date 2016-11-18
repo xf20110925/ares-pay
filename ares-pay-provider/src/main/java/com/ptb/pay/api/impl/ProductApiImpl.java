@@ -121,10 +121,24 @@ public class ProductApiImpl implements IProductApi {
 
     @SuppressWarnings("unchecked")
     @Override
-    public ResponseVo<Integer> getProductDealNum(long productId) {
-        Product product = productMapper.selectByPrimaryKey(productId);
-        if(null == product)
+    public ResponseVo<Integer> getProductDealNum(long relevantId) {
+        List<Product> products = productMapper.selectByRelevantId(relevantId);
+        if(CollectionUtils.isEmpty(products))
             return ReturnUtil.error(ErrorCode.PRODUCT_API_NO_EXISTS.getCode(), ErrorCode.PRODUCT_API_NO_EXISTS.getMessage());
-        return ReturnUtil.success(null == product.getDealNum()?0:product.getDealNum());
+        final int[] num = {0};
+        products.forEach(item->{
+            num[0] +=item.getDealNum();
+        });
+        return ReturnUtil.success(num[0]);
+    }
+
+    public ResponseVo<Integer> getUserProductNum(long userId, int status){
+        int num = 0;
+        if(status == ProductState.PRODUCT_ON_OFF_SELL.getStatus()){
+            num = productMapper.selectNumByUid(userId);
+        }else{
+            num = productMapper.selectNumByUidAndType(userId, status);
+        }
+        return ReturnUtil.success(num);
     }
 }

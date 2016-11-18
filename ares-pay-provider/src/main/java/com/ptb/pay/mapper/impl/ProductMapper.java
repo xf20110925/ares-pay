@@ -34,4 +34,10 @@ public interface ProductMapper extends MyMapper<Product>{
     @Select("select * from ptb_product where relevant_id=#{rid} order by create_time desc")
     @ResultMap("BaseResultMap")
     List<Product> selectByRelevantId(@Param("rid") long relevantId);
+
+    @Select("select * from ptb_product where owner_id=#{uid}")
+    int selectNumByUid(@Param("uid") long userId);
+
+    @Select("select * from ptb_product where owner_id=#{uid} and status=#{status}")
+    int selectNumByUidAndType(@Param("status") long userId, @Param("status") int status);
 }
