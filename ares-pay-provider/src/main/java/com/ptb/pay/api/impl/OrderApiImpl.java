@@ -173,7 +173,7 @@ public class OrderApiImpl implements IOrderApi {
             throw e;
         }
     }
-
+    @Transactional( rollbackFor = Exception.class, propagation = Propagation.REQUIRED)
     @Override
     public ResponseVo refund(Long userId, Long orderId, String deviceType) throws Exception {
         logger.info( "买家申请退款。userId:{} orderId:{}", userId, orderId);

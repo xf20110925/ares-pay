@@ -61,11 +61,11 @@ public interface IOrderService {
      /**
      * 买家申请退款
      * @param ptbOrderId
-     * @param buyerId
+     * @param userId
      * @param orderNo
      * @throws Exception
      */
-    void updateStaterefund(Long ptbOrderId,Long buyerId,String orderNo)throws Exception;
+    void updateStaterefund(Long ptbOrderId,Long userId,String orderNo)throws Exception;
 
 
 
