@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ptb.pay.mapper.impl.ProductMapper" >
+  <resultMap id="BaseResultMap" type="com.ptb.pay.model.Product" >
+    <id column="ptb_product_id" property="ptbProductId" jdbcType="BIGINT" />
+    <result column="product_name" property="productName" jdbcType="VARCHAR" />
+    <result column="product_type" property="productType" jdbcType="INTEGER" />
+    <result column="price" property="price" jdbcType="BIGINT" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="last_update_time" property="lastUpdateTime" jdbcType="TIMESTAMP" />
+    <result column="owner_id" property="ownerId" jdbcType="BIGINT" />
+    <result column="owner_type" property="ownerType" jdbcType="INTEGER" />
+    <result column="status" property="status" jdbcType="INTEGER" />
+    <result column="desc" property="desc" jdbcType="VARCHAR" />
+    <result column="deal_num" property="dealNum" jdbcType="INTEGER" />
+    <result column="relevant_id" property="relevantId" jdbcType="BIGINT" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    ptb_product_id, product_name, product_type, price, create_time, last_update_time, 
+    owner_id, owner_type, status, desc, deal_num, relevant_id
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select 
+    <include refid="Base_Column_List" />
+    from ptb_product
+    where ptb_product_id = #{ptbProductId,jdbcType=BIGINT}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+    delete from ptb_product
+    where ptb_product_id = #{ptbProductId,jdbcType=BIGINT}
+  </delete>
+  <insert id="insert" parameterType="com.ptb.pay.model.Product" >
+    insert into ptb_product (ptb_product_id, product_name, product_type, 
+      price, create_time, last_update_time, 
+      owner_id, owner_type, status, 
+      desc, deal_num, relevant_id
+      )
+    values (#{ptbProductId,jdbcType=BIGINT}, #{productName,jdbcType=VARCHAR}, #{productType,jdbcType=INTEGER}, 
+      #{price,jdbcType=BIGINT}, #{createTime,jdbcType=TIMESTAMP}, #{lastUpdateTime,jdbcType=TIMESTAMP}, 
+      #{ownerId,jdbcType=BIGINT}, #{ownerType,jdbcType=INTEGER}, #{status,jdbcType=INTEGER}, 
+      #{desc,jdbcType=VARCHAR}, #{dealNum,jdbcType=INTEGER}, #{relevantId,jdbcType=BIGINT}
+      )
+  </insert>
+  <insert id="insertReturnId" parameterType="com.ptb.pay.model.Product"  useGeneratedKeys="true" keyProperty="id" >
+    insert into ptb_product (ptb_product_id, product_name, product_type,
+    price, create_time, last_update_time,
+    owner_id, owner_type, status,
+    desc, deal_num, relevant_id
+    )
+    values (#{ptbProductId,jdbcType=BIGINT}, #{productName,jdbcType=VARCHAR}, #{productType,jdbcType=INTEGER},
+    #{price,jdbcType=BIGINT}, #{createTime,jdbcType=TIMESTAMP}, #{lastUpdateTime,jdbcType=TIMESTAMP},
+    #{ownerId,jdbcType=BIGINT}, #{ownerType,jdbcType=INTEGER}, #{status,jdbcType=INTEGER},
+    #{desc,jdbcType=VARCHAR}, #{dealNum,jdbcType=INTEGER}, #{relevantId,jdbcType=BIGINT}
+    )
+  </insert>
+  <insert id="insertSelective" parameterType="com.ptb.pay.model.Product" >
+    insert into ptb_product
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="ptbProductId != null" >
+        ptb_product_id,
+      </if>
+      <if test="productName != null" >
+        product_name,
+      </if>
+      <if test="productType != null" >
+        product_type,
+      </if>
+      <if test="price != null" >
+        price,
+      </if>
+      <if test="createTime != null" >
+        create_time,
+      </if>
+      <if test="lastUpdateTime != null" >
+        last_update_time,
+      </if>
+      <if test="ownerId != null" >
+        owner_id,
+      </if>
+      <if test="ownerType != null" >
+        owner_type,
+      </if>
+      <if test="status != null" >
+        status,
+      </if>
+      <if test="desc != null" >
+        desc,
+      </if>
+      <if test="dealNum != null" >
+        deal_num,
+      </if>
+      <if test="relevantId != null" >
+        relevant_id,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="ptbProductId != null" >
+        #{ptbProductId,jdbcType=BIGINT},
+      </if>
+      <if test="productName != null" >
+        #{productName,jdbcType=VARCHAR},
+      </if>
+      <if test="productType != null" >
+        #{productType,jdbcType=INTEGER},
+      </if>
+      <if test="price != null" >
+        #{price,jdbcType=BIGINT},
+      </if>
+      <if test="createTime != null" >
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="lastUpdateTime != null" >
+        #{lastUpdateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="ownerId != null" >
+        #{ownerId,jdbcType=BIGINT},
+      </if>
+      <if test="ownerType != null" >
+        #{ownerType,jdbcType=INTEGER},
+      </if>
+      <if test="status != null" >
+        #{status,jdbcType=INTEGER},
+      </if>
+      <if test="desc != null" >
+        #{desc,jdbcType=VARCHAR},
+      </if>
+      <if test="dealNum != null" >
+        #{dealNum,jdbcType=INTEGER},
+      </if>
+      <if test="relevantId != null" >
+        #{relevantId,jdbcType=BIGINT},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.ptb.pay.model.Product" >
+    update ptb_product
+    <set >
+      <if test="productName != null" >
+        product_name = #{productName,jdbcType=VARCHAR},
+      </if>
+      <if test="productType != null" >
+        product_type = #{productType,jdbcType=INTEGER},
+      </if>
+      <if test="price != null" >
+        price = #{price,jdbcType=BIGINT},
+      </if>
+      <if test="createTime != null" >
+        create_time = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="lastUpdateTime != null" >
+        last_update_time = #{lastUpdateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="ownerId != null" >
+        owner_id = #{ownerId,jdbcType=BIGINT},
+      </if>
+      <if test="ownerType != null" >
+        owner_type = #{ownerType,jdbcType=INTEGER},
+      </if>
+      <if test="status != null" >
+        status = #{status,jdbcType=INTEGER},
+      </if>
+      <if test="desc != null" >
+        desc = #{desc,jdbcType=VARCHAR},
+      </if>
+      <if test="dealNum != null" >
+        deal_num = #{dealNum,jdbcType=INTEGER},
+      </if>
+      <if test="relevantId != null" >
+        relevant_id = #{relevantId,jdbcType=BIGINT},
+      </if>
+    </set>
+    where ptb_product_id = #{ptbProductId,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.ptb.pay.model.Product" >
+    update ptb_product
+    set product_name = #{productName,jdbcType=VARCHAR},
+      product_type = #{productType,jdbcType=INTEGER},
+      price = #{price,jdbcType=BIGINT},
+      create_time = #{createTime,jdbcType=TIMESTAMP},
+      last_update_time = #{lastUpdateTime,jdbcType=TIMESTAMP},
+      owner_id = #{ownerId,jdbcType=BIGINT},
+      owner_type = #{ownerType,jdbcType=INTEGER},
+      status = #{status,jdbcType=INTEGER},
+      desc = #{desc,jdbcType=VARCHAR},
+      deal_num = #{dealNum,jdbcType=INTEGER},
+      relevant_id = #{relevantId,jdbcType=BIGINT}
+    where ptb_product_id = #{ptbProductId,jdbcType=BIGINT}
+  </update>
+</mapper>
