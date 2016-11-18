@@ -14,6 +14,7 @@ public enum ErrorCode {
     ORDER_API_5001( "5001", "登录用户ID与订单中的卖家ID不符"),
     ORDER_API_5002( "5002", "订单状态不正确"),
     ORDER_API_5003( "5003", "退款金额不正确"),
+    ORDER_API_5004( "5004", "登录用户ID与订单中的买家ID不符"),
 
     //商品相关错误码6000-6999
     PRODUCT_API_REPEAT("6000", "相同用户商品重复"),
