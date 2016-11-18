@@ -121,8 +121,31 @@ public class OrderServiceImpl implements IOrderService {
         orderLog.setActionType( OrderActionEnum.SALER_AGREE_REFUND.getOrderAction());
         orderLog.setCreateTime( date);
         orderLog.setUserId( salerId);
-        orderLog.setUserType( salerStatus);
+        orderLog.setUserType( 2);//卖家
         orderLog.setRemarks( "卖家同意退款,订单关闭");
+        orderLogMapper.insertSelective( orderLog);
+    }
+
+    @Override
+    public void updateStatusForCancelRefund(Long ptbOrderId, Long buyerId, String orderNo) throws Exception {
+        int buyerStatus = 4;//取消申请退款
+        Date date = new Date();
+        Order order = new Order();
+        order.setPtbOrderId( ptbOrderId);
+        order.setBuyerStatus( buyerStatus);
+        order.setLastModifyTime( date);
+        order.setLastModifierId( buyerId);
+        int updateCnt = orderMapper.updateByPrimaryKeySelective( order);
+        if ( updateCnt < 1){
+            throw new Exception("更新订单状态失败");
+        }
+        OrderLog orderLog = new OrderLog();
+        orderLog.setOrderNo( orderNo);
+        orderLog.setActionType( OrderActionEnum.BUYER_CANCEL_REFUND.getOrderAction());
+        orderLog.setCreateTime( date);
+        orderLog.setUserId( buyerId);
+        orderLog.setUserType( 1);//买家
+        orderLog.setRemarks( "买家取消申请退款");
         orderLogMapper.insertSelective( orderLog);
     }
 }

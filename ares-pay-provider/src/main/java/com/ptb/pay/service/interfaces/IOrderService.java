@@ -28,6 +28,15 @@ public interface IOrderService {
     void updateStatusForArgeeRefund( Long ptbOrderId, Long salerId, String orderNo) throws Exception;
 
     /**
+     * 买家取消申请退款更新订单状态
+     * @param ptbOrderId 订单主键
+     * @param buyerId 买家用户编号
+     * @param orderNo 订单编号
+     * @throws Exception
+     */
+    void updateStatusForCancelRefund( Long ptbOrderId, Long buyerId, String orderNo) throws Exception;
+
+    /**
      * 根据订单状态获取客户端展示的卖家按钮及文案
      * @param multiOrderStatus 订单状态+卖家状态+买家状态 eg: 买家已付款，订单状态、卖家状态、买家状态分别为：1、0、1，则参数为：101
      * @return

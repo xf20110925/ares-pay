@@ -20,14 +20,17 @@ import com.ptb.utils.tool.ParamUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Map;
 import java.util.TreeMap;
 
 /**
  * Created by zuokui.fu on 2016/11/16.
  */
+@Service("orderApi")
 public class OrderApiImpl implements IOrderApi {
 
     private static final Logger logger = LoggerFactory.getLogger( OrderApiImpl.class);
@@ -39,14 +42,38 @@ public class OrderApiImpl implements IOrderApi {
     @Autowired
     private IOrderService orderService;
 
+    @Transactional( rollbackFor = Exception.class, propagation = Propagation.REQUIRED)
     @Override
-    public ResponseVo cancelApplyRefund(Long salerId) {
-        return null;
+    public ResponseVo<Map<String,Object>> cancelApplyRefund(Long buyerId, Long orderId) throws Exception {
+        logger.info( "卖家取消申请退款。buyerId:{} orderId:{}", buyerId, orderId);
+        try {
+            //参数校验
+            if (!ParamUtil.checkParams(buyerId, orderId)) {
+                return ReturnUtil.error(ErrorCode.PAY_API_COMMMON_1001.getCode(), ErrorCode.PAY_API_COMMMON_1001.getMessage());
+            }
+            //检查订单状态
+            Order order = orderMapper.selectByPrimaryKey(orderId);
+            if (order.getBuyerId().longValue() != buyerId.longValue()) {
+                //买家ID与订单中的买家ID不符
+                return ReturnUtil.error(ErrorCode.ORDER_API_5004.getCode(), ErrorCode.ORDER_API_5004.getMessage());
+            }
+            if (!orderService.checkOrderStatus(OrderActionEnum.BUYER_CANCEL_REFUND, order.getOrderStatus(), order.getSellerStatus(), order.getBuyerStatus())) {
+                //订单状态有误
+                return ReturnUtil.error(ErrorCode.ORDER_API_5002.getCode(), ErrorCode.ORDER_API_5002.getMessage());
+            }
+            //更新订单状态、新增订单日志记录
+            orderService.updateStatusForCancelRefund( orderId, buyerId, order.getOrderNo());
+            Order resultOrder = orderMapper.selectByPrimaryKey( orderId);
+            return ReturnUtil.success( orderService.getBuyerOrderStatus( resultOrder.getOrderNo()+resultOrder.getSellerStatus()+resultOrder.getBuyerStatus()));
+        } catch ( Exception e){
+            logger.error( "买家取消申请退款接口调用失败。error message: {}", e.getMessage());
+            throw e;
+        }
     }
 
     @Transactional( rollbackFor = Exception.class, propagation = Propagation.REQUIRED)
     @Override
-    public ResponseVo agreeRefund( Long salerId, Long orderId, Long money, String deviceType) throws Exception {
+    public ResponseVo<Map<String,Object>> agreeRefund(Long salerId, Long orderId, Long money, String deviceType) throws Exception {
         logger.info( "卖家同意退款。salerId:{} orderId:{}, money:{}, deviceType:{}", salerId, orderId, money, deviceType);
         try {
             //参数校验
