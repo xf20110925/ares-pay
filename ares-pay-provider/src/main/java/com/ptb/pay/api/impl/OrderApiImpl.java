@@ -40,24 +40,24 @@ public class OrderApiImpl implements IOrderApi {
     private IOrderService orderService;
 
     @Override
-    public ResponseVo cancelApplyRefund(String orderNo) {
+    public ResponseVo cancelApplyRefund(Long salerId) {
         return null;
     }
 
     @Transactional( rollbackFor = Exception.class, propagation = Propagation.REQUIRED)
     @Override
-    public ResponseVo agreeRefund( Long salerId, String orderNo, Long money, String deviceType) throws Exception {
-        logger.info( "卖家同意退款。salerId:{} orderNo:{}, money:{}, deviceType:{}", salerId, orderNo, orderNo, deviceType);
+    public ResponseVo agreeRefund( Long salerId, Long orderId, Long money, String deviceType) throws Exception {
+        logger.info( "卖家同意退款。salerId:{} orderId:{}, money:{}, deviceType:{}", salerId, orderId, money, deviceType);
         try {
             //参数校验
-            if (!ParamUtil.checkParams(salerId, orderNo, money, deviceType)) {
+            if (!ParamUtil.checkParams(salerId, orderId, money, deviceType)) {
                 return ReturnUtil.error(ErrorCode.PAY_API_COMMMON_1001.getCode(), ErrorCode.PAY_API_COMMMON_1001.getMessage());
             }
             if (money <= 0) {
                 return ReturnUtil.error(ErrorCode.PAY_API_COMMMON_1002.getCode(), ErrorCode.PAY_API_COMMMON_1002.getMessage());
             }
             //检查订单状态
-            Order order = orderMapper.getOrderByOrderNo(orderNo);
+            Order order = orderMapper.selectByPrimaryKey(orderId);
             if (order.getSellerId().longValue() != salerId.longValue()) {
                 //TODO 卖家ID有误
             }
@@ -69,13 +69,13 @@ public class OrderApiImpl implements IOrderApi {
                 //TODO 退款金额有误
             }
             //更新订单状态、新增订单日志记录
-            orderService.updateStatusForArgeeRefund(order.getPtbOrderId(), salerId, orderNo);
+            orderService.updateStatusForArgeeRefund( orderId, salerId, order.getOrderNo());
             //调用虚拟账户退款接口
             AccountRefundParam param = new AccountRefundParam();
             param.setBuyerId(order.getBuyerId());
             param.setSalerId(order.getSellerId());
             param.setMoney(money);
-            param.setOrderNo(orderNo);
+            param.setOrderNo( order.getOrderNo());
             param.setDeviceType(DeviceTypeEnum.getDeviceTypeEnum(deviceType));
             param.setPlatform(PlatformEnum.xiaomi);
             //隐式加密
@@ -87,7 +87,8 @@ public class OrderApiImpl implements IOrderApi {
                 logger.error( "虚拟账户退款dubbo接口调用失败。salerId:{}", salerId);
                 throw new Exception();
             }
-            return ReturnUtil.success();
+            Order resultOrder = orderMapper.selectByPrimaryKey( orderId);
+            return ReturnUtil.success( orderService.getSalerOrderStatus( resultOrder.getOrderNo()+resultOrder.getSellerStatus()+resultOrder.getBuyerStatus()));
         } catch ( Exception e){
             logger.error( "卖家同意退款接口调用失败。error message: {}", e.getMessage());
             throw e;

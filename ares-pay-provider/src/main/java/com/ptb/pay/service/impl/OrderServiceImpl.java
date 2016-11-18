@@ -103,10 +103,14 @@ public class OrderServiceImpl implements IOrderService {
 
     @Override
     public void updateStatusForArgeeRefund(Long ptbOrderId, Long salerId, String orderNo) throws Exception {
+        int salerStatus = 2;//同意退款
+        int orderStatus = 3;//关闭
+        Date date = new Date();
         Order order = new Order();
         order.setPtbOrderId( ptbOrderId);
-        order.setSellerStatus( 2);
-        order.setLastModifyTime( new Date());
+        order.setSellerStatus( salerStatus);
+        order.setOrderStatus( orderStatus);
+        order.setLastModifyTime( date);
         order.setLastModifierId( salerId);
         int updateCnt = orderMapper.updateByPrimaryKeySelective( order);
         if ( updateCnt < 1){
@@ -115,9 +119,10 @@ public class OrderServiceImpl implements IOrderService {
         OrderLog orderLog = new OrderLog();
         orderLog.setOrderNo( orderNo);
         orderLog.setActionType( OrderActionEnum.SALER_AGREE_REFUND.getOrderAction());
-        orderLog.setCreateTime( new Date());
+        orderLog.setCreateTime( date);
         orderLog.setUserId( salerId);
-        orderLog.setUserType( 2);
+        orderLog.setUserType( salerStatus);
+        orderLog.setRemarks( "卖家同意退款,订单关闭");
         orderLogMapper.insertSelective( orderLog);
     }
 }
