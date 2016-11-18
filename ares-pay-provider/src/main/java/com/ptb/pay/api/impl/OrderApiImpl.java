@@ -54,7 +54,7 @@ public class OrderApiImpl implements IOrderApi {
             }
             //检查订单状态
             Order order = orderMapper.selectByPrimaryKey(orderId);
-            if (null!= order || order.getBuyerId().longValue() != buyerId.longValue()) {
+            if (null!= order && order.getBuyerId().longValue() != buyerId.longValue()) {
                 //买家ID与订单中的买家ID不符
                 return ReturnUtil.error(ErrorCode.ORDER_API_5004.getCode(), ErrorCode.ORDER_API_5004.getMessage());
             }
@@ -86,7 +86,7 @@ public class OrderApiImpl implements IOrderApi {
             }
             //检查订单状态
             Order order = orderMapper.selectByPrimaryKey(orderId);
-            if (null!= order || order.getSellerId().longValue() != salerId.longValue()) {
+            if (null!= order && order.getSellerId().longValue() != salerId.longValue()) {
                 //卖家ID与订单中的卖家ID不符
                 return ReturnUtil.error(ErrorCode.ORDER_API_5001.getCode(), ErrorCode.ORDER_API_5001.getMessage());
             }
@@ -138,7 +138,7 @@ public class OrderApiImpl implements IOrderApi {
             //查询订单信息
             Order order = orderMapper.selectByPrimaryKey(orderId);
             //检查订单是否有误
-            if (null!= order || order.getBuyerId().longValue() != userId.longValue()){
+            if (null!= order && order.getBuyerId().longValue() != userId.longValue()){
                 return ReturnUtil.error(ErrorCode.ORDER_API_5001.getCode(), ErrorCode.ORDER_API_5001.getMessage());
             }
             if (!orderService.checkOrderStatus(OrderActionEnum.BUYER_PAY, order.getOrderStatus(), order.getSellerStatus(), order.getBuyerStatus())) {
@@ -184,7 +184,7 @@ public class OrderApiImpl implements IOrderApi {
             }
             //检查订单状态
             Order order = orderMapper.selectByPrimaryKey(orderId);
-            if (null!= order || order.getBuyerId().longValue() != userId.longValue()) {
+            if (null!= order && order.getBuyerId().longValue() != userId.longValue()) {
                 //买家ID与订单中的买家ID不符
                 return ReturnUtil.error(ErrorCode.ORDER_API_5004.getCode(), ErrorCode.ORDER_API_5004.getMessage());
             }
