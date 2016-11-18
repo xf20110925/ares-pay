@@ -18,6 +18,7 @@ public enum ErrorCode {
     //商品相关错误码6000-6999
     PRODUCT_API_REPEAT("6000", "相同用户商品重复"),
     PRODUCT_API_NO_EXISTS("6001", "商品不存在"),
+    PRODUCT_API_PARAMETER_ERROR("6002", "参数错误"),
     ;
 
 
