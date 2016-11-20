@@ -216,6 +216,7 @@ public class OrderApiImpl implements IOrderApi {
     }
 
     @Override
+    @Transactional
     public ResponseVo submitOrder(long userId, ProductVO productVO) {
         logger.info("买家提交订单 userID:{}", userId);
 
@@ -229,15 +230,17 @@ public class OrderApiImpl implements IOrderApi {
                 logger.error("generate order no error! userId:{} productId:{}", userId, productVO.getProductId());
                 return ReturnUtil.error("", "no product");
             }
-            orderService.insertNewOrder(userId, productVO.getOwnerId(), productVO.getPrice(), orderNo);
-
-            OrderDetailVO orderDetailVO = orderDetailService.convertOrderDetailVO(orderNo, productVO.getPrice(), 0, productVO.getProductId());
-            int insert = orderDetailService.insertOrderDetail(orderDetailVO);
+            int insert = orderService.insertNewOrder(userId, productVO.getOwnerId(), productVO.getPrice(), orderNo);
             if (insert < 1){
-                logger.error("insert order detail error! orderNo:{} product iD:{}", orderNo, productVO.getProductId());
-                throw new Exception("order detail error!");
+                throw new RuntimeException("insert order error!");
             }
 
+            OrderDetailVO orderDetailVO = orderDetailService.convertOrderDetailVO(orderNo, productVO.getPrice(), 0, productVO.getProductId());
+            insert = orderDetailService.insertOrderDetail(orderDetailVO);
+            if (insert < 1){
+                logger.error("insert order detail error! orderNo:{} product iD:{}", orderNo, productVO.getProductId());
+                throw new RuntimeException("order detail error!");
+            }
         }catch (Exception e){
             logger.error("submit order error!", e);
             return ReturnUtil.error("", "no product");

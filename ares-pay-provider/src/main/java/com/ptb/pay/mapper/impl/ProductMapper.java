@@ -9,6 +9,7 @@ import org.apache.ibatis.annotations.Select;
 import java.util.List;
 
 public interface ProductMapper extends MyMapper<Product>{
+    int insertReturnId(Product record);
 
     @Select("select * from ptb_product where relevant_id=#{rUid} and owner_id=#{uid}")
     @ResultMap("BaseResultMap")
@@ -27,6 +28,4 @@ public interface ProductMapper extends MyMapper<Product>{
 
     @Select("select * from ptb_product where owner_id = #{ownerId}")
     public List<Product> selectByOwnerId(@Param("ownerId") long ownerId);
-
-
 }
