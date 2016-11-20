@@ -6,16 +6,21 @@ import com.ptb.account.api.IAccountApi;
 import com.ptb.account.vo.PtbAccountVo;
 import com.ptb.account.vo.param.AccountRefundParam;
 import com.ptb.common.enums.DeviceTypeEnum;
+import com.ptb.common.enums.NumberClassifyEnum;
 import com.ptb.common.enums.PlatformEnum;
 import com.ptb.common.vo.ResponseVo;
 import com.ptb.pay.api.IOrderApi;
 import com.ptb.pay.enums.ErrorCode;
 import com.ptb.pay.enums.OrderActionEnum;
 import com.ptb.pay.mapper.impl.OrderMapper;
+import com.ptb.pay.mapper.impl.ProductMapper;
 import com.ptb.pay.model.Order;
+import com.ptb.pay.model.Product;
 import com.ptb.pay.service.interfaces.IOrderService;
+import com.ptb.pay.vo.product.ProductVO;
 import com.ptb.utils.encrypt.SignUtil;
 import com.ptb.utils.service.ReturnUtil;
+import com.ptb.utils.tool.GenerateOrderNoUtil;
 import com.ptb.utils.tool.ParamUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,6 +29,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -41,6 +47,8 @@ public class OrderApiImpl implements IOrderApi {
     private OrderMapper orderMapper;
     @Autowired
     private IOrderService orderService;
+    @Autowired
+    private ProductMapper productMapper;
 
     @Transactional( rollbackFor = Exception.class, propagation = Propagation.REQUIRED)
     @Override
@@ -129,4 +137,30 @@ public class OrderApiImpl implements IOrderApi {
     public ResponseVo buyerPayment(long userId, String orderId, String plyPassword) {
         return null;
     }
+
+    @Override
+    public ResponseVo submitOrder(long userId, ProductVO productVO) {
+        logger.info("买家提交订单 userID:{}", userId);
+
+        try {
+            List<Product> products = productMapper.selectByOwnerId(userId);
+            if (products == null || products.size() == 0) {
+                return ReturnUtil.error("", "no product");
+            }
+            String orderNo = GenerateOrderNoUtil.createOrderNo(2, productVO.getDeviceType(), 3);
+            if (orderNo == null){
+                logger.error("generate order no error! userId:{} productId:{}", userId, productVO.getProductId());
+                return ReturnUtil.error("", "no product");
+            }
+            orderService.insertNewOrder(userId, productVO.getOwnerId(), productVO.getPrice(), orderNo);
+
+
+        }catch (Exception e){
+
+        }
+
+        return null;
+    }
+
+
 }

@@ -1,11 +1,14 @@
 package com.ptb.pay.service.impl;
 
+import com.ptb.common.enums.AllCodeNameEnum;
 import com.ptb.pay.enums.OrderActionEnum;
 import com.ptb.pay.mapper.impl.OrderLogMapper;
 import com.ptb.pay.mapper.impl.OrderMapper;
 import com.ptb.pay.model.Order;
 import com.ptb.pay.model.OrderLog;
 import com.ptb.pay.service.interfaces.IOrderService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -18,6 +21,7 @@ import java.util.Map;
  */
 @Service("orderService")
 public class OrderServiceImpl implements IOrderService {
+    private static Logger logger = LoggerFactory.getLogger(OrderServiceImpl.class);
     @Autowired
     private OrderMapper orderMapper;
     @Autowired
@@ -67,6 +71,52 @@ public class OrderServiceImpl implements IOrderService {
      */
     public Map<String, Object> getBuyerOrderStatus( String multiOrderStatus){
         return (Map<String, Object>)buyerOrderStatusMap.get( multiOrderStatus);
+    }
+
+    @Override
+    public int insertNewOrder(long buyerId, long sellerId, long price, String orderId) throws Exception {
+        if (buyerId <= 0 || sellerId <= 0 || orderId == null){
+            logger.error("insert order error! buyerId:{} sellerId:{} orderId:{}", buyerId, sellerId, orderId);
+            return -1;
+        }
+        Date date = new Date();
+        Order order = new Order();
+        order.setOrderNo( orderId);
+        order.setOrderStatus( AllCodeNameEnum.orderNoPayment.getNum());
+        order.setSellerStatus( AllCodeNameEnum.sellerOrig.getNum());
+        order.setBuyerStatus( AllCodeNameEnum.buyerOrig.getNum());
+        order.setOriginalPrice(price);
+        order.setPayablePrice(0l);
+        order.setSellerId( sellerId);
+        order.setBuyerId( buyerId);
+        order.setCreateTime( date);
+        order.setLastModifyTime( date);
+        order.setLastModifierId( buyerId);
+        int insertCnt = orderMapper.insert( order);
+        if ( insertCnt < 1){
+            throw new Exception("更新订单状态失败");
+        }
+        String remarks = "买家提交订单";
+        this.insertOrderLog(orderId, AllCodeNameEnum.buyerOrig.getNum(), date, remarks, buyerId, AllCodeNameEnum.buyer.getNum());
+
+       return 0;
+    }
+
+    public int insertOrderLog(String orderNo, int actionType, Date createTime, String remarks, long userID, int userType){
+        OrderLog orderLog = new OrderLog();
+        orderLog.setOrderNo( orderNo);
+        orderLog.setActionType(actionType);
+        orderLog.setActionType( OrderActionEnum.SALER_AGREE_REFUND.getOrderAction());
+        orderLog.setCreateTime( createTime);
+        orderLog.setUserId( userID);
+        orderLog.setUserType( userType);
+        orderLog.setRemarks( remarks);
+        int ret = orderLogMapper.insertSelective(orderLog);
+        if (ret < 1){
+            logger.error("insert order log error! orderNo:{} userId:{} userType:{}", orderNo, userID, userType);
+            return -1;
+        }
+        return ret;
     }
 
     @Override

@@ -56,11 +56,11 @@
         <!--</table>-->
 
         <!--<table tableName="pth_third_payment_notify_log" domainObjectName="ThirdPaymentNotifyLog" enableCountByExample="false" enableSelectByExample="true" enableUpdateByExample="true" enableDeleteByExample="true" />-->
-        <table tableName="ptb_order_log" domainObjectName="OrderLog" enableCountByExample="false" enableSelectByExample="false" enableUpdateByExample="false" enableDeleteByExample="false" >
-            <columnOverride column="action_type" javaType="java.lang.Integer" jdbcType="INTEGER" />
-            <columnOverride column="user_type" javaType="java.lang.Integer" jdbcType="INTEGER" />
-        </table>
-        <!--<table tableName="ptb_order" domainObjectName="Order" enableCountByExample="false" enableSelectByExample="false" enableUpdateByExample="false" enableDeleteByExample="false" />-->
+        <!--<table tableName="ptb_order_log" domainObjectName="OrderLog" enableCountByExample="false" enableSelectByExample="false" enableUpdateByExample="false" enableDeleteByExample="false" >-->
+            <!--<columnOverride column="action_type" javaType="java.lang.Integer" jdbcType="INTEGER" />-->
+            <!--<columnOverride column="user_type" javaType="java.lang.Integer" jdbcType="INTEGER" />-->
+        <!--</table>-->
+        <table tableName="ptb_product" domainObjectName="Product" enableCountByExample="false" enableSelectByExample="false" enableUpdateByExample="false" enableDeleteByExample="false" />
         <!--<table tableName="media_channel" enableCountByExample="false" enableSelectByExample="false" enableUpdateByExample="false" enableDeleteByExample="false" />-->
         <!--<table tableName="media_channel_detail" enableCountByExample="false" enableSelectByExample="false" enableUpdateByExample="false" enableDeleteByExample="false">-->
         <!--<table tableName="wb_topic" enableCountByExample="false" enableSelectByExample="false" enableUpdateByExample="false" enableDeleteByExample="false">-->

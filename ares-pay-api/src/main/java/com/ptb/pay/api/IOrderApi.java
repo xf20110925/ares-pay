@@ -1,6 +1,7 @@
 package com.ptb.pay.api;
 
 import com.ptb.common.vo.ResponseVo;
+import com.ptb.pay.vo.product.ProductVO;
 
 import java.util.Map;
 
@@ -37,4 +38,10 @@ public interface IOrderApi {
     ResponseVo buyerPayment(long userId, String orderId,String plyPassword);
 
 
+    /**
+     * 用户提交订单
+     * @param userId
+     * @return
+     */
+    ResponseVo submitOrder(long userId, ProductVO productVO);
 }

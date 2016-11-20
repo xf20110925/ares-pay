@@ -50,6 +50,15 @@ public interface IOrderService {
      */
     public Map<String, Object> getBuyerOrderStatus( String multiOrderStatus);
 
-
+    /**
+     * 买家提交订单
+     * @param buyerId
+     * @param sellerId
+     * @param price
+     * @param orderId
+     * @return
+     * @throws Exception
+     */
+    int insertNewOrder(long buyerId, long sellerId, long price, String orderId) throws Exception;
 
 }
