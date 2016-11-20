@@ -5,10 +5,12 @@ import com.ptb.pay.model.order.OrderDetail;
 import com.ptb.pay.service.interfaces.IOrderDetailService;
 import com.ptb.pay.vo.orderdetail.OrderDetailVO;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 /**
  * Created by watson zhang on 2016/11/20.
  */
+@Service("orderDetailService")
 public class OrderDetailServiceImpl implements IOrderDetailService{
 
     @Autowired
@@ -26,6 +28,7 @@ public class OrderDetailServiceImpl implements IOrderDetailService{
         return insert;
     }
 
+    @Override
     public OrderDetailVO convertOrderDetailVO(String orderNo, long origPrice, long payAblePrice, long productId){
         OrderDetailVO orderDetailVO = new OrderDetailVO();
         orderDetailVO.setOrderNo(orderNo);

@@ -16,7 +16,7 @@ import com.ptb.pay.mapper.impl.OrderMapper;
 import com.ptb.pay.mapper.impl.ProductMapper;
 import com.ptb.pay.model.Order;
 import com.ptb.pay.model.Product;
-import com.ptb.pay.service.impl.OrderDetailServiceImpl;
+import com.ptb.pay.service.interfaces.IOrderDetailService;
 import com.ptb.pay.service.interfaces.IOrderService;
 import com.ptb.pay.vo.orderdetail.OrderDetailVO;
 import com.ptb.pay.vo.product.ProductVO;
@@ -52,7 +52,7 @@ public class OrderApiImpl implements IOrderApi {
     @Autowired
     private ProductMapper productMapper;
     @Autowired
-    private OrderDetailServiceImpl orderDetailService;
+    private IOrderDetailService orderDetailService;
 
     @Transactional( rollbackFor = Exception.class, propagation = Propagation.REQUIRED)
     @Override

@@ -21,7 +21,7 @@ public class Product {
 
     private Integer status;
 
-    private String desc;
+    private String description;
 
     private Integer dealNum;
 
@@ -100,11 +100,11 @@ public class Product {
     }
 
     public String getDesc() {
-        return desc;
+        return description;
     }
 
     public void setDesc(String desc) {
-        this.desc = desc == null ? null : desc.trim();
+        this.description = desc == null ? null : desc.trim();
     }
 
     public Integer getDealNum() {

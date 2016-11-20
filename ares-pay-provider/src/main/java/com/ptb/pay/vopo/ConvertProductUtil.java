@@ -37,6 +37,7 @@ public class ConvertProductUtil {
         productVO.setProductType(product.getProductType());
         productVO.setRelevantId(product.getRelevantId());
         productVO.setStatus(product.getStatus());
+        productVO.setProductId(product.getPtbProductId());
         return productVO;
     }
 }

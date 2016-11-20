@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:dubbo="http://code.alibabatech.com/schema/dubbo"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans  http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+	 http://code.alibabatech.com/schema/dubbo	http://code.alibabatech.com/schema/dubbo/dubbo.xsd"
+	default-lazy-init="false" default-autowire="byName">
+
+	<description>dubbo consumer配置</description>
+
+	<dubbo:application name="ares-pay" />
+
+	<dubbo:registry address="192.168.40.25:2181,192.168.40.26:2181,192.168.40.27:2181"
+		protocol="zookeeper" id="payProvider" />
+
+	<dubbo:protocol name="dubbo" port="20882"
+		dispather="all" threadpool="cached" threads="5000" />
+
+	<dubbo:consumer check="false"/>
+
+	<dubbo:reference interface="com.ptb.service.api.ISystemConfigApi"
+		id="systemConfigApi" registry="payProvider" loadbalance="roundrobin"
+		owner="wgh" version="1.0" />
+
+	<dubbo:reference interface="com.ptb.service.api.IBlockApi"
+		id="blockApi" registry="payProvider" loadbalance="roundrobin" owner="wgh"
+		version="1.0" />
+
+	<!-- 虚拟账户相关服务 -->
+	<dubbo:reference interface="com.ptb.account.api.IAccountApi"
+					 id="accountApi" owner="zuokui.fu" version="1.0" protocol="dubbo"
+					 retries="0" />
+</beans>

@@ -1,6 +1,6 @@
 package com.ptb.pay.service.impl;
 
-import com.ptb.common.enums.AllCodeNameEnum;
+//import com.ptb.common.enums.AllCodeNameEnum;
 import com.ptb.pay.enums.OrderActionEnum;
 import com.ptb.pay.mapper.impl.OrderLogMapper;
 import com.ptb.pay.mapper.impl.OrderMapper;
@@ -83,9 +83,9 @@ public class OrderServiceImpl implements IOrderService {
         Date date = new Date();
         Order order = new Order();
         order.setOrderNo( orderId);
-        order.setOrderStatus( AllCodeNameEnum.orderNoPayment.getNum());
-        order.setSellerStatus( AllCodeNameEnum.sellerOrig.getNum());
-        order.setBuyerStatus( AllCodeNameEnum.buyerOrig.getNum());
+        //order.setOrderStatus( AllCodeNameEnum.orderNoPayment.getNum());
+        //order.setSellerStatus( AllCodeNameEnum.sellerOrig.getNum());
+        //order.setBuyerStatus( AllCodeNameEnum.buyerOrig.getNum());
         order.setOriginalPrice(price);
         order.setPayablePrice(0l);
         order.setSellerId( sellerId);
@@ -98,7 +98,7 @@ public class OrderServiceImpl implements IOrderService {
             throw new Exception("更新订单状态失败");
         }
         String remarks = "买家提交订单";
-        this.insertOrderLog(orderId, AllCodeNameEnum.buyerOrig.getNum(), date, remarks, buyerId, AllCodeNameEnum.buyer.getNum());
+        //this.insertOrderLog(orderId, AllCodeNameEnum.buyerOrig.getNum(), date, remarks, buyerId, AllCodeNameEnum.buyer.getNum());
 
        return 0;
     }

@@ -23,8 +23,8 @@ public interface ProductMapper extends MyMapper<Product>{
     @ResultMap("BaseResultMap")
     List<Product> selectByRelevantId(@Param("rid") long relevantId);
 
-    @Select("select * from ptb_product where owner_id=#{uid}")
-    int selectNumByUid(@Param("uid") long userId);
+    @Select("select count(*) from ptb_product where owner_id=#{uid}")
+    int selectProductNumByUid(@Param("uid") long userId);
 
     @Select("select * from ptb_product where owner_id = #{ownerId}")
     public List<Product> selectByOwnerId(@Param("ownerId") long ownerId);
