@@ -33,4 +33,5 @@ sublime-project
 sublime-project.sublime-workspace
 
 coverage-report/
-
+logs
+ares-pay-provider/logs
