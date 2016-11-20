@@ -35,7 +35,17 @@ public interface IOrderApi {
      * @param plyPassword
      * @return
      */
-    ResponseVo buyerPayment(long userId, String orderId,String plyPassword);
+    ResponseVo buyerPayment(Long userId, Long orderId,String plyPassword,String deviceType)throws  Exception;
+
+    /**
+     * 买家申请退款
+     * @param userId
+     * @param orderId
+     * @param deviceType
+     * @return
+     * @throws Exception
+     */
+    ResponseVo refund(Long userId,Long orderId,String deviceType)throws  Exception;
 
 
     /**

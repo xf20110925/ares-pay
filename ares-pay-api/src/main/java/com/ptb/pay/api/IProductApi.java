@@ -62,4 +62,11 @@ public interface IProductApi {
      * @return
      */
     public ResponseVo<Integer>  getProductDealNum(long productId);
+
+    /**
+     * 获取用户商品个数
+     * @param userId 用户ID
+     * @return
+     */
+    public ResponseVo<Integer> getUserProductNum(long userId);
 }

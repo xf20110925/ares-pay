@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.zip.ZipException;
 
 /**
  * Created by zuokui.fu on 2016/11/16.
@@ -117,6 +118,59 @@ public class OrderServiceImpl implements IOrderService {
             return -1;
         }
         return ret;
+    }
+
+    @Override
+    public void updateStatusBuyerPayment(Long ptbOrderId,Long userId, String orderNo) throws Exception {
+        int order_status = 1;//进行中
+        int buyer_status = 1; //已支付;
+        Date date = new Date();
+        Order order = new Order();
+        order.setPtbOrderId(ptbOrderId);
+        order.setOrderStatus(order_status);
+        order.setBuyerStatus(buyer_status);
+        order.setLastModifyTime( date);
+        order.setLastModifierId( userId);
+        int updateCnt = orderMapper.updateByPrimaryKeySelective(order);
+        if ( updateCnt < 1){
+            throw new Exception("更新订单状态失败");
+        }
+        OrderLog orderLog = new OrderLog();
+        orderLog.setOrderNo(orderNo);
+        orderLog.setActionType(OrderActionEnum.BUYER_PAY.getOrderAction());
+        orderLog.setCreateTime(date);
+        orderLog.setUserId(userId);
+        orderLog.setUserType(1);
+        orderLog.setRemarks("买家付款,订单关闭");
+        orderLogMapper.insertSelective(orderLog);
+    }
+
+    @Override
+    public void updateStaterefund(Long ptbOrderId, Long userId, String orderNo) throws Exception {
+        int buyer_status = 3;//申请退款
+        Date date = new Date();
+        Order order = new Order();
+        order.setBuyerStatus(buyer_status);
+        order.setOrderNo(orderNo);
+        order.setPtbOrderId(ptbOrderId);
+        order.setLastModifyTime(date);
+        order.setLastModifierId(userId);
+        int i = orderMapper.updateByPrimaryKey(order);
+        if (i < 1){
+            throw new Exception("退款订单更新失败");
+        }
+        OrderLog orderLog = new OrderLog();
+        orderLog.setOrderNo(orderNo);
+        orderLog.setActionType(OrderActionEnum.BUYER_APPLY_REFUND.getOrderAction());
+        orderLog.setCreateTime(date);
+        orderLog.setPtbOrderLogId(ptbOrderId);
+        orderLog.setUserId(userId);
+        orderLog.setUserType(1);
+        orderLog.setRemarks("买家申请退款，订单关闭");
+        orderLogMapper.insertSelective(orderLog);
+
+
+
     }
 
     @Override
