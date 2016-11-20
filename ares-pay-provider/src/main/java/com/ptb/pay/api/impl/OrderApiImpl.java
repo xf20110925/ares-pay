@@ -6,7 +6,6 @@ import com.ptb.account.api.IAccountApi;
 import com.ptb.account.vo.PtbAccountVo;
 import com.ptb.account.vo.param.AccountRefundParam;
 import com.ptb.common.enums.DeviceTypeEnum;
-import com.ptb.common.enums.NumberClassifyEnum;
 import com.ptb.common.enums.PlatformEnum;
 import com.ptb.common.vo.ResponseVo;
 import com.ptb.pay.api.IOrderApi;
@@ -16,7 +15,9 @@ import com.ptb.pay.mapper.impl.OrderMapper;
 import com.ptb.pay.mapper.impl.ProductMapper;
 import com.ptb.pay.model.Order;
 import com.ptb.pay.model.Product;
+import com.ptb.pay.service.impl.OrderDetailServiceImpl;
 import com.ptb.pay.service.interfaces.IOrderService;
+import com.ptb.pay.vo.orderdetail.OrderDetailVO;
 import com.ptb.pay.vo.product.ProductVO;
 import com.ptb.utils.encrypt.SignUtil;
 import com.ptb.utils.service.ReturnUtil;
@@ -49,6 +50,8 @@ public class OrderApiImpl implements IOrderApi {
     private IOrderService orderService;
     @Autowired
     private ProductMapper productMapper;
+    @Autowired
+    private OrderDetailServiceImpl orderDetailService;
 
     @Transactional( rollbackFor = Exception.class, propagation = Propagation.REQUIRED)
     @Override
@@ -154,13 +157,17 @@ public class OrderApiImpl implements IOrderApi {
             }
             orderService.insertNewOrder(userId, productVO.getOwnerId(), productVO.getPrice(), orderNo);
 
+            OrderDetailVO orderDetailVO = orderDetailService.convertOrderDetailVO(orderNo, productVO.getPrice(), 0, productVO.getProductId());
+            int insert = orderDetailService.insertOrderDetail(orderDetailVO);
+            if (insert < 1){
+                logger.error("insert order detail error! orderNo:{} product iD:{}", orderNo, productVO.getProductId());
+                throw new Exception("order detail error!");
+            }
 
         }catch (Exception e){
-
+            logger.error("submit order error!", e);
+            return ReturnUtil.error("", "no product");
         }
-
         return null;
     }
-
-
 }

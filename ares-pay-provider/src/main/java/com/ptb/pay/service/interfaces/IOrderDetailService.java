@@ -1,11 +1,16 @@
 package com.ptb.pay.service.interfaces;
 
-import com.alipay.api.domain.OrderDetail;
+import com.ptb.pay.vo.orderdetail.OrderDetailVO;
 
 /**
  * Created by watson zhang on 2016/11/20.
  */
 public interface IOrderDetailService {
 
-    public int insertOrderDetail(OrderDetail orderDetail);
+    /**
+     * 插入订单详情表
+     * @param orderDetailVO
+     * @return
+     */
+    public int insertOrderDetail(OrderDetailVO orderDetailVO);
 }
