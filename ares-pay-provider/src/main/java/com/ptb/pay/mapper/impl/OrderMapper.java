@@ -7,6 +7,8 @@ import org.apache.ibatis.annotations.ResultMap;
 import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
 
+import java.util.List;
+
 /**
  * Created by zuokui.fu on 2016/11/16.
  */
@@ -19,4 +21,12 @@ public interface OrderMapper extends MyMapper<Order> {
 
     @Update(" update ptb_order set order_status = #{orderStatus} where ptb_order_id = #{orderId}")
     int updateOrderStateByOrderNo(@Param("orderId") long orderId, @Param("orderStatus") int orderStatus);
+
+    @Select("select * from ptb_order where seller_id=#{uid} order by create_time desc")
+    @ResultMap("BaseResultMap")
+    List<Order> selectBySellerUid(@Param("uid") long userId);
+
+    @Select("select * from ptb_order where buyer_id=#{uid} order by create_time desc")
+    @ResultMap("BaseResultMap")
+    List<Order> selectByBuyerUid(@Param("uid") long userId);
 }

@@ -2,6 +2,7 @@ package com.ptb.pay.api.impl;
 
 import com.alibaba.druid.support.json.JSONParser;
 import com.alibaba.dubbo.common.json.JSON;
+import com.alibaba.dubbo.common.utils.CollectionUtils;
 import com.alibaba.dubbo.rpc.RpcContext;
 import com.alibaba.fastjson.JSONObject;
 import com.ptb.account.api.IAccountApi;
@@ -13,10 +14,7 @@ import com.ptb.common.enums.PlatformEnum;
 import com.ptb.common.vo.ResponseVo;
 import com.ptb.pay.api.IOrderApi;
 import com.ptb.pay.api.IProductApi;
-import com.ptb.pay.enums.ErrorCode;
-import com.ptb.pay.enums.OrderActionEnum;
-import com.ptb.pay.enums.SellerStatusEnum;
-import com.ptb.pay.enums.UserType;
+import com.ptb.pay.enums.*;
 import com.ptb.pay.mapper.impl.OrderMapper;
 import com.ptb.pay.mapper.impl.ProductMapper;
 import com.ptb.pay.model.Order;
@@ -24,12 +22,10 @@ import com.ptb.pay.model.Product;
 import com.ptb.pay.service.interfaces.IOrderDetailService;
 import com.ptb.pay.service.interfaces.IOrderService;
 import com.ptb.pay.service.interfaces.IProductService;
-import com.ptb.pay.vo.order.ConfirmOrderReqVO;
-import com.ptb.pay.vo.order.OrderDetailVO;
-import com.ptb.pay.vo.order.OrderListReqVO;
+import com.ptb.pay.vo.order.*;
+import com.ptb.pay.vopo.ConvertOrderUtil;
 import com.ptb.ucenter.api.IBindMediaApi;
 import com.ptb.pay.vo.order.OrderDetailVO;
-import com.ptb.pay.vo.order.OrderVO;
 import com.ptb.utils.encrypt.SignUtil;
 import com.ptb.utils.service.ReturnUtil;
 import com.ptb.utils.tool.GenerateOrderNoUtil;
@@ -45,6 +41,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.stream.Collectors;
 
 /**
  * Created by zuokui.fu on 2016/11/16.
@@ -364,15 +361,37 @@ public class OrderApiImpl implements IOrderApi {
             }
             return ReturnUtil.error(responseVo.getCode(), responseVo.getMessage());
         }else{
-            return ReturnUtil.error("","");
+            return ReturnUtil.error("","未知用户类型");
         }
     }
 
-    public ResponseVo getOrderList(long userId, OrderListReqVO orderListReqVO){
+    public ResponseVo<OrderListVO> getOrderList(long userId, OrderListReqVO orderListReqVO){
+        OrderListVO orderListVO = OrderListVO.Empty();
+        //用户校验
         if(userId != orderListReqVO.getUserId())
-            return ReturnUtil.success();
+            return ReturnUtil.success(orderListVO);
 
-        return null;
+        //获取用户所有订单
+        List<Order> orders = null;
+        if(orderListReqVO.getUserType() == UserType.USER_IS_BUYER.getUserType())
+            orders = orderMapper.selectByBuyerUid(orderListReqVO.getUserId());
+        else
+            orders = orderMapper.selectBySellerUid(orderListReqVO.getUserId());
+
+        //订单为空返回
+        if(CollectionUtils.isEmpty(orders))
+            return ReturnUtil.success(orderListVO);
+
+        //状态过滤
+        if(orderListReqVO.getOrderStatus() != OrderStatusEnum.ORDER_STATUS_DEAL_ALL.getStatus()){
+            orders = orders.stream().filter(item->item.getOrderStatus()==orderListReqVO.getOrderStatus()).collect(Collectors.toList());
+        }
+
+        //分页 转换
+        orderListVO.setTotalNum(orders.size());
+        orderListVO.getOrderVOList().addAll(orders.stream().map(ConvertOrderUtil::convertOrderToOrderVO).skip(orderListReqVO.getStart()).limit(orderListReqVO.getEnd()-orderListReqVO.getStart()).collect(Collectors.toList()));
+
+        return ReturnUtil.success(orderListVO);
     }
 
 }
