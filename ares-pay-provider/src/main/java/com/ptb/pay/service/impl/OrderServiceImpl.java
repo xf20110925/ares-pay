@@ -253,7 +253,10 @@ public class OrderServiceImpl implements IOrderService {
         orderLog.setUserId( salerId);
         orderLog.setUserType( 2);//卖家
         orderLog.setRemarks( "卖家同意退款,订单关闭");
-        orderLogMapper.insertSelective( orderLog);
+        updateCnt = orderLogMapper.insertSelective( orderLog);
+        if ( updateCnt < 1){
+            throw new Exception("卖家同意退款插入日志失败");
+        }
     }
 
     @Override
@@ -276,6 +279,9 @@ public class OrderServiceImpl implements IOrderService {
         orderLog.setUserId( buyerId);
         orderLog.setUserType( 1);//买家
         orderLog.setRemarks( "买家取消申请退款");
-        orderLogMapper.insertSelective( orderLog);
+        updateCnt = orderLogMapper.insertSelective( orderLog);
+        if ( updateCnt < 1){
+            throw new Exception("买家取消申请退款插入日志失败");
+        }
     }
 }
