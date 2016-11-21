@@ -58,7 +58,7 @@ public class OrderDetailServiceImpl implements IOrderDetailService{
 
     @Override
     public Long getProductIdByOrderNo(String orderNo) {
-        OrderDetail orderDetail = orderDetailMapper.selectByOrderNo(orderNo);
+        OrderDetail orderDetail = orderDetailMapper.getOrderDetailByOrderNo(orderNo);
         if(null != orderDetail)
             return orderDetail.getProductId();
         return null;
