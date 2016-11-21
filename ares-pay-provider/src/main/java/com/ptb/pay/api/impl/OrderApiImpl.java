@@ -57,7 +57,7 @@ public class OrderApiImpl implements IOrderApi {
     @Transactional( rollbackFor = Exception.class, propagation = Propagation.REQUIRED)
     @Override
     public ResponseVo<Map<String,Object>> cancelApplyRefund(Long buyerId, Long orderId) throws Exception {
-        logger.info( "卖家取消申请退款。buyerId:{} orderId:{}", buyerId, orderId);
+        logger.info( "买家取消申请退款。buyerId:{} orderId:{}", buyerId, orderId);
         try {
             //参数校验
             if (!ParamUtil.checkParams(buyerId, orderId)) {
@@ -134,7 +134,7 @@ public class OrderApiImpl implements IOrderApi {
             RpcContext.getContext().setAttachment("key", sign);
             ResponseVo<PtbAccountVo> accountResponse = accountApi.refund(param);
             if ( !"0".equals( accountResponse.getCode())){
-                logger.error( "虚拟账户退款dubbo接口调用失败。salerId:{}", salerId);
+                logger.error( "虚拟账户退款dubbo接口调用失败。salerId:{}, code:{}, message:{}", salerId,accountResponse.getCode(), accountResponse.getMessage());
                 throw new Exception();
             }
             Order resultOrder = orderMapper.selectByPrimaryKey( orderId);
@@ -186,7 +186,7 @@ public class OrderApiImpl implements IOrderApi {
             RpcContext.getContext().setAttachment("key", sign);
             ResponseVo<PtbAccountVo> responseVo = accountApi.pay(param);
             if ( !"0".equals( responseVo.getCode())){
-                logger.error( "虚拟账户付款dubbo接口调用失败。salerId:{}", userId);
+                logger.error( "虚拟账户付款dubbo接口调用失败。salerId:{}, code:{}, message:{}", userId, responseVo.getCode(), responseVo.getMessage());
                 throw new Exception();
             }
             Order resultOrder = orderMapper.selectByPrimaryKey(orderId);

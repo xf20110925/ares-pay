@@ -21,4 +21,13 @@ public class OrderApiImplTest extends BaseTest {
             e.printStackTrace();
         }
     }
+
+    @Test
+    public void agreeRefund(){
+        try {
+            orderApi.agreeRefund( 776L, 1L, 800000L, "iphone");
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
 }
