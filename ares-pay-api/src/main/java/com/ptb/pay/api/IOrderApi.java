@@ -71,4 +71,6 @@ public interface IOrderApi {
      * @return
      */
     ResponseVo getOrderDetail(long userId, String orderNo);
+
+    ResponseVo sellerChangePrice(long userId, long orderId, long price);
 }

@@ -295,6 +295,15 @@ public class OrderApiImpl implements IOrderApi {
         return new ResponseVo("0", "获取订单详情成功", orderDetail);
     }
 
+    @Override
+    public ResponseVo sellerChangePrice(long userId, long orderId, long price) {
+        //是否可以修改
+
+        //修改订单价格
+
+
+        return null;
+    }
 
 
     @Transactional

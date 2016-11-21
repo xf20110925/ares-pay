@@ -1,11 +1,12 @@
 package com.ptb.pay.vo.order;
 
+import java.io.Serializable;
 import java.util.Date;
 
 /**
  * Created by watson zhang on 2016/11/21.
  */
-public class OrderVO {
+public class OrderVO implements Serializable{
     private Long ptbOrderId;
 
     private String orderNo;

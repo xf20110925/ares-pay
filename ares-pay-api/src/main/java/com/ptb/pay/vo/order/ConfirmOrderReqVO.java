@@ -2,10 +2,12 @@ package com.ptb.pay.vo.order;
 
 import com.ptb.pay.vo.BaseVO;
 
+import java.io.Serializable;
+
 /**
  * Created by MyThinkpad on 2016/11/21.
  */
-public class ConfirmOrderReqVO extends BaseVO{
+public class ConfirmOrderReqVO extends BaseVO implements Serializable{
     private long userId;
     private int  userType;
     private String password;
