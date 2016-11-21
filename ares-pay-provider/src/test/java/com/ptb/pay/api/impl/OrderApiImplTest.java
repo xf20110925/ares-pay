@@ -63,7 +63,7 @@ public class OrderApiImplTest extends BaseTest {
 
     @Test
     public void getMediaDetailInfo(){
-        orderApi.getOrderInfo(10, 42L);
+        orderApi.getOrderInfo(10, 6L);
     }
 
     @Test
