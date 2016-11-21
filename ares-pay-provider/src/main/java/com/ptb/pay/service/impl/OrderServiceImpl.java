@@ -185,7 +185,7 @@ public class OrderServiceImpl implements IOrderService {
         order.setPtbOrderId(ptbOrderId);
         order.setLastModifyTime(date);
         order.setLastModifierId(userId);
-        int i = orderMapper.updateByPrimaryKey(order);
+        int i = orderMapper.updateByPrimaryKeySelective(order);
         if (i < 1){
             throw new Exception("退款订单更新失败");
         }
@@ -193,7 +193,6 @@ public class OrderServiceImpl implements IOrderService {
         orderLog.setOrderNo(orderNo);
         orderLog.setActionType(OrderActionEnum.BUYER_APPLY_REFUND.getOrderAction());
         orderLog.setCreateTime(date);
-        orderLog.setPtbOrderLogId(ptbOrderId);
         orderLog.setUserId(userId);
         orderLog.setUserType(1);
         orderLog.setRemarks("买家申请退款!");
