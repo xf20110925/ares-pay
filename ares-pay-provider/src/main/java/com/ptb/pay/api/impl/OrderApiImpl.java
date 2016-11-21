@@ -262,7 +262,7 @@ public class OrderApiImpl implements IOrderApi {
                 throw new RuntimeException("order detail error!");
             }
 
-            return new ResponseVo<OrderVO>("", "", parse);
+            return new ResponseVo<OrderVO>("0", "", parse);
         }catch (Exception e){
             logger.error("submit order error!", e);
             return ReturnUtil.error("20002", "no product");

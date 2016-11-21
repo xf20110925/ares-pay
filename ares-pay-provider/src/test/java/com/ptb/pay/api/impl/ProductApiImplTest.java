@@ -18,7 +18,7 @@ public class ProductApiImplTest extends BaseTest {
 
     @Test
     public void generateProductTest(){
-        ProductVO productVO = new ProductVO(112, ProductOwnerType.USER_TYPE.getType(), "test2", ProductType.MEDIA_SERVICE_TYPE.getType(), 124);
+        ProductVO productVO = new ProductVO(114, ProductOwnerType.USER_TYPE.getType(), "test2", ProductType.MEDIA_SERVICE_TYPE.getType(), 124);
         ResponseVo responseVo = productApi.generateProduct(productVO);
         Assert.assertTrue(responseVo.getCode().equals("0"));
     }

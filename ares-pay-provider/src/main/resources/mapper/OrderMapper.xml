@@ -47,7 +47,7 @@ remarks,
 remarks,jdbcType=VARCHAR}, 
       #{payTime,jdbcType=TIMESTAMP}, #{lastModifierId,jdbcType=BIGINT})
   </insert>
-  <insert id="insertReturnId" parameterType="com.ptb.pay.model.Order"  useGeneratedKeys="true" keyProperty="id">
+  <insert id="insertReturnId" parameterType="com.ptb.pay.model.Order"  useGeneratedKeys="true" keyProperty="ptbOrderId">
     insert into ptb_order (ptb_order_id, order_no, order_status,
     seller_status, buyer_status, original_price,
     payable_price, seller_id, buyer_id,

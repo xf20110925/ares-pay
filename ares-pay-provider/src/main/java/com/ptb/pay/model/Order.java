@@ -1,8 +1,9 @@
 package com.ptb.pay.model;
 
+import java.io.Serializable;
 import java.util.Date;
 
-public class Order {
+public class Order implements Serializable{
     private Long ptbOrderId;
 
     private String orderNo;
