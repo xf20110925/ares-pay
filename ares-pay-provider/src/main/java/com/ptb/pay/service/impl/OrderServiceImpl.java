@@ -171,6 +171,7 @@ public class OrderServiceImpl implements IOrderService {
         int i = orderLogMapper.insertSelective(orderLog);
         if (i < 1){
             logger.error("buyerPayment insert order log error! orderNo:{} userId:{}",orderNo,userId);
+            throw new Exception("买家付款日志插入失败");
         }
     }
 
@@ -199,6 +200,7 @@ public class OrderServiceImpl implements IOrderService {
         int i1 = orderLogMapper.insertSelective(orderLog);
         if (i1 < 1){
             logger.error("refund insert order log error!orderNo:{}userId:{}",orderNo,userId);
+            throw new Exception("买家申请退款日志插入失败");
         }
 
 
