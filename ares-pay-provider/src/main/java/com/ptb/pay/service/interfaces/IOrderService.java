@@ -89,6 +89,8 @@ public interface IOrderService {
      */
     int cancelOrderByBuyer(long buyerId, long orderId) throws Exception;
 
+    Order getOrderByOrderId(long orderId);
+
     boolean sellerConfirmOrder(long seller, Order order);
 
     boolean buyerConfirmOrder(long buyer, Order order);

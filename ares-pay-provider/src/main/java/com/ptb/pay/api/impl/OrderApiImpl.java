@@ -252,7 +252,7 @@ public class OrderApiImpl implements IOrderApi {
             //添加新订单
             Order order = orderService.insertNewOrder(userId, product.getOwnerId(), product.getPrice(), orderNo);
             String json = JSON.json(order);
-            OrderVO parse = JSON.parse(json, OrderVO.class);
+            OrderVO orderVO = JSON.parse(json, OrderVO.class);
 
             //添加订单详情
             OrderDetailVO orderDetailVO = orderDetailService.convertOrderDetailVO(orderNo, product.getPrice(), 0, product.getPtbProductId());
@@ -262,7 +262,10 @@ public class OrderApiImpl implements IOrderApi {
                 throw new RuntimeException("order detail error!");
             }
 
-            return new ResponseVo<OrderVO>("0", "", parse);
+            Map<String, Object> map = orderService.getSalerOrderStatus( ""+order.getOrderStatus()+order.getSellerStatus()+order.getBuyerStatus());
+            orderVO.setButton(map.get("button").toString());
+            orderVO.setDesc(map.get("desc").toString());
+            return new ResponseVo<OrderVO>("0", "", orderVO);
         }catch (Exception e){
             logger.error("submit order error!", e);
             return ReturnUtil.error("20002", "no product");
@@ -284,7 +287,7 @@ public class OrderApiImpl implements IOrderApi {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return null;
+        return new ResponseVo("0", "", null);
     }
 
     @Override
