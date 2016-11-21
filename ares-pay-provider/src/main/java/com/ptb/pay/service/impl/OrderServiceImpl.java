@@ -1,6 +1,6 @@
 package com.ptb.pay.service.impl;
 
-//import com.ptb.common.enums.AllCodeNameEnum;
+import com.ptb.common.enums.AllCodeNameEnum;
 import com.ptb.pay.enums.OrderActionEnum;
 import com.ptb.pay.mapper.impl.OrderLogMapper;
 import com.ptb.pay.mapper.impl.OrderMapper;
@@ -167,13 +167,16 @@ public class OrderServiceImpl implements IOrderService {
         orderLog.setCreateTime(date);
         orderLog.setUserId(userId);
         orderLog.setUserType(1);
-        orderLog.setRemarks("买家付款,订单关闭");
-        orderLogMapper.insertSelective(orderLog);
+        orderLog.setRemarks("买家付款!");
+        int i = orderLogMapper.insertSelective(orderLog);
+        if (i < 1){
+            logger.error("buyerPayment insert order log error! orderNo:{} userId:{}",orderNo,userId);
+        }
     }
 
     @Override
     public void updateStaterefund(Long ptbOrderId, Long userId, String orderNo) throws Exception {
-        int buyer_status = 3;//申请退款
+        int buyer_status = 2;//申请退款
         Date date = new Date();
         Order order = new Order();
         order.setBuyerStatus(buyer_status);
@@ -192,9 +195,11 @@ public class OrderServiceImpl implements IOrderService {
         orderLog.setPtbOrderLogId(ptbOrderId);
         orderLog.setUserId(userId);
         orderLog.setUserType(1);
-        orderLog.setRemarks("买家申请退款，订单关闭");
-        orderLogMapper.insertSelective(orderLog);
-
+        orderLog.setRemarks("买家申请退款!");
+        int i1 = orderLogMapper.insertSelective(orderLog);
+        if (i1 < 1){
+            logger.error("refund insert order log error!orderNo:{}userId:{}",orderNo,userId);
+        }
 
 
     }
