@@ -1,6 +1,7 @@
 package com.ptb.pay.service.impl;
 
-//import com.ptb.common.enums.AllCodeNameEnum;
+import com.ptb.common.enums.AllCodeNameEnum;
+
 import com.ptb.pay.enums.OrderActionEnum;
 import com.ptb.pay.mapper.impl.OrderLogMapper;
 import com.ptb.pay.mapper.impl.OrderMapper;
@@ -17,7 +18,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.zip.ZipException;
 
 /**
  * Created by zuokui.fu on 2016/11/16.
