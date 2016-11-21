@@ -47,6 +47,20 @@ remarks,
 remarks,jdbcType=VARCHAR}, 
       #{payTime,jdbcType=TIMESTAMP}, #{lastModifierId,jdbcType=BIGINT})
   </insert>
+  <insert id="insertReturnId" parameterType="com.ptb.pay.model.Order"  useGeneratedKeys="true" keyProperty="id">
+    insert into ptb_order (ptb_order_id, order_no, order_status,
+    seller_status, buyer_status, original_price,
+    payable_price, seller_id, buyer_id,
+    create_time, last_modify_time,
+    remarks,
+    pay_time, last_modifier_id)
+    values (#{ptbOrderId,jdbcType=BIGINT}, #{orderNo,jdbcType=VARCHAR}, #{orderStatus,jdbcType=VARCHAR},
+    #{sellerStatus,jdbcType=INTEGER}, #{buyerStatus,jdbcType=INTEGER}, #{originalPrice,jdbcType=BIGINT},
+    #{payablePrice,jdbcType=BIGINT}, #{sellerId,jdbcType=BIGINT}, #{buyerId,jdbcType=BIGINT},
+    #{createTime,jdbcType=TIMESTAMP}, #{lastModifyTime,jdbcType=TIMESTAMP}, #{
+remarks,jdbcType=VARCHAR},
+    #{payTime,jdbcType=TIMESTAMP}, #{lastModifierId,jdbcType=BIGINT})
+  </insert>
   <insert id="insertSelective" parameterType="com.ptb.pay.model.Order" >
     insert into ptb_order
     <trim prefix="(" suffix=")" suffixOverrides="," >

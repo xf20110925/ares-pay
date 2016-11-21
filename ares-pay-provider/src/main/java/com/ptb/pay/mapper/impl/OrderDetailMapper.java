@@ -7,6 +7,6 @@ import org.apache.ibatis.annotations.Select;
 
 public interface OrderDetailMapper extends MyMapper<OrderDetail>{
 
-    @Select("select * from ptb_order_detail where order_no=#{orderNo}")
-    OrderDetail selectByOrderNo(@Param("orderNo") String orderNo);
+    @Select("select * from ptb_order_detail where order_no = #{orderNo}")
+    OrderDetail getOrderDetailByOrderNo(@Param("orderNo") String orderNo);
 }

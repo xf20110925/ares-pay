@@ -78,7 +78,7 @@ public interface IOrderService {
      * @return
      * @throws Exception
      */
-    int insertNewOrder(long buyerId, long sellerId, long price, String orderId) throws Exception;
+    Order insertNewOrder(long buyerId, long sellerId, long price, String orderId) throws Exception;
 
     /**
      * 买家取消订单
