@@ -294,6 +294,7 @@ public class OrderApiImpl implements IOrderApi {
 
 
 
+    @Override
     @Transactional
     public ResponseVo confirmOrder(long userId, ConfirmOrderReqVO confirmOrderVO){
         //参数校验
@@ -313,7 +314,7 @@ public class OrderApiImpl implements IOrderApi {
                 //修改相关状态
                 boolean ret = orderService.sellerConfirmOrder(userId, order);
                 return ret?
-                        ReturnUtil.success(orderService.getSalerOrderStatus( order.getOrderNo()+order.getSellerStatus()+order.getBuyerStatus())):
+                        ReturnUtil.success(orderService.getSalerOrderStatus( ""+order.getOrderStatus()+order.getSellerStatus()+order.getBuyerStatus())):
                         ReturnUtil.error(ErrorCode.PAY_API_COMMMON_1000.getCode(),ErrorCode.PAY_API_COMMMON_1000.getMessage());
             }else{
                 //买家未付款, 操作失败
@@ -358,7 +359,7 @@ public class OrderApiImpl implements IOrderApi {
                     if(!ret){
                         //更新失败 add message to bus
                     }
-                    return ReturnUtil.success(orderService.getSalerOrderStatus( order.getOrderNo()+order.getSellerStatus()+order.getBuyerStatus()));
+                    return ReturnUtil.success(orderService.getSalerOrderStatus( ""+order.getOrderStatus()+order.getSellerStatus()+order.getBuyerStatus()));
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -369,6 +370,7 @@ public class OrderApiImpl implements IOrderApi {
         }
     }
 
+    @Override
     public ResponseVo<OrderListVO> getOrderList(long userId, OrderListReqVO orderListReqVO){
         OrderListVO orderListVO = OrderListVO.Empty();
         //用户校验
@@ -394,7 +396,11 @@ public class OrderApiImpl implements IOrderApi {
         //分页 转换
         orderListVO.setTotalNum(orders.size());
         orderListVO.getOrderVOList().addAll(orders.stream().map(ConvertOrderUtil::convertOrderToOrderVO).skip(orderListReqVO.getStart()).limit(orderListReqVO.getEnd()-orderListReqVO.getStart()).collect(Collectors.toList()));
-
+        orderListVO.getOrderVOList().forEach(item->{
+            Map<String, Object> map = orderService.getSalerOrderStatus( ""+item.getOrderStatus()+item.getSellerStatus()+item.getBuyerStatus());
+            item.setButton(map.get("button").toString());
+            item.setDesc(map.get("desc").toString());
+        });
         return ReturnUtil.success(orderListVO);
     }
 

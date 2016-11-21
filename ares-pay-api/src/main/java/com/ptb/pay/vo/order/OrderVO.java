@@ -34,6 +34,10 @@ public class OrderVO {
 
     private Long lastModifierId;
 
+    private String button;
+
+    private String desc;
+
     public Long getPtbOrderId() {
         return ptbOrderId;
     }
@@ -144,5 +148,21 @@ public class OrderVO {
 
     public void setLastModifierId(Long lastModifierId) {
         this.lastModifierId = lastModifierId;
+    }
+
+    public String getButton() {
+        return button;
+    }
+
+    public void setButton(String button) {
+        this.button = button;
+    }
+
+    public String getDesc() {
+        return desc;
+    }
+
+    public void setDesc(String desc) {
+        this.desc = desc;
     }
 }

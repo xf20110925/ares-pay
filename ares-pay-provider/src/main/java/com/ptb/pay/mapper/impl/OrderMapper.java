@@ -19,8 +19,8 @@ public interface OrderMapper extends MyMapper<Order> {
     @ResultMap("BaseResultMap")
     Order getOrderByOrderNo( @Param("orderNo") String orderNo);
 
-    @Update(" update ptb_order set order_status = #{orderStatus} where ptb_order_id = #{orderId}")
-    int updateOrderStateByOrderNo(@Param("orderId") long orderId, @Param("orderStatus") int orderStatus);
+    @Update(" update ptb_order set order_status = #{orderStatus}, buyer_status = #{buyerStatus} where ptb_order_id = #{orderId}")
+    int updateOrderStateByOrderNo(@Param("orderId") long orderId, @Param("orderStatus") int orderStatus, @Param("buyerStatus") int buyerStatus);
 
     @Select("select * from ptb_order where seller_id=#{uid} order by create_time desc")
     @ResultMap("BaseResultMap")
