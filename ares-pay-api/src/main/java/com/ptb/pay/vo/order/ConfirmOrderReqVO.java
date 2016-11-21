@@ -11,6 +11,15 @@ public class ConfirmOrderReqVO extends BaseVO{
     private String password;
     private long orderId;
 
+    public ConfirmOrderReqVO(){}
+
+    public ConfirmOrderReqVO(long userId, int userType, String password, long orderId){
+        this.userId = userId;
+        this.userType = userType;
+        this.password = password;
+        this.orderId = orderId;
+    }
+
     public long getUserId() {
         return userId;
     }
