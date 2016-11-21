@@ -1,6 +1,9 @@
 package com.ptb.pay.api;
 
 import com.ptb.common.vo.ResponseVo;
+import com.ptb.pay.vo.order.ConfirmOrderReqVO;
+import com.ptb.pay.vo.order.OrderListReqVO;
+import com.ptb.pay.vo.order.OrderListVO;
 
 import java.util.Map;
 
@@ -71,6 +74,22 @@ public interface IOrderApi {
      * @return
      */
     ResponseVo getOrderDetail(long userId, String orderNo);
+
+    /**
+     * 买卖双方确认完成接口
+     * @param userId
+     * @param confirmOrderVO
+     * @return
+     */
+    public ResponseVo confirmOrder(long userId, ConfirmOrderReqVO confirmOrderVO);
+
+    /**
+     * 获取订单列表接口
+     * @param userId
+     * @param orderListReqVO
+     * @return
+     */
+    public ResponseVo<OrderListVO> getOrderList(long userId, OrderListReqVO orderListReqVO);
 
     ResponseVo sellerChangePrice(long userId, long orderId, long price);
 }

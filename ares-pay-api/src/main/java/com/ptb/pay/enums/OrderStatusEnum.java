@@ -7,7 +7,8 @@ public enum OrderStatusEnum {
     ORDER_STATUS_NEW_DEAL(0, "新建状态"),
     ORDER_STATUS_DEALING(1, "进行中状态"),
     ORDER_STATUS_DEAL_OVER(2, "已完成状态"),
-    ORDER_STATUS_DEAL_CLOSE(3, "已关闭状态");
+    ORDER_STATUS_DEAL_CLOSE(3, "已关闭状态"),
+    ORDER_STATUS_DEAL_ALL(4, "全部状态");
 
     int status;
     String desc;
