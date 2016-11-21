@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 import javax.annotation.Resource;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -87,7 +88,7 @@ public class ProductApiImpl implements IProductApi {
         product.setDesc(desc);
         product.setPrice(prince);
         product.setStatus(state);
-
+        product.setLastUpdateTime(new Date());
         if(productMapper.updateByPrimaryKeySelective(product) < 1)
             return ReturnUtil.error(ErrorCode.PAY_API_COMMMON_1000.getCode(), ErrorCode.PAY_API_COMMMON_1000.getMessage());
 
@@ -136,7 +137,7 @@ public class ProductApiImpl implements IProductApi {
     @SuppressWarnings("unchecked")
     @Override
     public ResponseVo<Integer> getUserProductNum(long userId){
-        int num = productMapper.selectNumByUid(userId);
+        int num = productMapper.selectProductNumByUid(userId);
         return ReturnUtil.success(num);
     }
 }

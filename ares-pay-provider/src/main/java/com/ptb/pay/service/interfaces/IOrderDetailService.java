@@ -13,4 +13,7 @@ public interface IOrderDetailService {
      * @return
      */
     public int insertOrderDetail(OrderDetailVO orderDetailVO);
+
+
+    public OrderDetailVO convertOrderDetailVO(String orderNo, long origPrice, long payAblePrice, long productId);
 }

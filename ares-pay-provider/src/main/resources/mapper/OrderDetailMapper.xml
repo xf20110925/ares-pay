@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.ptb.pay.mapper.impl.OrderDetailMapper" >
-  <resultMap id="BaseResultMap" type="com.ptb.pay.model.OrderDetail" >
+  <resultMap id="BaseResultMap" type="com.ptb.pay.model.order.OrderDetail" >
     <id column="ptb_order_detail_id" property="ptbOrderDetailId" jdbcType="BIGINT" />
     <result column="order_no" property="orderNo" jdbcType="VARCHAR" />
     <result column="original_price" property="originalPrice" jdbcType="BIGINT" />
@@ -21,13 +21,13 @@
     delete from ptb_order_detail
     where ptb_order_detail_id = #{ptbOrderDetailId,jdbcType=BIGINT}
   </delete>
-  <insert id="insert" parameterType="com.ptb.pay.model.OrderDetail" >
+  <insert id="insert" parameterType="com.ptb.pay.model.order.OrderDetail" >
     insert into ptb_order_detail (ptb_order_detail_id, order_no, original_price, 
       payable_price, product_id)
     values (#{ptbOrderDetailId,jdbcType=BIGINT}, #{orderNo,jdbcType=VARCHAR}, #{originalPrice,jdbcType=BIGINT}, 
       #{payablePrice,jdbcType=BIGINT}, #{productId,jdbcType=BIGINT})
   </insert>
-  <insert id="insertSelective" parameterType="com.ptb.pay.model.OrderDetail" >
+  <insert id="insertSelective" parameterType="com.ptb.pay.model.order.OrderDetail" >
     insert into ptb_order_detail
     <trim prefix="(" suffix=")" suffixOverrides="," >
       <if test="ptbOrderDetailId != null" >
@@ -64,7 +64,7 @@
       </if>
     </trim>
   </insert>
-  <update id="updateByPrimaryKeySelective" parameterType="com.ptb.pay.model.OrderDetail" >
+  <update id="updateByPrimaryKeySelective" parameterType="com.ptb.pay.model.order.OrderDetail" >
     update ptb_order_detail
     <set >
       <if test="orderNo != null" >
@@ -82,7 +82,7 @@
     </set>
     where ptb_order_detail_id = #{ptbOrderDetailId,jdbcType=BIGINT}
   </update>
-  <update id="updateByPrimaryKey" parameterType="com.ptb.pay.model.OrderDetail" >
+  <update id="updateByPrimaryKey" parameterType="com.ptb.pay.model.order.OrderDetail" >
     update ptb_order_detail
     set order_no = #{orderNo,jdbcType=VARCHAR},
       original_price = #{originalPrice,jdbcType=BIGINT},

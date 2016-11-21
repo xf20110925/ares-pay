@@ -11,13 +11,13 @@
     <result column="owner_id" property="ownerId" jdbcType="BIGINT" />
     <result column="owner_type" property="ownerType" jdbcType="INTEGER" />
     <result column="status" property="status" jdbcType="INTEGER" />
-    <result column="desc" property="desc" jdbcType="VARCHAR" />
+    <result column="description" property="description" jdbcType="VARCHAR" />
     <result column="deal_num" property="dealNum" jdbcType="INTEGER" />
     <result column="relevant_id" property="relevantId" jdbcType="BIGINT" />
   </resultMap>
   <sql id="Base_Column_List" >
     ptb_product_id, product_name, product_type, price, create_time, last_update_time, 
-    owner_id, owner_type, status, desc, deal_num, relevant_id
+    owner_id, owner_type, status, description, deal_num, relevant_id
   </sql>
   <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
     select 
@@ -33,24 +33,24 @@
     insert into ptb_product (ptb_product_id, product_name, product_type, 
       price, create_time, last_update_time, 
       owner_id, owner_type, status, 
-      desc, deal_num, relevant_id
+      description, deal_num, relevant_id
       )
     values (#{ptbProductId,jdbcType=BIGINT}, #{productName,jdbcType=VARCHAR}, #{productType,jdbcType=INTEGER}, 
       #{price,jdbcType=BIGINT}, #{createTime,jdbcType=TIMESTAMP}, #{lastUpdateTime,jdbcType=TIMESTAMP}, 
       #{ownerId,jdbcType=BIGINT}, #{ownerType,jdbcType=INTEGER}, #{status,jdbcType=INTEGER}, 
-      #{desc,jdbcType=VARCHAR}, #{dealNum,jdbcType=INTEGER}, #{relevantId,jdbcType=BIGINT}
+      #{description,jdbcType=VARCHAR}, #{dealNum,jdbcType=INTEGER}, #{relevantId,jdbcType=BIGINT}
       )
   </insert>
   <insert id="insertReturnId" parameterType="com.ptb.pay.model.Product"  useGeneratedKeys="true" keyProperty="id" >
     insert into ptb_product (ptb_product_id, product_name, product_type,
     price, create_time, last_update_time,
     owner_id, owner_type, status,
-    desc, deal_num, relevant_id
+    description, deal_num, relevant_id
     )
     values (#{ptbProductId,jdbcType=BIGINT}, #{productName,jdbcType=VARCHAR}, #{productType,jdbcType=INTEGER},
     #{price,jdbcType=BIGINT}, #{createTime,jdbcType=TIMESTAMP}, #{lastUpdateTime,jdbcType=TIMESTAMP},
     #{ownerId,jdbcType=BIGINT}, #{ownerType,jdbcType=INTEGER}, #{status,jdbcType=INTEGER},
-    #{desc,jdbcType=VARCHAR}, #{dealNum,jdbcType=INTEGER}, #{relevantId,jdbcType=BIGINT}
+    #{description,jdbcType=VARCHAR}, #{dealNum,jdbcType=INTEGER}, #{relevantId,jdbcType=BIGINT}
     )
   </insert>
   <insert id="insertSelective" parameterType="com.ptb.pay.model.Product" >
@@ -83,8 +83,8 @@
       <if test="status != null" >
         status,
       </if>
-      <if test="desc != null" >
-        desc,
+      <if test="description != null" >
+        description,
       </if>
       <if test="dealNum != null" >
         deal_num,
@@ -121,8 +121,8 @@
       <if test="status != null" >
         #{status,jdbcType=INTEGER},
       </if>
-      <if test="desc != null" >
-        #{desc,jdbcType=VARCHAR},
+      <if test="description != null" >
+        #{description,jdbcType=VARCHAR},
       </if>
       <if test="dealNum != null" >
         #{dealNum,jdbcType=INTEGER},
@@ -159,8 +159,8 @@
       <if test="status != null" >
         status = #{status,jdbcType=INTEGER},
       </if>
-      <if test="desc != null" >
-        desc = #{desc,jdbcType=VARCHAR},
+      <if test="description != null" >
+        description = #{description,jdbcType=VARCHAR},
       </if>
       <if test="dealNum != null" >
         deal_num = #{dealNum,jdbcType=INTEGER},
@@ -181,7 +181,7 @@
       owner_id = #{ownerId,jdbcType=BIGINT},
       owner_type = #{ownerType,jdbcType=INTEGER},
       status = #{status,jdbcType=INTEGER},
-      desc = #{desc,jdbcType=VARCHAR},
+      description = #{description,jdbcType=VARCHAR},
       deal_num = #{dealNum,jdbcType=INTEGER},
       relevant_id = #{relevantId,jdbcType=BIGINT}
     where ptb_product_id = #{ptbProductId,jdbcType=BIGINT}
