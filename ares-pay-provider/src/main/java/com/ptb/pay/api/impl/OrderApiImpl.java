@@ -298,6 +298,25 @@ public class OrderApiImpl implements IOrderApi {
     }
 
     @Override
+    public ResponseVo getOrderInfo(long userId, Long orderId) {
+        Order order = orderMapper.selectByPrimaryKey(orderId);
+        if(null == order || (userId != order.getBuyerId() && userId != order.getSellerId()))
+            return ReturnUtil.error(ErrorCode.ORDER_API_5005.getCode(), ErrorCode.ORDER_API_5005.getMessage());
+        OrderVO orderVO = ConvertOrderUtil.convertOrderToOrderVO(order);
+
+        Map<String,Object> map = null;
+        if(userId == order.getBuyerId())
+            map = orderService.getBuyerOrderStatus("" +order.getOrderStatus() + order.getSellerStatus() + order.getBuyerStatus());
+        else
+            map = orderService.getSalerOrderStatus("" +order.getOrderStatus() + order.getSellerStatus() + order.getBuyerStatus());
+
+        orderVO.setButton(map.get("button").toString());
+        orderVO.setDesc(map.get("desc").toString());
+
+        return ReturnUtil.success(orderVO);
+    }
+
+    @Override
     public ResponseVo sellerChangePrice(long userId, long orderId, long price) {
         //是否可以修改
 
@@ -391,12 +410,15 @@ public class OrderApiImpl implements IOrderApi {
         if(userId != orderListReqVO.getUserId())
             return ReturnUtil.success(orderListVO);
 
+        int userType = UserType.USER_IS_BUYER.getUserType();
         //获取用户所有订单
         List<Order> orders = null;
         if(orderListReqVO.getUserType() == UserType.USER_IS_BUYER.getUserType())
             orders = orderMapper.selectByBuyerUid(orderListReqVO.getUserId());
-        else
+        else {
+            userType = UserType.USER_IS_SELLER.getUserType();
             orders = orderMapper.selectBySellerUid(orderListReqVO.getUserId());
+        }
 
         //订单为空返回
         if(CollectionUtils.isEmpty(orders))
@@ -410,8 +432,9 @@ public class OrderApiImpl implements IOrderApi {
         //分页 转换
         orderListVO.setTotalNum(orders.size());
         orderListVO.getOrderVOList().addAll(orders.stream().map(ConvertOrderUtil::convertOrderToOrderVO).skip(orderListReqVO.getStart()).limit(orderListReqVO.getEnd()-orderListReqVO.getStart()).collect(Collectors.toList()));
+        final int finalUserType = userType;
         orderListVO.getOrderVOList().forEach(item->{
-            Map<String, Object> map = orderService.getSalerOrderStatus( ""+item.getOrderStatus()+item.getSellerStatus()+item.getBuyerStatus());
+            Map<String, Object> map = finalUserType ==UserType.USER_IS_SELLER.getUserType()?orderService.getSalerOrderStatus( ""+item.getOrderStatus()+item.getSellerStatus()+item.getBuyerStatus()):orderService.getBuyerOrderStatus(""+item.getOrderStatus()+item.getSellerStatus()+item.getBuyerStatus());
             item.setButton(map.get("button").toString());
             item.setDesc(map.get("desc").toString());
         });
