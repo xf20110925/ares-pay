@@ -130,6 +130,11 @@ public class OrderServiceImpl implements IOrderService {
     }
 
     @Override
+    public Order getOrderByOrderId(long orderId) {
+        return null;
+    }
+
+    @Override
     @Transactional
     public boolean sellerConfirmOrder(long seller, Order order) {
         //修改订单状态
