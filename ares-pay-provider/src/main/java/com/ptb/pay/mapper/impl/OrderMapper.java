@@ -11,6 +11,7 @@ import org.apache.ibatis.annotations.Update;
  * Created by zuokui.fu on 2016/11/16.
  */
 public interface OrderMapper extends MyMapper<Order> {
+    int insertReturnId(Order order);
 
     @Select( "select * from ptb_order where order_no = #{orderNo}")
     @ResultMap("BaseResultMap")

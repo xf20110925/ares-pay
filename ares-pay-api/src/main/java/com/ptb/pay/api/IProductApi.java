@@ -55,7 +55,6 @@ public interface IProductApi {
      */
     public ResponseVo<ProductListVO>  getProductList(long userId, long relevantId, int status, int start, int end);
 
-
     /**
      * 获取某一个商品的成交量
      * @param productId 商品ID
@@ -69,4 +68,12 @@ public interface IProductApi {
      * @return
      */
     public ResponseVo<Integer> getUserProductNum(long userId);
+
+    /**
+     * 根据商品ID获取商品信息
+     * @param userId
+     * @param productId
+     * @return
+     */
+    public ResponseVo<ProductVO> getProduct(long userId, long productId);
 }

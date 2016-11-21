@@ -1,6 +1,7 @@
 package com.ptb.pay.service.impl;
 
 //import com.ptb.common.enums.AllCodeNameEnum;
+import com.ptb.common.enums.AllCodeNameEnum;
 import com.ptb.pay.enums.OrderActionEnum;
 import com.ptb.pay.mapper.impl.OrderLogMapper;
 import com.ptb.pay.mapper.impl.OrderMapper;
@@ -77,17 +78,17 @@ public class OrderServiceImpl implements IOrderService {
     }
 
     @Override
-    public int insertNewOrder(long buyerId, long sellerId, long price, String orderId) throws Exception {
+    public Order insertNewOrder(long buyerId, long sellerId, long price, String orderId) throws Exception {
         if (buyerId <= 0 || sellerId <= 0 || orderId == null){
             logger.error("insert order error! buyerId:{} sellerId:{} orderId:{}", buyerId, sellerId, orderId);
-            return -1;
+            return null;
         }
         Date date = new Date();
         Order order = new Order();
         order.setOrderNo( orderId);
-        //order.setOrderStatus( AllCodeNameEnum.orderNoPayment.getNum());
-        //order.setSellerStatus( AllCodeNameEnum.sellerOrig.getNum());
-        //order.setBuyerStatus( AllCodeNameEnum.buyerOrig.getNum());
+        order.setOrderStatus( AllCodeNameEnum.orderNoPayment.getNum());
+        order.setSellerStatus( AllCodeNameEnum.sellerOrig.getNum());
+        order.setBuyerStatus( AllCodeNameEnum.buyerOrig.getNum());
         order.setOriginalPrice(price);
         order.setPayablePrice(0l);
         order.setSellerId( sellerId);
@@ -95,14 +96,14 @@ public class OrderServiceImpl implements IOrderService {
         order.setCreateTime( date);
         order.setLastModifyTime( date);
         order.setLastModifierId( buyerId);
-        int insertCnt = orderMapper.insert( order);
+        int insertCnt = orderMapper.insertReturnId( order);
         if ( insertCnt < 1){
             throw new Exception("更新订单状态失败");
         }
         String remarks = "买家提交订单";
-        //this.insertOrderLog(orderId, AllCodeNameEnum.buyerOrig.getNum(), date, remarks, buyerId, AllCodeNameEnum.buyer.getNum());
+        this.insertOrderLog(orderId, AllCodeNameEnum.buyerOrig.getNum(), date, remarks, buyerId, AllCodeNameEnum.buyer.getNum());
 
-       return insertCnt;
+       return order;
     }
 
     @Override

@@ -1,5 +1,7 @@
 package com.ptb.pay.api.impl;
 
+import com.alibaba.druid.support.json.JSONParser;
+import com.alibaba.dubbo.common.json.JSON;
 import com.alibaba.dubbo.rpc.RpcContext;
 import com.alibaba.fastjson.JSONObject;
 import com.ptb.account.api.IAccountApi;
@@ -18,8 +20,8 @@ import com.ptb.pay.model.Order;
 import com.ptb.pay.model.Product;
 import com.ptb.pay.service.interfaces.IOrderDetailService;
 import com.ptb.pay.service.interfaces.IOrderService;
-import com.ptb.pay.vo.orderdetail.OrderDetailVO;
-import com.ptb.pay.vo.product.ProductVO;
+import com.ptb.pay.vo.order.OrderDetailVO;
+import com.ptb.pay.vo.order.OrderVO;
 import com.ptb.utils.encrypt.SignUtil;
 import com.ptb.utils.service.ReturnUtil;
 import com.ptb.utils.tool.GenerateOrderNoUtil;
@@ -31,7 +33,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -233,23 +234,23 @@ public class OrderApiImpl implements IOrderApi {
                 return ReturnUtil.error("", "no product");
             }
             //添加新订单
-            int insert = orderService.insertNewOrder(userId, product.getOwnerId(), product.getPrice(), orderNo);
-            if (insert < 1){
-                throw new RuntimeException("insert order error!");
-            }
+            Order order = orderService.insertNewOrder(userId, product.getOwnerId(), product.getPrice(), orderNo);
+            String json = JSON.json(order);
+            OrderVO parse = JSON.parse(json, OrderVO.class);
 
             //添加订单详情
             OrderDetailVO orderDetailVO = orderDetailService.convertOrderDetailVO(orderNo, product.getPrice(), 0, product.getPtbProductId());
-            insert = orderDetailService.insertOrderDetail(orderDetailVO);
+            int insert = orderDetailService.insertOrderDetail(orderDetailVO);
             if (insert < 1){
                 logger.error("insert order detail error! orderNo:{} product iD:{}", orderNo, product.getPtbProductId());
                 throw new RuntimeException("order detail error!");
             }
+
+            return new ResponseVo<OrderVO>("", "", parse);
         }catch (Exception e){
             logger.error("submit order error!", e);
             return ReturnUtil.error("", "no product");
         }
-        return null;
     }
 
     @Override
@@ -263,7 +264,16 @@ public class OrderApiImpl implements IOrderApi {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
         return null;
+    }
+
+    @Override
+    public ResponseVo getOrderDetail(long userId, String orderNo) {
+        OrderDetailVO orderDetail = orderDetailService.getOrderDetail(orderNo);
+        if (orderDetail == null){
+            logger.error("获取订单详情失败 userId:{} orderNo:{}", userId, orderNo);
+            return ReturnUtil.error("20001", "获取订单详情失败");
+        }
+        return new ResponseVo("0", "获取订单详情成功", orderDetail);
     }
 }
