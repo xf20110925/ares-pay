@@ -88,7 +88,7 @@ public class OrderApiImpl implements IOrderApi {
             //更新订单状态、新增订单日志记录
             orderService.updateStatusForCancelRefund( orderId, buyerId, order.getOrderNo());
             Order resultOrder = orderMapper.selectByPrimaryKey( orderId);
-            return ReturnUtil.success( orderService.getBuyerOrderStatus( resultOrder.getOrderNo()+resultOrder.getSellerStatus()+resultOrder.getBuyerStatus()));
+            return ReturnUtil.success( orderService.getBuyerOrderStatus( resultOrder.getOrderStatus().toString()+resultOrder.getSellerStatus()+resultOrder.getBuyerStatus()));
         } catch ( Exception e){
             logger.error( "买家取消申请退款接口调用失败。error message: {}", e.getMessage());
             throw e;
@@ -142,7 +142,7 @@ public class OrderApiImpl implements IOrderApi {
                 throw new Exception();
             }
             Order resultOrder = orderMapper.selectByPrimaryKey( orderId);
-            return ReturnUtil.success( orderService.getSalerOrderStatus( resultOrder.getOrderNo()+resultOrder.getSellerStatus()+resultOrder.getBuyerStatus()));
+            return ReturnUtil.success( orderService.getSalerOrderStatus( resultOrder.getOrderStatus().toString()+resultOrder.getSellerStatus()+resultOrder.getBuyerStatus()));
         } catch ( Exception e){
             logger.error( "卖家同意退款接口调用失败。error message: {}", e.getMessage());
             throw e;
@@ -185,12 +185,15 @@ public class OrderApiImpl implements IOrderApi {
             String sign = SignUtil.getSignKey(toSign);
             RpcContext.getContext().setAttachment("key", sign);
             ResponseVo<PtbAccountVo> responseVo = accountApi.pay(param);
+            if (responseVo.getCode().equals("6002"))return responseVo;
             if ( !"0".equals( responseVo.getCode())){
                 logger.error( "虚拟账户付款dubbo接口调用失败。salerId:{}", userId);
                 throw new Exception();
             }
             Order resultOrder = orderMapper.selectByPrimaryKey(orderId);
-            return ReturnUtil.success( orderService.getBuyerOrderStatus( resultOrder.getOrderNo()+resultOrder.getSellerStatus()+resultOrder.getBuyerStatus()));
+            Map<String, Object> buyerOrderStatus = orderService.getBuyerOrderStatus(resultOrder.getOrderStatus().toString() + resultOrder.getSellerStatus() + resultOrder.getBuyerStatus());
+            ResponseVo responseVo1 = ReturnUtil.success("操作成功", buyerOrderStatus);
+            return responseVo1;
         }catch (Exception e){
             logger.error( "买家付款接口调用失败。error message: {}", e.getMessage());
             throw e;
@@ -218,7 +221,9 @@ public class OrderApiImpl implements IOrderApi {
             //更新订单状态、并新增订单日志记录
             orderService.updateStaterefund(orderId,userId, order.getOrderNo());
             Order resultOrder = orderMapper.selectByPrimaryKey(orderId);
-            return ReturnUtil.success( orderService.getBuyerOrderStatus( resultOrder.getOrderNo()+resultOrder.getSellerStatus()+resultOrder.getBuyerStatus()));
+            Map<String, Object> buyerOrderStatus = orderService.getBuyerOrderStatus(resultOrder.getOrderStatus().toString() + resultOrder.getSellerStatus() + resultOrder.getBuyerStatus());
+            ResponseVo responseVo = ReturnUtil.success("操作成功", buyerOrderStatus);
+            return responseVo;
         }catch (Exception e){
             logger.error( "买家申请退款接口调用失败。error message: {}", e.getMessage());
             throw e;
