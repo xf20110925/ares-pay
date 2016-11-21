@@ -1,6 +1,7 @@
 package com.ptb.pay.service.interfaces;
 
 import com.ptb.pay.enums.OrderActionEnum;
+import com.ptb.pay.model.Order;
 
 import java.util.Map;
 
@@ -87,4 +88,8 @@ public interface IOrderService {
      * @throws Exception
      */
     int cancelOrderByBuyer(long buyerId, long orderId) throws Exception;
+
+    boolean sellerConfirmOrder(long seller, Order order);
+
+    boolean buyerConfirmOrder(long buyer, Order order);
 }

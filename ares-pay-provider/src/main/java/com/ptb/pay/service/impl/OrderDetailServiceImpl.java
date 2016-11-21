@@ -3,7 +3,7 @@ package com.ptb.pay.service.impl;
 import com.ptb.pay.mapper.impl.OrderDetailMapper;
 import com.ptb.pay.model.order.OrderDetail;
 import com.ptb.pay.service.interfaces.IOrderDetailService;
-import com.ptb.pay.vo.orderdetail.OrderDetailVO;
+import com.ptb.pay.vo.order.OrderDetailVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -36,5 +36,13 @@ public class OrderDetailServiceImpl implements IOrderDetailService{
         orderDetailVO.setPayAblePrice(payAblePrice);
         orderDetailVO.setProductId(productId);
         return orderDetailVO;
+    }
+
+    @Override
+    public Long getProductIdByOrderNo(String orderNo) {
+        OrderDetail orderDetail = orderDetailMapper.selectByOrderNo(orderNo);
+        if(null != orderDetail)
+            return orderDetail.getProductId();
+        return null;
     }
 }

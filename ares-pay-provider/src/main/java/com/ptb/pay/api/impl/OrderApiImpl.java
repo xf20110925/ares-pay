@@ -10,16 +10,22 @@ import com.ptb.common.enums.DeviceTypeEnum;
 import com.ptb.common.enums.PlatformEnum;
 import com.ptb.common.vo.ResponseVo;
 import com.ptb.pay.api.IOrderApi;
+import com.ptb.pay.api.IProductApi;
 import com.ptb.pay.enums.ErrorCode;
 import com.ptb.pay.enums.OrderActionEnum;
+import com.ptb.pay.enums.SellerStatusEnum;
+import com.ptb.pay.enums.UserType;
 import com.ptb.pay.mapper.impl.OrderMapper;
 import com.ptb.pay.mapper.impl.ProductMapper;
 import com.ptb.pay.model.Order;
 import com.ptb.pay.model.Product;
 import com.ptb.pay.service.interfaces.IOrderDetailService;
 import com.ptb.pay.service.interfaces.IOrderService;
-import com.ptb.pay.vo.orderdetail.OrderDetailVO;
-import com.ptb.pay.vo.product.ProductVO;
+import com.ptb.pay.service.interfaces.IProductService;
+import com.ptb.pay.vo.order.ConfirmOrderReqVO;
+import com.ptb.pay.vo.order.OrderDetailVO;
+import com.ptb.pay.vo.order.OrderListReqVO;
+import com.ptb.ucenter.api.IBindMediaApi;
 import com.ptb.utils.encrypt.SignUtil;
 import com.ptb.utils.service.ReturnUtil;
 import com.ptb.utils.tool.GenerateOrderNoUtil;
@@ -31,6 +37,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -53,6 +60,10 @@ public class OrderApiImpl implements IOrderApi {
     private ProductMapper productMapper;
     @Autowired
     private IOrderDetailService orderDetailService;
+    @Autowired
+    private IProductApi productApi;
+    @Autowired
+    private IBindMediaApi bindMediaApi;
 
     @Transactional( rollbackFor = Exception.class, propagation = Propagation.REQUIRED)
     @Override
@@ -266,4 +277,89 @@ public class OrderApiImpl implements IOrderApi {
 
         return null;
     }
+
+
+
+    @Transactional
+    public ResponseVo confirmOrder(long userId, ConfirmOrderReqVO confirmOrderVO){
+        //参数校验
+        Order order = orderMapper.selectByPrimaryKey(confirmOrderVO.getOrderId());
+        if(null == order)
+            return ReturnUtil.error(ErrorCode.ORDER_API_5005.getCode(), ErrorCode.ORDER_API_5005.getMessage());
+
+        if(confirmOrderVO.getUserType() == UserType.USER_IS_SELLER.getUserType()){ //当前用户是卖家
+
+
+            //用户与订单是否匹配
+            if(userId == order.getSellerId())
+                return ReturnUtil.error(ErrorCode.ORDER_API_5001.getCode(), ErrorCode.ORDER_API_5001.getMessage());
+
+            //卖家确认
+            if(orderService.checkOrderStatus(OrderActionEnum.SALER_COMPLETE, order.getOrderStatus(),order.getSellerStatus(), order.getBuyerStatus())){
+                //修改相关状态
+                boolean ret = orderService.sellerConfirmOrder(userId, order);
+                return ret?
+                        ReturnUtil.success(orderService.getSalerOrderStatus( order.getOrderNo()+order.getSellerStatus()+order.getBuyerStatus())):
+                        ReturnUtil.error(ErrorCode.PAY_API_COMMMON_1000.getCode(),ErrorCode.PAY_API_COMMMON_1000.getMessage());
+            }else{
+                //买家未付款, 操作失败
+                return ReturnUtil.error(ErrorCode.ORDER_API_5002.getCode(), ErrorCode.ORDER_API_5002.getMessage());
+            }
+
+
+        }else if(confirmOrderVO.getUserType() == UserType.USER_IS_BUYER.getUserType()){ //当前用户是买家
+
+            //用户与订单是否匹配
+            if(userId == order.getBuyerId())
+                return ReturnUtil.error(ErrorCode.ORDER_API_5004.getCode(), ErrorCode.ORDER_API_5004.getMessage());
+
+            //密码不能为空
+            if(confirmOrderVO.getPassword() == null){
+                return ReturnUtil.error(ErrorCode.PAY_API_COMMMON_1001.getCode(), ErrorCode.PAY_API_COMMMON_1001.getMessage());
+            }
+
+
+            ResponseVo responseVo = null;
+            try {
+                //取消款项冻结
+                responseVo = buyerPayment(userId, order.getPtbOrderId(), confirmOrderVO.getPassword(), confirmOrderVO.getDeviceTypeEnum().getDeviceType());
+                if(responseVo.getCode().equals("0")) {
+                    //上报用户中心交易成功
+                    ResponseVo responseVo1 = bindMediaApi.reportDealInfo(order.getSellerId(), order.getBuyerId(), 0);
+                    if(!responseVo1.getCode().equals("0")){
+                        //更新失败 add message to bus
+                    }
+                    //更新商品计数
+                    Long productId = orderDetailService.getProductIdByOrderNo(order.getOrderNo());
+                    if(productId != null) {
+                        responseVo1 = productApi.updateProductDealNum(userId, productId);
+                        if (!responseVo1.getCode().equals("0")) {
+                            //更新失败 add message to bus
+                        }
+                    }else{
+                        logger.error("orderNo " + order.getOrderNo() + " not exists");
+                    }
+                    //更新相应状态
+                    boolean ret = orderService.buyerConfirmOrder(userId, order);
+                    if(!ret){
+                        //更新失败 add message to bus
+                    }
+                    return ReturnUtil.success(orderService.getSalerOrderStatus( order.getOrderNo()+order.getSellerStatus()+order.getBuyerStatus()));
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            return ReturnUtil.error(responseVo.getCode(), responseVo.getMessage());
+        }else{
+            return ReturnUtil.error("","");
+        }
+    }
+
+    public ResponseVo getOrderList(long userId, OrderListReqVO orderListReqVO){
+        if(userId != orderListReqVO.getUserId())
+            return ReturnUtil.success();
+
+        return null;
+    }
+
 }

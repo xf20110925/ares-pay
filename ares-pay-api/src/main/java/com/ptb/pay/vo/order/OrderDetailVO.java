@@ -1,4 +1,4 @@
-package com.ptb.pay.vo.orderdetail;
+package com.ptb.pay.vo.order;
 
 import java.io.Serializable;
 

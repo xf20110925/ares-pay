@@ -1,7 +1,7 @@
 package com.ptb.pay.service.impl;
 
-//import com.ptb.common.enums.AllCodeNameEnum;
-import com.ptb.pay.enums.OrderActionEnum;
+import com.ptb.common.enums.AllCodeNameEnum;
+import com.ptb.pay.enums.*;
 import com.ptb.pay.mapper.impl.OrderLogMapper;
 import com.ptb.pay.mapper.impl.OrderMapper;
 import com.ptb.pay.model.Order;
@@ -127,6 +127,63 @@ public class OrderServiceImpl implements IOrderService {
         this.insertOrderLog(order.getOrderNo(), AllCodeNameEnum.orderClosed.getNum(), new Date(), remarks, buyerId, AllCodeNameEnum.buyer.getNum());
 
         return update;
+    }
+
+    @Override
+    @Transactional
+    public boolean sellerConfirmOrder(long seller, Order order) {
+        //修改订单状态
+        Date date = new Date();
+        order.setSellerStatus(SellerStatusEnum.SELLER_STATUS_CONFIRM.getStatus());
+        order.setLastModifierId(order.getSellerId());
+        order.setLastModifyTime(date);
+        int ia = orderMapper.updateByPrimaryKeySelective(order);
+
+        if(ia < 1)
+            throw new RuntimeException("卖家确认完成更新订单状态失败");
+
+        //增加操作日志
+        OrderLog orderLog = new OrderLog();
+        orderLog.setActionType(OrderActionEnum.SALER_COMPLETE.getOrderAction());
+        orderLog.setCreateTime(date);
+        orderLog.setOrderNo(order.getOrderNo());
+        orderLog.setRemarks("卖家确认完成");
+        orderLog.setUserType(UserType.USER_IS_SELLER.getUserType());
+        orderLog.setUserId(order.getSellerId());
+        ia = orderLogMapper.insert(orderLog);
+        if(ia < 1)
+            throw new RuntimeException("卖家确认完成更新订单操作日志失败");
+
+        return true;
+    }
+
+    @Override
+    @Transactional
+    public boolean buyerConfirmOrder(long buyer, Order order) {
+        //修改订单状态
+        Date date = new Date();
+        order.setOrderStatus(OrderStatusEnum.ORDER_STATUS_DEAL_OVER.getStatus());
+        order.setBuyerStatus(BuyerStatusEnum.BUYER_STATUS_CONFIRM.getStatus());
+        order.setLastModifierId(order.getSellerId());
+        order.setLastModifyTime(date);
+        order.setPayTime(date);
+        int ia = orderMapper.updateByPrimaryKeySelective(order);
+        if(ia < 1)
+            throw new RuntimeException("买家确认完成更新订单状态失败");
+
+        //增加操作日志
+        OrderLog orderLog = new OrderLog();
+        orderLog.setActionType(OrderActionEnum.BUYER_COMPLETE.getOrderAction());
+        orderLog.setCreateTime(date);
+        orderLog.setOrderNo(order.getOrderNo());
+        orderLog.setRemarks("买家确认完成");
+        orderLog.setUserType(UserType.USER_IS_BUYER.getUserType());
+        orderLog.setUserId(order.getBuyerId());
+        ia = orderLogMapper.insert(orderLog);
+        if(ia < 1)
+            throw new RuntimeException("买家确认完成更新订单操作日志失败");
+
+        return true;
     }
 
     public int insertOrderLog(String orderNo, int actionType, Date createTime, String remarks, long userID, int userType){

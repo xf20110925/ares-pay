@@ -95,6 +95,20 @@ public class ProductApiImpl implements IProductApi {
         return ReturnUtil.success();
     }
 
+    @Override
+    public ResponseVo updateProductDealNum(long userId, long productId) {
+        Product product = productMapper.selectByPrimaryKey(productId);
+        if(null == product || !product.getOwnerId().equals(userId)){
+            return ReturnUtil.error(ErrorCode.PRODUCT_API_NO_EXISTS.getCode(), ErrorCode.PRODUCT_API_NO_EXISTS.getMessage());
+        }
+
+        if(productMapper.updateDealNumByProductId(productId, new Date(), product.getDealNum()) < 1)
+            return ReturnUtil.error(ErrorCode.PAY_API_COMMMON_1000.getCode(), ErrorCode.PAY_API_COMMMON_1000.getMessage());
+
+        return ReturnUtil.success();
+    }
+
+
     @SuppressWarnings("unchecked")
     @Override
     public ResponseVo<ProductListVO> getProductList(long userId, long relevantId, int status, int start, int end) {
