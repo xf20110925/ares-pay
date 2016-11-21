@@ -1,6 +1,7 @@
 package com.ptb.pay.service.interfaces;
 
 import com.ptb.pay.enums.OrderActionEnum;
+import com.ptb.pay.model.Order;
 
 import java.util.Map;
 
@@ -77,7 +78,7 @@ public interface IOrderService {
      * @return
      * @throws Exception
      */
-    int insertNewOrder(long buyerId, long sellerId, long price, String orderId) throws Exception;
+    Order insertNewOrder(long buyerId, long sellerId, long price, String orderId) throws Exception;
 
     /**
      * 买家取消订单
@@ -87,4 +88,10 @@ public interface IOrderService {
      * @throws Exception
      */
     int cancelOrderByBuyer(long buyerId, long orderId) throws Exception;
+
+    boolean sellerConfirmOrder(long seller, Order order);
+
+    boolean buyerConfirmOrder(long buyer, Order order);
+
+    int getOrderStatus(long orderId);
 }

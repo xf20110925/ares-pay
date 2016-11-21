@@ -3,7 +3,9 @@ package com.ptb.pay.service.impl;
 import com.ptb.pay.mapper.impl.OrderDetailMapper;
 import com.ptb.pay.model.order.OrderDetail;
 import com.ptb.pay.service.interfaces.IOrderDetailService;
-import com.ptb.pay.vo.orderdetail.OrderDetailVO;
+import com.ptb.pay.vo.order.OrderDetailVO;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -12,9 +14,25 @@ import org.springframework.stereotype.Service;
  */
 @Service("orderDetailService")
 public class OrderDetailServiceImpl implements IOrderDetailService{
+    private static Logger logger = LoggerFactory.getLogger(OrderDetailServiceImpl.class);
 
     @Autowired
     OrderDetailMapper orderDetailMapper;
+
+    @Override
+    public OrderDetailVO getOrderDetail(String orderNo) {
+        OrderDetail orderDetailByOrderNo = orderDetailMapper.getOrderDetailByOrderNo(orderNo);
+        if (orderDetailByOrderNo == null){
+            logger.error("get order detail error!");
+            return null;
+        }
+        OrderDetailVO orderDetailVO = new OrderDetailVO(orderDetailByOrderNo.getPtbOrderDetailId(),
+                orderDetailByOrderNo.getOrderNo(),
+                orderDetailByOrderNo.getOriginalPrice(),
+                orderDetailByOrderNo.getPayablePrice(),
+                orderDetailByOrderNo.getProductId());
+        return orderDetailVO;
+    }
 
     @Override
     public int insertOrderDetail(OrderDetailVO orderDetailVO) {
@@ -36,5 +54,13 @@ public class OrderDetailServiceImpl implements IOrderDetailService{
         orderDetailVO.setPayAblePrice(payAblePrice);
         orderDetailVO.setProductId(productId);
         return orderDetailVO;
+    }
+
+    @Override
+    public Long getProductIdByOrderNo(String orderNo) {
+        OrderDetail orderDetail = orderDetailMapper.getOrderDetailByOrderNo(orderNo);
+        if(null != orderDetail)
+            return orderDetail.getProductId();
+        return null;
     }
 }

@@ -43,6 +43,14 @@ public interface IProductApi {
      */
     public ResponseVo updateProductInfo(long userId, long productId, String desc, Long prince, Integer state);
 
+    /**
+     * 更新商品交易量
+     * @param userId 用户ID
+     * @param productId 商品ID
+     * @return
+     */
+    public ResponseVo updateProductDealNum(long userId, long productId);
+
 
     /**
      * 获取包含某一个具体物品的的商品列表
@@ -54,7 +62,6 @@ public interface IProductApi {
      * @return
      */
     public ResponseVo<ProductListVO>  getProductList(long userId, long relevantId, int status, int start, int end);
-
 
     /**
      * 获取某一个商品的成交量
@@ -69,4 +76,12 @@ public interface IProductApi {
      * @return
      */
     public ResponseVo<Integer> getUserProductNum(long userId);
+
+    /**
+     * 根据商品ID获取商品信息
+     * @param userId
+     * @param productId
+     * @return
+     */
+    public ResponseVo<ProductVO> getProduct(long userId, long productId);
 }

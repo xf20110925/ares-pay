@@ -1,5 +1,7 @@
 package com.ptb.pay.api.impl;
 
+import com.alibaba.druid.support.json.JSONParser;
+import com.alibaba.dubbo.common.json.JSON;
 import com.alibaba.dubbo.rpc.RpcContext;
 import com.alibaba.fastjson.JSONObject;
 import com.ptb.account.api.IAccountApi;
@@ -10,16 +12,24 @@ import com.ptb.common.enums.DeviceTypeEnum;
 import com.ptb.common.enums.PlatformEnum;
 import com.ptb.common.vo.ResponseVo;
 import com.ptb.pay.api.IOrderApi;
+import com.ptb.pay.api.IProductApi;
 import com.ptb.pay.enums.ErrorCode;
 import com.ptb.pay.enums.OrderActionEnum;
+import com.ptb.pay.enums.SellerStatusEnum;
+import com.ptb.pay.enums.UserType;
 import com.ptb.pay.mapper.impl.OrderMapper;
 import com.ptb.pay.mapper.impl.ProductMapper;
 import com.ptb.pay.model.Order;
 import com.ptb.pay.model.Product;
 import com.ptb.pay.service.interfaces.IOrderDetailService;
 import com.ptb.pay.service.interfaces.IOrderService;
-import com.ptb.pay.vo.orderdetail.OrderDetailVO;
-import com.ptb.pay.vo.product.ProductVO;
+import com.ptb.pay.service.interfaces.IProductService;
+import com.ptb.pay.vo.order.ConfirmOrderReqVO;
+import com.ptb.pay.vo.order.OrderDetailVO;
+import com.ptb.pay.vo.order.OrderListReqVO;
+import com.ptb.ucenter.api.IBindMediaApi;
+import com.ptb.pay.vo.order.OrderDetailVO;
+import com.ptb.pay.vo.order.OrderVO;
 import com.ptb.utils.encrypt.SignUtil;
 import com.ptb.utils.service.ReturnUtil;
 import com.ptb.utils.tool.GenerateOrderNoUtil;
@@ -31,6 +41,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -53,6 +64,10 @@ public class OrderApiImpl implements IOrderApi {
     private ProductMapper productMapper;
     @Autowired
     private IOrderDetailService orderDetailService;
+    @Autowired
+    private IProductApi productApi;
+    @Autowired
+    private IBindMediaApi bindMediaApi;
 
     @Transactional( rollbackFor = Exception.class, propagation = Propagation.REQUIRED)
     @Override
@@ -65,11 +80,7 @@ public class OrderApiImpl implements IOrderApi {
             }
             //检查订单状态
             Order order = orderMapper.selectByPrimaryKey(orderId);
-            if ( null == order){
-                //订单不存在
-                return ReturnUtil.error(ErrorCode.ORDER_API_5005.getCode(), ErrorCode.ORDER_API_5005.getMessage());
-            }
-            if ( null == order.getBuyerId() || order.getBuyerId().longValue() != buyerId.longValue()) {
+            if (null!= order && order.getBuyerId().longValue() != buyerId.longValue()) {
                 //买家ID与订单中的买家ID不符
                 return ReturnUtil.error(ErrorCode.ORDER_API_5004.getCode(), ErrorCode.ORDER_API_5004.getMessage());
             }
@@ -101,11 +112,7 @@ public class OrderApiImpl implements IOrderApi {
             }
             //检查订单状态
             Order order = orderMapper.selectByPrimaryKey(orderId);
-            if ( null == order){
-                //订单不存在
-                return ReturnUtil.error(ErrorCode.ORDER_API_5005.getCode(), ErrorCode.ORDER_API_5005.getMessage());
-            }
-            if ( null == order.getBuyerId() || order.getSellerId().longValue() != salerId.longValue()) {
+            if (null!= order && order.getSellerId().longValue() != salerId.longValue()) {
                 //卖家ID与订单中的卖家ID不符
                 return ReturnUtil.error(ErrorCode.ORDER_API_5001.getCode(), ErrorCode.ORDER_API_5001.getMessage());
             }
@@ -156,12 +163,8 @@ public class OrderApiImpl implements IOrderApi {
             }
             //查询订单信息
             Order order = orderMapper.selectByPrimaryKey(orderId);
-            if ( null == order){
-                //订单不存在
-                return ReturnUtil.error(ErrorCode.ORDER_API_5005.getCode(), ErrorCode.ORDER_API_5005.getMessage());
-            }
             //检查订单是否有误
-            if (null == order.getBuyerId() || order.getBuyerId().longValue() != userId.longValue()){
+            if (null!= order && order.getBuyerId().longValue() != userId.longValue()){
                 return ReturnUtil.error(ErrorCode.ORDER_API_5001.getCode(), ErrorCode.ORDER_API_5001.getMessage());
             }
             if (!orderService.checkOrderStatus(OrderActionEnum.BUYER_PAY, order.getOrderStatus(), order.getSellerStatus(), order.getBuyerStatus())) {
@@ -210,11 +213,7 @@ public class OrderApiImpl implements IOrderApi {
             }
             //检查订单状态
             Order order = orderMapper.selectByPrimaryKey(orderId);
-            if ( null == order){
-                //订单不存在
-                return ReturnUtil.error(ErrorCode.ORDER_API_5005.getCode(), ErrorCode.ORDER_API_5005.getMessage());
-            }
-            if (null == order.getBuyerId() || order.getBuyerId().longValue() != userId.longValue()) {
+            if (null!= order && order.getBuyerId().longValue() != userId.longValue()) {
                 //买家ID与订单中的买家ID不符
                 return ReturnUtil.error(ErrorCode.ORDER_API_5004.getCode(), ErrorCode.ORDER_API_5004.getMessage());
             }
@@ -236,8 +235,8 @@ public class OrderApiImpl implements IOrderApi {
 
     }
 
-    @Override
     @Transactional (rollbackFor = RuntimeException.class, propagation = Propagation.REQUIRED)
+    @Override
     public ResponseVo submitOrder(long userId, long productId, String desc, int device) {
         logger.info("买家提交订单 userID:{}", userId);
 
@@ -245,46 +244,144 @@ public class OrderApiImpl implements IOrderApi {
             //查询商品信息
             Product product = productMapper.selectByPrimaryKey(productId);
             if (product == null) {
-                return ReturnUtil.error("", "no product");
+                return ReturnUtil.error("20002", "no product");
             }
             //生成订单号
             String orderNo = GenerateOrderNoUtil.createOrderNo(2, device, 3);
             if (orderNo == null){
                 logger.error("generate order no error! userId:{} productId:{}", userId, product.getPtbProductId());
-                return ReturnUtil.error("", "no product");
+                return ReturnUtil.error("20002", "no product");
             }
             //添加新订单
-            int insert = orderService.insertNewOrder(userId, product.getOwnerId(), product.getPrice(), orderNo);
-            if (insert < 1){
-                throw new RuntimeException("insert order error!");
-            }
+            Order order = orderService.insertNewOrder(userId, product.getOwnerId(), product.getPrice(), orderNo);
+            String json = JSON.json(order);
+            OrderVO parse = JSON.parse(json, OrderVO.class);
 
             //添加订单详情
             OrderDetailVO orderDetailVO = orderDetailService.convertOrderDetailVO(orderNo, product.getPrice(), 0, product.getPtbProductId());
-            insert = orderDetailService.insertOrderDetail(orderDetailVO);
+            int insert = orderDetailService.insertOrderDetail(orderDetailVO);
             if (insert < 1){
                 logger.error("insert order detail error! orderNo:{} product iD:{}", orderNo, product.getPtbProductId());
                 throw new RuntimeException("order detail error!");
             }
+
+            return new ResponseVo<OrderVO>("", "", parse);
         }catch (Exception e){
             logger.error("submit order error!", e);
-            return ReturnUtil.error("", "no product");
+            return ReturnUtil.error("20002", "no product");
         }
-        return null;
     }
 
     @Override
     public ResponseVo cancelOrder(long userId, long orderId) {
         logger.info("买家取消订单 buyerId:{}  orderId:{}", userId, orderId);
         //是否可以取消订单
-
+        int orderStatus = orderService.getOrderStatus(orderId);
+        if (orderStatus != 0){
+            logger.warn("can not cancel order orderId:{}", orderId);
+            return ReturnUtil.error("41003","can not cancel order");
+        }
         //修改订单状态
         try {
             orderService.cancelOrderByBuyer(userId, orderId);
         } catch (Exception e) {
             e.printStackTrace();
         }
+        return null;
+    }
+
+    @Override
+    public ResponseVo getOrderDetail(long userId, String orderNo) {
+        OrderDetailVO orderDetail = orderDetailService.getOrderDetail(orderNo);
+        if (orderDetail == null){
+            logger.error("获取订单详情失败 userId:{} orderNo:{}", userId, orderNo);
+            return ReturnUtil.error("20001", "获取订单详情失败");
+        }
+        return new ResponseVo("0", "获取订单详情成功", orderDetail);
+    }
+
+
+
+    @Transactional
+    public ResponseVo confirmOrder(long userId, ConfirmOrderReqVO confirmOrderVO){
+        //参数校验
+        Order order = orderMapper.selectByPrimaryKey(confirmOrderVO.getOrderId());
+        if(null == order)
+            return ReturnUtil.error(ErrorCode.ORDER_API_5005.getCode(), ErrorCode.ORDER_API_5005.getMessage());
+
+        if(confirmOrderVO.getUserType() == UserType.USER_IS_SELLER.getUserType()){ //当前用户是卖家
+
+
+            //用户与订单是否匹配
+            if(userId == order.getSellerId())
+                return ReturnUtil.error(ErrorCode.ORDER_API_5001.getCode(), ErrorCode.ORDER_API_5001.getMessage());
+
+            //卖家确认
+            if(orderService.checkOrderStatus(OrderActionEnum.SALER_COMPLETE, order.getOrderStatus(),order.getSellerStatus(), order.getBuyerStatus())){
+                //修改相关状态
+                boolean ret = orderService.sellerConfirmOrder(userId, order);
+                return ret?
+                        ReturnUtil.success(orderService.getSalerOrderStatus( order.getOrderNo()+order.getSellerStatus()+order.getBuyerStatus())):
+                        ReturnUtil.error(ErrorCode.PAY_API_COMMMON_1000.getCode(),ErrorCode.PAY_API_COMMMON_1000.getMessage());
+            }else{
+                //买家未付款, 操作失败
+                return ReturnUtil.error(ErrorCode.ORDER_API_5002.getCode(), ErrorCode.ORDER_API_5002.getMessage());
+            }
+
+
+        }else if(confirmOrderVO.getUserType() == UserType.USER_IS_BUYER.getUserType()){ //当前用户是买家
+
+            //用户与订单是否匹配
+            if(userId == order.getBuyerId())
+                return ReturnUtil.error(ErrorCode.ORDER_API_5004.getCode(), ErrorCode.ORDER_API_5004.getMessage());
+
+            //密码不能为空
+            if(confirmOrderVO.getPassword() == null){
+                return ReturnUtil.error(ErrorCode.PAY_API_COMMMON_1001.getCode(), ErrorCode.PAY_API_COMMMON_1001.getMessage());
+            }
+
+
+            ResponseVo responseVo = null;
+            try {
+                //取消款项冻结
+                responseVo = buyerPayment(userId, order.getPtbOrderId(), confirmOrderVO.getPassword(), confirmOrderVO.getDeviceTypeEnum().getDeviceType());
+                if(responseVo.getCode().equals("0")) {
+                    //上报用户中心交易成功
+                    ResponseVo responseVo1 = bindMediaApi.reportDealInfo(order.getSellerId(), order.getBuyerId(), 0);
+                    if(!responseVo1.getCode().equals("0")){
+                        //更新失败 add message to bus
+                    }
+                    //更新商品计数
+                    Long productId = orderDetailService.getProductIdByOrderNo(order.getOrderNo());
+                    if(productId != null) {
+                        responseVo1 = productApi.updateProductDealNum(userId, productId);
+                        if (!responseVo1.getCode().equals("0")) {
+                            //更新失败 add message to bus
+                        }
+                    }else{
+                        logger.error("orderNo " + order.getOrderNo() + " not exists");
+                    }
+                    //更新相应状态
+                    boolean ret = orderService.buyerConfirmOrder(userId, order);
+                    if(!ret){
+                        //更新失败 add message to bus
+                    }
+                    return ReturnUtil.success(orderService.getSalerOrderStatus( order.getOrderNo()+order.getSellerStatus()+order.getBuyerStatus()));
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            return ReturnUtil.error(responseVo.getCode(), responseVo.getMessage());
+        }else{
+            return ReturnUtil.error("","");
+        }
+    }
+
+    public ResponseVo getOrderList(long userId, OrderListReqVO orderListReqVO){
+        if(userId != orderListReqVO.getUserId())
+            return ReturnUtil.success();
 
         return null;
     }
+
 }

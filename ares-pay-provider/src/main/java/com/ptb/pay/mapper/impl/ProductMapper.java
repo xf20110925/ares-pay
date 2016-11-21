@@ -5,7 +5,9 @@ import com.ptb.pay.model.Product;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.ResultMap;
 import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
 
+import java.util.Date;
 import java.util.List;
 
 public interface ProductMapper extends MyMapper<Product>{
@@ -28,4 +30,7 @@ public interface ProductMapper extends MyMapper<Product>{
 
     @Select("select * from ptb_product where ptb_product_id = #{productId}")
     public List<Product> selectByProductId(@Param("productId") long productId);
+
+    @Update("update ptb_product set deal_num=deal_num+1, last_update_time=#{dd} where ptb_product_id=#{pPid} and deal_num=#{dealNum}")
+    int updateDealNumByProductId(@Param("pPid") long productId, @Param("dd") Date date, @Param("dealNum") Integer dealNum);
 }
