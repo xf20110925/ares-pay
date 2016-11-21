@@ -40,4 +40,23 @@ public class OrderApiImplTest extends BaseTest {
     public void getOrderList(){
 
     }
+
+    @Test
+    public void submitOrderTest(){
+        try {
+            orderApi.submitOrder(777l, 23l, "test", 1);
+        }catch (Exception e){
+
+        }
+    }
+
+    @Test
+    public void cancelOrderTest(){
+        try {
+            ResponseVo responseVo = orderApi.cancelOrder(777l, 3);
+            System.out.println(responseVo.getMessage());
+        }catch (Exception e){
+
+        }
+    }
 }
