@@ -9,7 +9,6 @@ import java.util.List;
  * Created by MyThinkpad on 2016/11/21.
  */
 public class OrderListVO implements Serializable{
-public class OrderListVO {
     private int totalNum;
     private List<OrderVO> orderVOList;
 
