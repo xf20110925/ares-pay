@@ -230,8 +230,8 @@ public class OrderApiImpl implements IOrderApi {
 
     }
 
-    @Override
     @Transactional (rollbackFor = RuntimeException.class, propagation = Propagation.REQUIRED)
+    @Override
     public ResponseVo submitOrder(long userId, long productId, String desc, int device) {
         logger.info("买家提交订单 userID:{}", userId);
 
@@ -239,13 +239,13 @@ public class OrderApiImpl implements IOrderApi {
             //查询商品信息
             Product product = productMapper.selectByPrimaryKey(productId);
             if (product == null) {
-                return ReturnUtil.error("", "no product");
+                return ReturnUtil.error("20002", "no product");
             }
             //生成订单号
             String orderNo = GenerateOrderNoUtil.createOrderNo(2, device, 3);
             if (orderNo == null){
                 logger.error("generate order no error! userId:{} productId:{}", userId, product.getPtbProductId());
-                return ReturnUtil.error("", "no product");
+                return ReturnUtil.error("20002", "no product");
             }
             //添加新订单
             Order order = orderService.insertNewOrder(userId, product.getOwnerId(), product.getPrice(), orderNo);
@@ -263,7 +263,7 @@ public class OrderApiImpl implements IOrderApi {
             return new ResponseVo<OrderVO>("", "", parse);
         }catch (Exception e){
             logger.error("submit order error!", e);
-            return ReturnUtil.error("", "no product");
+            return ReturnUtil.error("20002", "no product");
         }
     }
 
@@ -271,7 +271,11 @@ public class OrderApiImpl implements IOrderApi {
     public ResponseVo cancelOrder(long userId, long orderId) {
         logger.info("买家取消订单 buyerId:{}  orderId:{}", userId, orderId);
         //是否可以取消订单
-
+        int orderStatus = orderService.getOrderStatus(orderId);
+        if (orderStatus != 0){
+            logger.warn("can not cancel order orderId:{}", orderId);
+            return ReturnUtil.error("41003","can not cancel order");
+        }
         //修改订单状态
         try {
             orderService.cancelOrderByBuyer(userId, orderId);

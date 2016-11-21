@@ -113,7 +113,7 @@ public class OrderServiceImpl implements IOrderService {
             return -1;
         }
 
-        int update = orderMapper.updateOrderStateByOrderNo(orderId, AllCodeNameEnum.orderClosed.getNum());
+        int update = orderMapper.updateOrderStateByOrderNo(orderId, AllCodeNameEnum.orderClosed.getNum(), AllCodeNameEnum.buyerCancelOrder.getNum());
         if (update < 1){
             logger.error("buyer cacle order error! buyer:{}  orderId:{}", buyerId, orderId);
             throw new RuntimeException("buyer cacle order error!");
@@ -184,6 +184,15 @@ public class OrderServiceImpl implements IOrderService {
             throw new RuntimeException("买家确认完成更新订单操作日志失败");
 
         return true;
+    }
+
+    @Override
+    public int getOrderStatus(long orderId) {
+        Order order = orderMapper.selectByPrimaryKey(orderId);
+        if (order == null){
+            return -1;
+        }
+        return order.getOrderStatus();
     }
 
     public int insertOrderLog(String orderNo, int actionType, Date createTime, String remarks, long userID, int userType){

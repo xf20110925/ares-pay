@@ -92,4 +92,6 @@ public interface IOrderService {
     boolean sellerConfirmOrder(long seller, Order order);
 
     boolean buyerConfirmOrder(long buyer, Order order);
+
+    int getOrderStatus(long orderId);
 }
