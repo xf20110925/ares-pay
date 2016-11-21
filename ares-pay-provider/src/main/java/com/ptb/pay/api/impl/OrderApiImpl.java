@@ -216,35 +216,54 @@ public class OrderApiImpl implements IOrderApi {
     }
 
     @Override
-    @Transactional
-    public ResponseVo submitOrder(long userId, ProductVO productVO) {
+    @Transactional (rollbackFor = RuntimeException.class, propagation = Propagation.REQUIRED)
+    public ResponseVo submitOrder(long userId, long productId, String desc, int device) {
         logger.info("买家提交订单 userID:{}", userId);
 
         try {
-            List<Product> products = productMapper.selectByOwnerId(userId);
-            if (products == null || products.size() == 0) {
+            //查询商品信息
+            Product product = productMapper.selectByPrimaryKey(productId);
+            if (product == null) {
                 return ReturnUtil.error("", "no product");
             }
-            String orderNo = GenerateOrderNoUtil.createOrderNo(2, productVO.getDeviceType(), 3);
+            //生成订单号
+            String orderNo = GenerateOrderNoUtil.createOrderNo(2, device, 3);
             if (orderNo == null){
-                logger.error("generate order no error! userId:{} productId:{}", userId, productVO.getProductId());
+                logger.error("generate order no error! userId:{} productId:{}", userId, product.getPtbProductId());
                 return ReturnUtil.error("", "no product");
             }
-            int insert = orderService.insertNewOrder(userId, productVO.getOwnerId(), productVO.getPrice(), orderNo);
+            //添加新订单
+            int insert = orderService.insertNewOrder(userId, product.getOwnerId(), product.getPrice(), orderNo);
             if (insert < 1){
                 throw new RuntimeException("insert order error!");
             }
 
-            OrderDetailVO orderDetailVO = orderDetailService.convertOrderDetailVO(orderNo, productVO.getPrice(), 0, productVO.getProductId());
+            //添加订单详情
+            OrderDetailVO orderDetailVO = orderDetailService.convertOrderDetailVO(orderNo, product.getPrice(), 0, product.getPtbProductId());
             insert = orderDetailService.insertOrderDetail(orderDetailVO);
             if (insert < 1){
-                logger.error("insert order detail error! orderNo:{} product iD:{}", orderNo, productVO.getProductId());
+                logger.error("insert order detail error! orderNo:{} product iD:{}", orderNo, product.getPtbProductId());
                 throw new RuntimeException("order detail error!");
             }
         }catch (Exception e){
             logger.error("submit order error!", e);
             return ReturnUtil.error("", "no product");
         }
+        return null;
+    }
+
+    @Override
+    public ResponseVo cancelOrder(long userId, long orderId) {
+        logger.info("买家取消订单 buyerId:{}  orderId:{}", userId, orderId);
+        //是否可以取消订单
+
+        //修改订单状态
+        try {
+            orderService.cancelOrderByBuyer(userId, orderId);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         return null;
     }
 }

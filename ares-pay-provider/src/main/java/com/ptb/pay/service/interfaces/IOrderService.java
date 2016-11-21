@@ -79,4 +79,12 @@ public interface IOrderService {
      */
     int insertNewOrder(long buyerId, long sellerId, long price, String orderId) throws Exception;
 
+    /**
+     * 买家取消订单
+     * @param buyerId
+     * @param orderId
+     * @return
+     * @throws Exception
+     */
+    int cancelOrderByBuyer(long buyerId, long orderId) throws Exception;
 }

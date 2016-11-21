@@ -11,6 +11,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -100,7 +102,31 @@ public class OrderServiceImpl implements IOrderService {
         String remarks = "买家提交订单";
         this.insertOrderLog(orderId, AllCodeNameEnum.buyerOrig.getNum(), date, remarks, buyerId, AllCodeNameEnum.buyer.getNum());
 
-       return 0;
+       return insertCnt;
+    }
+
+    @Override
+    @Transactional(rollbackFor = RuntimeException.class, propagation = Propagation.REQUIRED)
+    public int cancelOrderByBuyer(long buyerId, long orderId) throws Exception {
+        if (buyerId <= 0 || orderId <= 0){
+            logger.error("cancel order error! buyerId:{} orderId:{}", buyerId, orderId);
+            return -1;
+        }
+
+        int update = orderMapper.updateOrderStateByOrderNo(orderId, AllCodeNameEnum.orderClosed.getNum());
+        if (update < 1){
+            logger.error("buyer cacle order error! buyer:{}  orderId:{}", buyerId, orderId);
+            throw new RuntimeException("buyer cacle order error!");
+        }
+        String remarks = "买家取消订单";
+        Order order = orderMapper.selectByPrimaryKey(orderId);
+        if (order == null){
+            logger.error("get order by orderId error! orderId:{}", orderId);
+            throw new RuntimeException("get order by orderId error!");
+        }
+        this.insertOrderLog(order.getOrderNo(), AllCodeNameEnum.orderClosed.getNum(), new Date(), remarks, buyerId, AllCodeNameEnum.buyer.getNum());
+
+        return update;
     }
 
     public int insertOrderLog(String orderNo, int actionType, Date createTime, String remarks, long userID, int userType){

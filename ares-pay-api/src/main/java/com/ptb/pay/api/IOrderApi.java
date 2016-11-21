@@ -47,11 +47,21 @@ public interface IOrderApi {
      */
     ResponseVo refund(Long userId,Long orderId,String deviceType)throws  Exception;
 
-
     /**
-     * 用户提交订单
+     * 买家提交订单
      * @param userId
+     * @param productId
+     * @param desc
+     * @param device
      * @return
      */
-    ResponseVo submitOrder(long userId, ProductVO productVO);
+    ResponseVo submitOrder(long userId, long productId, String desc, int device);
+
+    /**
+     * 买家取消订单
+     * @param userId
+     * @param orderId
+     * @return
+     */
+    ResponseVo cancelOrder(long userId, long orderId);
 }

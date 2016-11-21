@@ -26,6 +26,6 @@ public interface ProductMapper extends MyMapper<Product>{
     @Select("select * from ptb_product where owner_id=#{uid}")
     int selectNumByUid(@Param("uid") long userId);
 
-    @Select("select * from ptb_product where owner_id = #{ownerId}")
-    public List<Product> selectByOwnerId(@Param("ownerId") long ownerId);
+    @Select("select * from ptb_product where ptb_product_id = #{productId}")
+    public List<Product> selectByProductId(@Param("productId") long productId);
 }
