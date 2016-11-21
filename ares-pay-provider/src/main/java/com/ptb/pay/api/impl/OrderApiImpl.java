@@ -332,7 +332,7 @@ public class OrderApiImpl implements IOrderApi {
             ResponseVo responseVo = null;
             try {
                 //取消款项冻结
-                responseVo = buyerPayment(userId, order.getPtbOrderId(), confirmOrderVO.getPassword(), confirmOrderVO.getDeviceTypeEnum().getDeviceType());
+                responseVo = ReturnUtil.success();//buyerPayment(userId, order.getPtbOrderId(), confirmOrderVO.getPassword(), confirmOrderVO.getDeviceTypeEnum().getDeviceType());
                 if(responseVo.getCode().equals("0")) {
                     //上报用户中心交易成功
                     ResponseVo responseVo1 = bindMediaApi.reportDealInfo(order.getSellerId(), order.getBuyerId(), 0);

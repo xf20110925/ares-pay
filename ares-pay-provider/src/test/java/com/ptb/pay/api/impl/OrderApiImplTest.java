@@ -30,4 +30,14 @@ public class OrderApiImplTest extends BaseTest {
             e.printStackTrace();
         }
     }
+
+    @Test
+    public void confirmOrder(){
+
+    }
+
+    @Test
+    public void getOrderList(){
+
+    }
 }
