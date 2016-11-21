@@ -1,7 +1,7 @@
 package com.ptb.pay.service.impl;
 
-//import com.ptb.common.enums.AllCodeNameEnum;
 import com.ptb.common.enums.AllCodeNameEnum;
+
 import com.ptb.pay.enums.OrderActionEnum;
 import com.ptb.pay.mapper.impl.OrderLogMapper;
 import com.ptb.pay.mapper.impl.OrderMapper;
@@ -18,7 +18,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.zip.ZipException;
 
 /**
  * Created by zuokui.fu on 2016/11/16.
@@ -168,13 +167,17 @@ public class OrderServiceImpl implements IOrderService {
         orderLog.setCreateTime(date);
         orderLog.setUserId(userId);
         orderLog.setUserType(1);
-        orderLog.setRemarks("买家付款,订单关闭");
-        orderLogMapper.insertSelective(orderLog);
+        orderLog.setRemarks("买家付款!");
+        int i = orderLogMapper.insertSelective(orderLog);
+        if (i < 1){
+            logger.error("buyerPayment insert order log error! orderNo:{} userId:{}",orderNo,userId);
+            throw new Exception("买家付款日志插入失败");
+        }
     }
 
     @Override
     public void updateStaterefund(Long ptbOrderId, Long userId, String orderNo) throws Exception {
-        int buyer_status = 3;//申请退款
+        int buyer_status = 2;//申请退款
         Date date = new Date();
         Order order = new Order();
         order.setBuyerStatus(buyer_status);
@@ -193,9 +196,12 @@ public class OrderServiceImpl implements IOrderService {
         orderLog.setPtbOrderLogId(ptbOrderId);
         orderLog.setUserId(userId);
         orderLog.setUserType(1);
-        orderLog.setRemarks("买家申请退款，订单关闭");
-        orderLogMapper.insertSelective(orderLog);
-
+        orderLog.setRemarks("买家申请退款!");
+        int i1 = orderLogMapper.insertSelective(orderLog);
+        if (i1 < 1){
+            logger.error("refund insert order log error!orderNo:{}userId:{}",orderNo,userId);
+            throw new Exception("买家申请退款日志插入失败");
+        }
 
 
     }
@@ -254,7 +260,10 @@ public class OrderServiceImpl implements IOrderService {
         orderLog.setUserId( salerId);
         orderLog.setUserType( 2);//卖家
         orderLog.setRemarks( "卖家同意退款,订单关闭");
-        orderLogMapper.insertSelective( orderLog);
+        updateCnt = orderLogMapper.insertSelective( orderLog);
+        if ( updateCnt < 1){
+            throw new Exception("卖家同意退款插入日志失败");
+        }
     }
 
     @Override
@@ -277,6 +286,9 @@ public class OrderServiceImpl implements IOrderService {
         orderLog.setUserId( buyerId);
         orderLog.setUserType( 1);//买家
         orderLog.setRemarks( "买家取消申请退款");
-        orderLogMapper.insertSelective( orderLog);
+        updateCnt = orderLogMapper.insertSelective( orderLog);
+        if ( updateCnt < 1){
+            throw new Exception("买家取消申请退款插入日志失败");
+        }
     }
 }

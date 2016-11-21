@@ -11,4 +11,5 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 @SpringApplicationConfiguration(classes = Application.class) // 指定我们SpringBoot工程的Application启动类
 public class BaseTest {
 
+
 }

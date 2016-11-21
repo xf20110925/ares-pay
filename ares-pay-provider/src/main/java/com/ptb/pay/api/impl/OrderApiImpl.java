@@ -58,7 +58,7 @@ public class OrderApiImpl implements IOrderApi {
     @Transactional( rollbackFor = Exception.class, propagation = Propagation.REQUIRED)
     @Override
     public ResponseVo<Map<String,Object>> cancelApplyRefund(Long buyerId, Long orderId) throws Exception {
-        logger.info( "卖家取消申请退款。buyerId:{} orderId:{}", buyerId, orderId);
+        logger.info( "买家取消申请退款。buyerId:{} orderId:{}", buyerId, orderId);
         try {
             //参数校验
             if (!ParamUtil.checkParams(buyerId, orderId)) {
@@ -66,7 +66,11 @@ public class OrderApiImpl implements IOrderApi {
             }
             //检查订单状态
             Order order = orderMapper.selectByPrimaryKey(orderId);
-            if (null!= order && order.getBuyerId().longValue() != buyerId.longValue()) {
+            if ( null == order){
+                //订单不存在
+                return ReturnUtil.error(ErrorCode.ORDER_API_5005.getCode(), ErrorCode.ORDER_API_5005.getMessage());
+            }
+            if ( null == order.getBuyerId() || order.getBuyerId().longValue() != buyerId.longValue()) {
                 //买家ID与订单中的买家ID不符
                 return ReturnUtil.error(ErrorCode.ORDER_API_5004.getCode(), ErrorCode.ORDER_API_5004.getMessage());
             }
@@ -98,7 +102,11 @@ public class OrderApiImpl implements IOrderApi {
             }
             //检查订单状态
             Order order = orderMapper.selectByPrimaryKey(orderId);
-            if (null!= order && order.getSellerId().longValue() != salerId.longValue()) {
+            if ( null == order){
+                //订单不存在
+                return ReturnUtil.error(ErrorCode.ORDER_API_5005.getCode(), ErrorCode.ORDER_API_5005.getMessage());
+            }
+            if ( null == order.getBuyerId() || order.getSellerId().longValue() != salerId.longValue()) {
                 //卖家ID与订单中的卖家ID不符
                 return ReturnUtil.error(ErrorCode.ORDER_API_5001.getCode(), ErrorCode.ORDER_API_5001.getMessage());
             }
@@ -127,7 +135,7 @@ public class OrderApiImpl implements IOrderApi {
             RpcContext.getContext().setAttachment("key", sign);
             ResponseVo<PtbAccountVo> accountResponse = accountApi.refund(param);
             if ( !"0".equals( accountResponse.getCode())){
-                logger.error( "虚拟账户退款dubbo接口调用失败。salerId:{}", salerId);
+                logger.error( "虚拟账户退款dubbo接口调用失败。salerId:{}, code:{}, message:{}", salerId,accountResponse.getCode(), accountResponse.getMessage());
                 throw new Exception();
             }
             Order resultOrder = orderMapper.selectByPrimaryKey( orderId);
@@ -149,8 +157,12 @@ public class OrderApiImpl implements IOrderApi {
             }
             //查询订单信息
             Order order = orderMapper.selectByPrimaryKey(orderId);
+            if ( null == order){
+                //订单不存在
+                return ReturnUtil.error(ErrorCode.ORDER_API_5005.getCode(), ErrorCode.ORDER_API_5005.getMessage());
+            }
             //检查订单是否有误
-            if (null!= order && order.getBuyerId().longValue() != userId.longValue()){
+            if (null == order.getBuyerId() || order.getBuyerId().longValue() != userId.longValue()){
                 return ReturnUtil.error(ErrorCode.ORDER_API_5001.getCode(), ErrorCode.ORDER_API_5001.getMessage());
             }
             if (!orderService.checkOrderStatus(OrderActionEnum.BUYER_PAY, order.getOrderStatus(), order.getSellerStatus(), order.getBuyerStatus())) {
@@ -175,7 +187,7 @@ public class OrderApiImpl implements IOrderApi {
             RpcContext.getContext().setAttachment("key", sign);
             ResponseVo<PtbAccountVo> responseVo = accountApi.pay(param);
             if ( !"0".equals( responseVo.getCode())){
-                logger.error( "虚拟账户付款dubbo接口调用失败。salerId:{}", userId);
+                logger.error( "虚拟账户付款dubbo接口调用失败。salerId:{}, code:{}, message:{}", userId, responseVo.getCode(), responseVo.getMessage());
                 throw new Exception();
             }
             Order resultOrder = orderMapper.selectByPrimaryKey(orderId);
@@ -196,7 +208,11 @@ public class OrderApiImpl implements IOrderApi {
             }
             //检查订单状态
             Order order = orderMapper.selectByPrimaryKey(orderId);
-            if (null!= order && order.getBuyerId().longValue() != userId.longValue()) {
+            if ( null == order){
+                //订单不存在
+                return ReturnUtil.error(ErrorCode.ORDER_API_5005.getCode(), ErrorCode.ORDER_API_5005.getMessage());
+            }
+            if (null == order.getBuyerId() || order.getBuyerId().longValue() != userId.longValue()) {
                 //买家ID与订单中的买家ID不符
                 return ReturnUtil.error(ErrorCode.ORDER_API_5004.getCode(), ErrorCode.ORDER_API_5004.getMessage());
             }
