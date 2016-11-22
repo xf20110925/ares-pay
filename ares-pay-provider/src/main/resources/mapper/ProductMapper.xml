@@ -25,6 +25,12 @@
     from ptb_product
     where ptb_product_id = #{ptbProductId,jdbcType=BIGINT}
   </select>
+  <select id="getMediaBindIdsByOrderNos" resultType="java.util.List">
+    select relevant_id from ptb_product where ptb_product_id in ( select product_id from ptb_order_detail where order_no in
+    <foreach item="item" index="index" collection="orderNos" open="(" separator="," close=")"> #{item}</foreach>
+    )
+
+  </select>
   <select id="selectByOrderNOList" resultMap="BaseResultMap" >
     select
     <include refid="Base_Column_List" />

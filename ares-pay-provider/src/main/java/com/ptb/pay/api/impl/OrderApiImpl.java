@@ -288,6 +288,10 @@ public class OrderApiImpl implements IOrderApi {
             logger.warn("can not cancel order orderId:{}", orderId);
             return ReturnUtil.error("41003","can not cancel order");
         }
+        if (orderByOrderId.getBuyerId() != userId){
+            logger.warn("buyerId is not match orderId:{},userId:{}", orderId,userId);
+            return ReturnUtil.error("41003","can not cancel order");
+        }
         //修改订单状态
         Order order = null;
         try {
@@ -364,6 +368,10 @@ public class OrderApiImpl implements IOrderApi {
         }
         if (orderByOrderId.getOrderStatus() != 0 || orderByOrderId.getBuyerStatus() != 0 || orderByOrderId.getSellerStatus() != 0){
             logger.warn("[ERROR] 用户不能修改价格! userId:{} orderId:{}",userId, orderId);
+            return ReturnUtil.error("30002","[ERROR] 用户不能修改价格!");
+        }
+        if (orderByOrderId.getSellerId() != userId){
+            logger.warn("[ERROR] 卖家ID不匹配! userId:{} orderId:{}",userId, orderId);
             return ReturnUtil.error("30002","[ERROR] 用户不能修改价格!");
         }
         //修改订单价格

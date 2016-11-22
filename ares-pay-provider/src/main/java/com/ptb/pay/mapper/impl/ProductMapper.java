@@ -34,6 +34,8 @@ public interface ProductMapper extends MyMapper<Product>{
     @Update("update ptb_product set deal_num=deal_num+1, last_update_time=#{dd} where ptb_product_id=#{pPid} and deal_num=#{dealNum}")
     int updateDealNumByProductId(@Param("pPid") long productId, @Param("dd") Date date, @Param("dealNum") Integer dealNum);
 
+    public List<Long> getMediaBindIdsByOrderNos(@Param("orderNos")List<String> orderNos);
+
     @ResultMap("BaseResultMap")
     List<Product> selectByOrderNOList(@Param("orderNos") List<String> orderNoList);
 
