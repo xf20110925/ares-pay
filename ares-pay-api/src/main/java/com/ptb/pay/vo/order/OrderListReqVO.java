@@ -14,6 +14,16 @@ public class OrderListReqVO extends BaseVO implements Serializable{
     private int  start;
     private int  end;
 
+    public OrderListReqVO(){}
+
+    public OrderListReqVO(long userId, int userType, int orderStatus, int start, int end){
+        this.userId = userId;
+        this.userType = userType;
+        this.orderStatus = orderStatus;
+        this.start = start;
+        this.end = end;
+    }
+
     public long getUserId() {
         return userId;
     }
