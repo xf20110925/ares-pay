@@ -509,7 +509,10 @@ public class OrderApiImpl implements IOrderApi {
         //获取订单对应商品列表
         if(!orderNoList.isEmpty()){
             List<OrderDetail> details = orderDetailService.getOrderDetailList(orderNoList);
-            Map<String, OrderDetail> ordrNoMapProductId = details.stream().collect(Collectors.toMap(OrderDetail::getOrderNo,(k)->k));
+            Map<String, OrderDetail> ordrNoMapProductId = new HashMap<>();//details.stream().collect(Collectors.toMap(OrderDetail::getOrderNo,(k)->k));
+            details.forEach(item->{
+                ordrNoMapProductId.put(item.getOrderNo(), item);
+            });
             List<Long> pidlist = details.stream().map(OrderDetail::getProductId).collect(Collectors.toList());
             if(!pidlist.isEmpty()) {
                 Map<Long, ProductVO> productIdMapProductVO = productMapper.selectByPtbProductID(pidlist).stream().map(ConvertProductUtil::convertProductToProductVO).collect(Collectors.toMap(ProductVO::getProductId, (k) -> k));
