@@ -1,6 +1,7 @@
 package com.ptb.pay.api;
 
 import com.ptb.common.vo.ResponseVo;
+import com.ptb.pay.vo.order.BaseOrderResVO;
 import com.ptb.pay.vo.order.ConfirmOrderReqVO;
 import com.ptb.pay.vo.order.OrderListReqVO;
 import com.ptb.pay.vo.order.OrderListVO;
@@ -65,7 +66,7 @@ public interface IOrderApi {
      * @param orderId
      * @return
      */
-    ResponseVo cancelOrder(long userId, long orderId);
+    ResponseVo<BaseOrderResVO> cancelOrder(long userId, long orderId);
 
     /**
      * 获取订单详情

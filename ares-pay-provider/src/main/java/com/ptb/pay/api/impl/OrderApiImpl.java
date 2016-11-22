@@ -271,11 +271,11 @@ public class OrderApiImpl implements IOrderApi {
     }
 
     @Override
-    public ResponseVo cancelOrder(long userId, long orderId) {
+    public ResponseVo<BaseOrderResVO> cancelOrder(long userId, long orderId) {
         logger.info("买家取消订单 buyerId:{}  orderId:{}", userId, orderId);
         //是否可以取消订单
-        int orderStatus = orderService.getOrderStatus(orderId);
-        if (orderStatus != 0){
+        Order orderByOrderId = orderService.getOrderByOrderId(orderId);
+        if (orderByOrderId.getOrderStatus() != 0){
             logger.warn("can not cancel order orderId:{}", orderId);
             return ReturnUtil.error("41003","can not cancel order");
         }
@@ -285,7 +285,12 @@ public class OrderApiImpl implements IOrderApi {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return new ResponseVo("0", "", null);
+
+        BaseOrderResVO baseOrderResVO = new BaseOrderResVO();
+        Map<String, Object> map = orderService.getBuyerOrderStatus( ""+orderByOrderId.getOrderStatus()+orderByOrderId.getSellerStatus()+orderByOrderId.getBuyerStatus());
+        baseOrderResVO.setButton(map.get("button").toString());
+        baseOrderResVO.setDesc(map.get("desc").toString());
+        return new ResponseVo("0", "", baseOrderResVO);
     }
 
     @Override
