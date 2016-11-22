@@ -78,7 +78,7 @@ public interface IOrderService {
      * @return
      * @throws Exception
      */
-    Order insertNewOrder(long buyerId, long sellerId, long price, String orderId) throws Exception;
+    Order insertNewOrder(long buyerId, long sellerId, long price, String orderId, String desc) throws Exception;
 
     /**
      * 买家取消订单
@@ -89,7 +89,21 @@ public interface IOrderService {
      */
     int cancelOrderByBuyer(long buyerId, long orderId) throws Exception;
 
+    /**
+     * 根据订单ID获取订单信息
+     * @param orderId
+     * @return
+     */
     Order getOrderByOrderId(long orderId);
+
+    /**
+     * 卖家修改价格
+     * @param userId
+     * @param orderId
+     * @param price
+     * @return
+     */
+    int changeOrderPrice(long userId, long orderId, long price);
 
     boolean sellerConfirmOrder(long seller, Order order);
 

@@ -230,8 +230,6 @@ public class OrderApiImpl implements IOrderApi {
             logger.error( "买家申请退款接口调用失败。error message: {}", e.getMessage());
             throw e;
         }
-
-
     }
 
     @Transactional (rollbackFor = RuntimeException.class, propagation = Propagation.REQUIRED)
@@ -252,7 +250,7 @@ public class OrderApiImpl implements IOrderApi {
                 return ReturnUtil.error("20002", "no product");
             }
             //添加新订单
-            Order order = orderService.insertNewOrder(userId, product.getOwnerId(), product.getPrice(), orderNo);
+            Order order = orderService.insertNewOrder(userId, product.getOwnerId(), product.getPrice(), orderNo, desc);
             String json = JSON.json(order);
             OrderVO orderVO = JSON.parse(json, OrderVO.class);
 
@@ -264,7 +262,7 @@ public class OrderApiImpl implements IOrderApi {
                 throw new RuntimeException("order detail error!");
             }
 
-            Map<String, Object> map = orderService.getSalerOrderStatus( ""+order.getOrderStatus()+order.getSellerStatus()+order.getBuyerStatus());
+            Map<String, Object> map = orderService.getBuyerOrderStatus( ""+order.getOrderStatus()+order.getSellerStatus()+order.getBuyerStatus());
             orderVO.setButton(map.get("button").toString());
             orderVO.setDesc(map.get("desc").toString());
             return new ResponseVo<OrderVO>("0", "", orderVO);
@@ -275,11 +273,11 @@ public class OrderApiImpl implements IOrderApi {
     }
 
     @Override
-    public ResponseVo cancelOrder(long userId, long orderId) {
+    public ResponseVo<BaseOrderResVO> cancelOrder(long userId, long orderId) {
         logger.info("买家取消订单 buyerId:{}  orderId:{}", userId, orderId);
         //是否可以取消订单
-        int orderStatus = orderService.getOrderStatus(orderId);
-        if (orderStatus != 0){
+        Order orderByOrderId = orderService.getOrderByOrderId(orderId);
+        if (orderByOrderId.getOrderStatus() != 0){
             logger.warn("can not cancel order orderId:{}", orderId);
             return ReturnUtil.error("41003","can not cancel order");
         }
@@ -289,7 +287,12 @@ public class OrderApiImpl implements IOrderApi {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return new ResponseVo("0", "", null);
+
+        BaseOrderResVO baseOrderResVO = new BaseOrderResVO();
+        Map<String, Object> map = orderService.getBuyerOrderStatus( ""+orderByOrderId.getOrderStatus()+orderByOrderId.getSellerStatus()+orderByOrderId.getBuyerStatus());
+        baseOrderResVO.setButton(map.get("button").toString());
+        baseOrderResVO.setDesc(map.get("desc").toString());
+        return new ResponseVo("0", "", baseOrderResVO);
     }
 
     @Override
@@ -326,13 +329,22 @@ public class OrderApiImpl implements IOrderApi {
     @Override
     public ResponseVo sellerChangePrice(long userId, long orderId, long price) {
         //是否可以修改
-
+        Order orderByOrderId = orderService.getOrderByOrderId(orderId);
+        if (orderByOrderId == null){
+            logger.error("get order by orderId error! orderId:{}", orderId);
+            return ReturnUtil.error("30001","获取订单信息出错!");
+        }
+        if (orderByOrderId.getOrderStatus() != 0 || orderByOrderId.getBuyerStatus() != 0 || orderByOrderId.getSellerStatus() != 0){
+            logger.warn("[ERROR] 用户不能修改价格! userId:{} orderId:{}",userId, orderId);
+            return ReturnUtil.error("30002","[ERROR] 用户不能修改价格!");
+        }
         //修改订单价格
-
-
-        return null;
+        int update = orderService.changeOrderPrice(userId, orderId, price);
+        if (update < 1){
+            logger.error("卖家更新价格出错!");
+        }
+        return new ResponseVo("0","更新成功",null);
     }
-
 
     @Override
     @Transactional

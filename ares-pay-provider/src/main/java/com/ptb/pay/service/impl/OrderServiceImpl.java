@@ -77,7 +77,7 @@ public class OrderServiceImpl implements IOrderService {
     }
 
     @Override
-    public Order insertNewOrder(long buyerId, long sellerId, long price, String orderId) throws Exception {
+    public Order insertNewOrder(long buyerId, long sellerId, long price, String orderId, String desc) throws Exception {
         if (buyerId <= 0 || sellerId <= 0 || orderId == null){
             logger.error("insert order error! buyerId:{} sellerId:{} orderId:{}", buyerId, sellerId, orderId);
             return null;
@@ -89,8 +89,9 @@ public class OrderServiceImpl implements IOrderService {
         order.setSellerStatus( AllCodeNameEnum.sellerOrig.getNum());
         order.setBuyerStatus( AllCodeNameEnum.buyerOrig.getNum());
         order.setOriginalPrice(price);
-        order.setPayablePrice(0l);
+        order.setPayablePrice(price);
         order.setSellerId( sellerId);
+        order.setRemarks(desc);
         order.setBuyerId( buyerId);
         order.setCreateTime( date);
         order.setLastModifyTime( date);
@@ -131,7 +132,26 @@ public class OrderServiceImpl implements IOrderService {
 
     @Override
     public Order getOrderByOrderId(long orderId) {
-        return null;
+        Order order = orderMapper.selectByPrimaryKey(orderId);
+        if (order == null){
+            logger.error("get order by orderId error! orderId:{}", order);
+            return null;
+        }
+        return order;
+    }
+
+    @Override
+    @Transactional
+    public int changeOrderPrice(long userId, long orderId, long price) {
+        int update = orderMapper.updateOrderPriceByOrderId(orderId, price);
+        if (update < 1){
+            logger.error("更新订单价格出错");
+            throw new RuntimeException("更新订单价格出错");
+        }
+        Order order = orderMapper.selectByPrimaryKey(orderId);
+        String remarks = "卖家修改价格";
+        this.insertOrderLog(order.getOrderNo(), 6, new Date(), remarks, userId, AllCodeNameEnum.saler.getNum());
+        return update;
     }
 
     @Override
