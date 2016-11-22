@@ -280,14 +280,19 @@ public class OrderApiImpl implements IOrderApi {
             return ReturnUtil.error("41003","can not cancel order");
         }
         //修改订单状态
+        Order order = null;
         try {
-            orderService.cancelOrderByBuyer(userId, orderId);
+            order = orderService.cancelOrderByBuyer(userId, orderId);
+            if (order == null){
+                throw new Exception("取消订单失败");
+            }
         } catch (Exception e) {
             e.printStackTrace();
+            return ReturnUtil.error("30010","取消订单失败");
         }
 
         BaseOrderResVO baseOrderResVO = new BaseOrderResVO();
-        Map<String, Object> map = orderService.getBuyerOrderStatus( ""+orderByOrderId.getOrderStatus()+orderByOrderId.getSellerStatus()+orderByOrderId.getBuyerStatus());
+        Map<String, Object> map = orderService.getBuyerOrderStatus( ""+order.getOrderStatus()+order.getSellerStatus()+order.getBuyerStatus());
         baseOrderResVO.setButton(map.get("button").toString());
         baseOrderResVO.setDesc(map.get("desc").toString());
         return new ResponseVo("0", "", baseOrderResVO);

@@ -87,7 +87,7 @@ public interface IOrderService {
      * @return
      * @throws Exception
      */
-    int cancelOrderByBuyer(long buyerId, long orderId) throws Exception;
+    Order cancelOrderByBuyer(long buyerId, long orderId) throws Exception;
 
     /**
      * 根据订单ID获取订单信息
