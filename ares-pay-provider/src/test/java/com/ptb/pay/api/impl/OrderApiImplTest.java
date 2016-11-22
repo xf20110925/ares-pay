@@ -48,23 +48,26 @@ public class OrderApiImplTest extends BaseTest {
         OrderListReqVO orderListReqVO = new OrderListReqVO();
         orderListReqVO.setStart(0);
         orderListReqVO.setEnd(10);
-        orderListReqVO.setUserId(777);
+        orderListReqVO.setUserId(517);
         orderListReqVO.setUserType(UserType.USER_IS_SELLER.getUserType());
         orderListReqVO.setDeviceTypeEnum(DeviceTypeEnum.android);
         orderListReqVO.setOrderStatus(OrderStatusEnum.ORDER_STATUS_NEW_DEAL.getStatus());
+        orderApi.getOrderList(517, orderListReqVO);
+
+/*        orderListReqVO.setOrderStatus(OrderStatusEnum.ORDER_STATUS_NEW_DEAL.getStatus());
         orderApi.getOrderList(777, orderListReqVO);
 
         orderListReqVO.setOrderStatus(OrderStatusEnum.ORDER_STATUS_DEALING.getStatus());
         orderApi.getOrderList(777, orderListReqVO);
 
         orderListReqVO.setOrderStatus(OrderStatusEnum.ORDER_STATUS_DEAL_ALL.getStatus());
-        orderApi.getOrderList(777, orderListReqVO);
+        orderApi.getOrderList(777, orderListReqVO);*/
 
     }
 
     @Test
     public void getMediaDetailInfo(){
-        orderApi.getOrderInfo(10, 6L);
+        orderApi.getOrderInfo(517, 124L);
     }
 
     @Test
