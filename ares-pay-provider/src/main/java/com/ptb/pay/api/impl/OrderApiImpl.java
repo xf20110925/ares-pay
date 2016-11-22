@@ -360,6 +360,10 @@ public class OrderApiImpl implements IOrderApi {
 
     @Override
     public ResponseVo sellerChangePrice(long userId, long orderId, long price) {
+        if (price < 0){
+            logger.warn("[ERROR]价格是负数! price:{}", price);
+            return ReturnUtil.error("30000","价格是负数!");
+        }
         //是否可以修改
         Order orderByOrderId = orderService.getOrderByOrderId(orderId);
         if (orderByOrderId == null){
@@ -372,7 +376,7 @@ public class OrderApiImpl implements IOrderApi {
         }
         if (orderByOrderId.getSellerId() != userId){
             logger.warn("[ERROR] 卖家ID不匹配! userId:{} orderId:{}",userId, orderId);
-            return ReturnUtil.error("30002","[ERROR] 用户不能修改价格!");
+            return ReturnUtil.error("30003","[ERROR] 用户不能修改价格!");
         }
         //修改订单价格
         int update = orderService.changeOrderPrice(userId, orderId, price);

@@ -5,6 +5,7 @@ import com.ptb.pay.model.order.OrderDetail;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.ResultMap;
 import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
 
 import java.util.List;
 
@@ -16,4 +17,7 @@ public interface OrderDetailMapper extends MyMapper<OrderDetail>{
 
     @ResultMap("BaseResultMap")
     List<OrderDetail> selectAllByOrderNos(@Param("orderNos") List<String> orderNoList);
+
+    @Update("update ptb_order_detail set payable_price = #{price} where order_no = #{orderNo}")
+    int updateProductPriceByOrderNo(@Param("orderNo") String orderNo, @Param("price") long price);
 }
