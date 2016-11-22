@@ -262,8 +262,16 @@ public class OrderApiImpl implements IOrderApi {
             }
 
             Map<String, Object> map = orderService.getBuyerOrderStatus( ""+order.getOrderStatus()+order.getSellerStatus()+order.getBuyerStatus());
-            orderVO.setButton(map.get("button").toString());
-            orderVO.setDesc(map.get("desc").toString());
+            if (map.get("button") != null){
+                orderVO.setButton(map.get("button").toString());
+            }else {
+                orderVO.setButton(null);
+            }
+            if (map.get("desc") != null){
+                orderVO.setDesc(map.get("desc").toString());
+            }else {
+                orderVO.setDesc(null);
+            }
             return new ResponseVo<OrderVO>("0", "", orderVO);
         }catch (Exception e){
             logger.error("submit order error!", e);
@@ -281,16 +289,29 @@ public class OrderApiImpl implements IOrderApi {
             return ReturnUtil.error("41003","can not cancel order");
         }
         //修改订单状态
+        Order order = null;
         try {
-            orderService.cancelOrderByBuyer(userId, orderId);
+            order = orderService.cancelOrderByBuyer(userId, orderId);
+            if (order == null){
+                throw new Exception("取消订单失败");
+            }
         } catch (Exception e) {
             e.printStackTrace();
+            return ReturnUtil.error("30010","取消订单失败");
         }
 
         BaseOrderResVO baseOrderResVO = new BaseOrderResVO();
-        Map<String, Object> map = orderService.getBuyerOrderStatus( ""+orderByOrderId.getOrderStatus()+orderByOrderId.getSellerStatus()+orderByOrderId.getBuyerStatus());
-        baseOrderResVO.setButton(map.get("button").toString());
-        baseOrderResVO.setDesc(map.get("desc").toString());
+        Map<String, Object> map = orderService.getBuyerOrderStatus( ""+order.getOrderStatus()+order.getSellerStatus()+order.getBuyerStatus());
+        if (map.get("button") != null){
+            baseOrderResVO.setButton(map.get("button").toString());
+        }else {
+            baseOrderResVO.setButton(null);
+        }
+        if (map.get("desc") != null){
+            baseOrderResVO.setDesc(map.get("desc").toString());
+        }else {
+            baseOrderResVO.setDesc(null);
+        }
         return new ResponseVo("0", "", baseOrderResVO);
     }
 
@@ -317,8 +338,16 @@ public class OrderApiImpl implements IOrderApi {
         else
             map = orderService.getSalerOrderStatus("" +order.getOrderStatus() + order.getSellerStatus() + order.getBuyerStatus());
 
-        orderVO.setButton(map.get("button").toString());
-        orderVO.setDesc(map.get("desc").toString());
+        if (map.get("button") != null){
+            orderVO.setButton(map.get("button").toString());
+        }else {
+            orderVO.setButton(null);
+        }
+        if (map.get("desc") != null){
+            orderVO.setDesc(map.get("desc").toString());
+        }else {
+            orderVO.setDesc(null);
+        }
         OrderDetailVO orderDetail = orderDetailService.getOrderDetail(order.getOrderNo());
         ResponseVo<ProductVO> responseVo = productApi.getProduct(userId, orderDetail.getProductId());
         orderVO.setProductVOList(singletonList(responseVo.getData()));
@@ -454,8 +483,16 @@ public class OrderApiImpl implements IOrderApi {
         List<String> orderNoList = new ArrayList<>();
         orderListVO.getOrderVOList().forEach(item->{
             Map<String, Object> map = finalUserType ==UserType.USER_IS_SELLER.getUserType()?orderService.getSalerOrderStatus( ""+item.getOrderStatus()+item.getSellerStatus()+item.getBuyerStatus()):orderService.getBuyerOrderStatus(""+item.getOrderStatus()+item.getSellerStatus()+item.getBuyerStatus());
-            item.setButton(map.get("button").toString());
-            item.setDesc(map.get("desc").toString());
+            if (map.get("button") != null){
+                item.setButton(map.get("button").toString());
+            }else {
+                item.setButton(null);
+            }
+            if (map.get("desc") != null){
+                item.setDesc(map.get("desc").toString());
+            }else {
+                item.setDesc(null);
+            }
             orderNoList.add(item.getOrderNo());
         });
 

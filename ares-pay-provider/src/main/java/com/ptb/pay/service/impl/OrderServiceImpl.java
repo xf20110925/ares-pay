@@ -108,10 +108,10 @@ public class OrderServiceImpl implements IOrderService {
 
     @Override
     @Transactional(rollbackFor = RuntimeException.class, propagation = Propagation.REQUIRED)
-    public int cancelOrderByBuyer(long buyerId, long orderId) throws Exception {
+    public Order cancelOrderByBuyer(long buyerId, long orderId) throws Exception {
         if (buyerId <= 0 || orderId <= 0){
             logger.error("cancel order error! buyerId:{} orderId:{}", buyerId, orderId);
-            return -1;
+            return null;
         }
 
         int update = orderMapper.updateOrderStateByOrderNo(orderId, AllCodeNameEnum.orderClosed.getNum(), AllCodeNameEnum.buyerCancelOrder.getNum());
@@ -127,7 +127,7 @@ public class OrderServiceImpl implements IOrderService {
         }
         this.insertOrderLog(order.getOrderNo(), AllCodeNameEnum.orderClosed.getNum(), new Date(), remarks, buyerId, AllCodeNameEnum.buyer.getNum());
 
-        return update;
+        return order;
     }
 
     @Override
