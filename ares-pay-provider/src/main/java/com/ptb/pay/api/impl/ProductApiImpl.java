@@ -101,7 +101,7 @@ public class ProductApiImpl implements IProductApi {
     @Override
     public ResponseVo updateProductDealNum(long userId, long productId) {
         Product product = productMapper.selectByPrimaryKey(productId);
-        if(null == product || !product.getOwnerId().equals(userId)){
+        if(null == product){
             return ReturnUtil.error(ErrorCode.PRODUCT_API_NO_EXISTS.getCode(), ErrorCode.PRODUCT_API_NO_EXISTS.getMessage());
         }
 

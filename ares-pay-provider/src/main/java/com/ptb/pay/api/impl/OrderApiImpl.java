@@ -386,7 +386,7 @@ public class OrderApiImpl implements IOrderApi {
 
 
             //用户与订单是否匹配
-            if(userId == order.getSellerId())
+            if(userId != order.getSellerId())
                 return ReturnUtil.error(ErrorCode.ORDER_API_5001.getCode(), ErrorCode.ORDER_API_5001.getMessage());
 
             //卖家确认
@@ -405,46 +405,56 @@ public class OrderApiImpl implements IOrderApi {
         }else if(confirmOrderVO.getUserType() == UserType.USER_IS_BUYER.getUserType()){ //当前用户是买家
 
             //用户与订单是否匹配
-            if(userId == order.getBuyerId())
+            if(userId != order.getBuyerId())
                 return ReturnUtil.error(ErrorCode.ORDER_API_5004.getCode(), ErrorCode.ORDER_API_5004.getMessage());
 
             //密码不能为空
             if(confirmOrderVO.getPassword() == null){
                 return ReturnUtil.error(ErrorCode.PAY_API_COMMMON_1001.getCode(), ErrorCode.PAY_API_COMMMON_1001.getMessage());
             }
-
+            if(!orderService.checkOrderStatus(OrderActionEnum.SALER_COMPLETE, order.getOrderStatus(),order.getSellerStatus(), order.getBuyerStatus())){
+                return ReturnUtil.error(ErrorCode.ORDER_API_5002.getCode(), ErrorCode.ORDER_API_5002.getMessage());
+            }
 
             ResponseVo responseVo = null;
+            //取消款项冻结
             try {
-                //取消款项冻结
-                responseVo = ReturnUtil.success();//buyerPayment(userId, order.getPtbOrderId(), confirmOrderVO.getPassword(), confirmOrderVO.getDeviceTypeEnum().getDeviceType());
-                if(responseVo.getCode().equals("0")) {
-                    //上报用户中心交易成功
-                    ResponseVo responseVo1 = bindMediaApi.reportDealInfo(order.getSellerId(), order.getBuyerId(), 0);
-                    if(!responseVo1.getCode().equals("0")){
+                responseVo = buyerPayment(userId, order.getPtbOrderId(), confirmOrderVO.getPassword(), confirmOrderVO.getDeviceTypeEnum().getDeviceType());
+                if(!responseVo.getCode().equals("0")) {
+                    return ReturnUtil.error(responseVo.getCode(), responseVo.getMessage());
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                return ReturnUtil.error(ErrorCode.PAY_API_COMMMON_1000.getCode(), ErrorCode.PAY_API_COMMMON_1000.getMessage());
+            }
+
+            try {
+                //上报用户中心交易成功
+                ResponseVo responseVo1 = bindMediaApi.reportDealInfo(order.getSellerId(), order.getBuyerId(), 0);
+                if(!responseVo1.getCode().equals("0")){
+                    //更新失败 add message to bus
+                }
+                //更新商品计数
+                Long productId = orderDetailService.getProductIdByOrderNo(order.getOrderNo());
+                if(productId != null) {
+                    responseVo1 = productApi.updateProductDealNum(userId, productId);
+                    if (!responseVo1.getCode().equals("0")) {
                         //更新失败 add message to bus
+                        logger.error("productDealNum update error orderNo:" + order.getOrderNo() + " productId:" + productId);
                     }
-                    //更新商品计数
-                    Long productId = orderDetailService.getProductIdByOrderNo(order.getOrderNo());
-                    if(productId != null) {
-                        responseVo1 = productApi.updateProductDealNum(userId, productId);
-                        if (!responseVo1.getCode().equals("0")) {
-                            //更新失败 add message to bus
-                        }
-                    }else{
-                        logger.error("orderNo " + order.getOrderNo() + " not exists");
-                    }
-                    //更新相应状态
-                    boolean ret = orderService.buyerConfirmOrder(userId, order);
-                    if(!ret){
-                        //更新失败 add message to bus
-                    }
-                    return ReturnUtil.success(orderService.getSalerOrderStatus( ""+order.getOrderStatus()+order.getSellerStatus()+order.getBuyerStatus()));
+                }else{
+                    logger.error("orderNo " + order.getOrderNo() + " not exists");
+                }
+                //更新订单状态 与 订单操作日志
+                boolean ret = orderService.buyerConfirmOrder(userId, order);
+                if(!ret){
+                    //更新失败 add message to bus
+                    logger.error("order info and order log info update error orderNo:" + order.getOrderNo());
                 }
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            return ReturnUtil.error(responseVo.getCode(), responseVo.getMessage());
+            return ReturnUtil.success(orderService.getBuyerOrderStatus(""+order.getOrderStatus()+order.getSellerStatus()+order.getBuyerStatus()));
         }else{
             return ReturnUtil.error("","未知用户类型");
         }

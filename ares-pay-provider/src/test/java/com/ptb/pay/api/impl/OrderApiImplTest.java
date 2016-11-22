@@ -6,6 +6,7 @@ import com.ptb.pay.BaseTest;
 import com.ptb.pay.api.IOrderApi;
 import com.ptb.pay.enums.OrderStatusEnum;
 import com.ptb.pay.enums.UserType;
+import com.ptb.pay.vo.order.ConfirmOrderReqVO;
 import com.ptb.pay.vo.order.OrderListReqVO;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -84,4 +85,27 @@ public class OrderApiImplTest extends BaseTest {
 
         }
     }
+
+    @Test
+    public void sellerConfirmOrder(){
+        ConfirmOrderReqVO confirmOrderReqVO = new ConfirmOrderReqVO();
+        confirmOrderReqVO.setOrderId(5);
+        confirmOrderReqVO.setUserId(777);
+        confirmOrderReqVO.setUserType(UserType.USER_IS_SELLER.getUserType());
+        confirmOrderReqVO.setDeviceTypeEnum(DeviceTypeEnum.android);
+        confirmOrderReqVO.setPassword("123123123");
+        orderApi.confirmOrder(777, confirmOrderReqVO);
+    }
+
+    @Test
+    public void buyerConfirmOrder(){
+        ConfirmOrderReqVO confirmOrderReqVO = new ConfirmOrderReqVO();
+        confirmOrderReqVO.setOrderId(5);
+        confirmOrderReqVO.setUserId(1111);
+        confirmOrderReqVO.setUserType(UserType.USER_IS_BUYER.getUserType());
+        confirmOrderReqVO.setDeviceTypeEnum(DeviceTypeEnum.android);
+        confirmOrderReqVO.setPassword("123123123");
+        orderApi.confirmOrder(1111, confirmOrderReqVO);
+    }
+
 }
