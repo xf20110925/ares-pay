@@ -89,7 +89,7 @@ public class OrderServiceImpl implements IOrderService {
         order.setSellerStatus( AllCodeNameEnum.sellerOrig.getNum());
         order.setBuyerStatus( AllCodeNameEnum.buyerOrig.getNum());
         order.setOriginalPrice(price);
-        order.setPayablePrice(0l);
+        order.setPayablePrice(price);
         order.setSellerId( sellerId);
         order.setRemarks(desc);
         order.setBuyerId( buyerId);

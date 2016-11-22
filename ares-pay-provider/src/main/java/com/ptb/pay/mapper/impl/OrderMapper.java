@@ -30,7 +30,7 @@ public interface OrderMapper extends MyMapper<Order> {
     @ResultMap("BaseResultMap")
     List<Order> selectByBuyerUid(@Param("uid") long userId);
 
-    @Update("UPDATE ptb_order SET original_price=#{price} WHERE ptb_order_id=#{orderId}")
+    @Update("UPDATE ptb_order SET payable_price=#{price} WHERE ptb_order_id=#{orderId}")
     @ResultMap("BaseResultMap")
     int updateOrderPriceByOrderId(@Param("orderId") long orderId, @Param("price") long price);
 
