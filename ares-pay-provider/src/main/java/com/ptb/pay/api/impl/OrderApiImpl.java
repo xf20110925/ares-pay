@@ -424,7 +424,7 @@ public class OrderApiImpl implements IOrderApi {
             if(confirmOrderVO.getPassword() == null){
                 return ReturnUtil.error(ErrorCode.PAY_API_COMMMON_1001.getCode(), ErrorCode.PAY_API_COMMMON_1001.getMessage());
             }
-            if(!orderService.checkOrderStatus(OrderActionEnum.SALER_COMPLETE, order.getOrderStatus(),order.getSellerStatus(), order.getBuyerStatus())){
+            if(!orderService.checkOrderStatus(OrderActionEnum.BUYER_COMPLETE, order.getOrderStatus(),order.getSellerStatus(), order.getBuyerStatus())){
                 return ReturnUtil.error(ErrorCode.ORDER_API_5002.getCode(), ErrorCode.ORDER_API_5002.getMessage());
             }
 

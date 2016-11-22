@@ -181,4 +181,10 @@ public class ProductApiImpl implements IProductApi {
 
         return new ResponseVo<>("0","get product success",productVO);
     }
+
+    @Override
+    public ResponseVo<List<Long>> getMediaBindIdsByOrderNos(List<String> orderNos) {
+        List<Long> mediaBindIds = productMapper.getMediaBindIdsByOrderNos( orderNos);
+        return ReturnUtil.success( mediaBindIds);
+    }
 }
