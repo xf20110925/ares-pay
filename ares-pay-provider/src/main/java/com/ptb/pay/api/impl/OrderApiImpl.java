@@ -1,11 +1,9 @@
 package com.ptb.pay.api.impl;
 
-import com.alibaba.druid.support.json.JSONParser;
 import com.alibaba.dubbo.common.json.JSON;
 import com.alibaba.dubbo.common.utils.CollectionUtils;
 import com.alibaba.dubbo.rpc.RpcContext;
 import com.alibaba.fastjson.JSONObject;
-import com.alipay.api.domain.OrderDetail;
 import com.ptb.account.api.IAccountApi;
 import com.ptb.account.vo.PtbAccountVo;
 import com.ptb.account.vo.param.AccountPayParam;
@@ -20,12 +18,13 @@ import com.ptb.pay.mapper.impl.OrderMapper;
 import com.ptb.pay.mapper.impl.ProductMapper;
 import com.ptb.pay.model.Order;
 import com.ptb.pay.model.Product;
+import com.ptb.pay.model.order.OrderDetail;
 import com.ptb.pay.service.interfaces.IOrderDetailService;
 import com.ptb.pay.service.interfaces.IOrderService;
-import com.ptb.pay.service.interfaces.IProductService;
 import com.ptb.pay.vo.order.*;
 import com.ptb.pay.vo.product.ProductVO;
 import com.ptb.pay.vopo.ConvertOrderUtil;
+import com.ptb.pay.vopo.ConvertProductUtil;
 import com.ptb.ucenter.api.IBindMediaApi;
 import com.ptb.pay.vo.order.OrderDetailVO;
 import com.ptb.utils.encrypt.SignUtil;
@@ -395,7 +394,7 @@ public class OrderApiImpl implements IOrderApi {
 
 
             //用户与订单是否匹配
-            if(userId == order.getSellerId())
+            if(userId != order.getSellerId())
                 return ReturnUtil.error(ErrorCode.ORDER_API_5001.getCode(), ErrorCode.ORDER_API_5001.getMessage());
 
             //卖家确认
@@ -414,46 +413,56 @@ public class OrderApiImpl implements IOrderApi {
         }else if(confirmOrderVO.getUserType() == UserType.USER_IS_BUYER.getUserType()){ //当前用户是买家
 
             //用户与订单是否匹配
-            if(userId == order.getBuyerId())
+            if(userId != order.getBuyerId())
                 return ReturnUtil.error(ErrorCode.ORDER_API_5004.getCode(), ErrorCode.ORDER_API_5004.getMessage());
 
             //密码不能为空
             if(confirmOrderVO.getPassword() == null){
                 return ReturnUtil.error(ErrorCode.PAY_API_COMMMON_1001.getCode(), ErrorCode.PAY_API_COMMMON_1001.getMessage());
             }
-
+            if(!orderService.checkOrderStatus(OrderActionEnum.SALER_COMPLETE, order.getOrderStatus(),order.getSellerStatus(), order.getBuyerStatus())){
+                return ReturnUtil.error(ErrorCode.ORDER_API_5002.getCode(), ErrorCode.ORDER_API_5002.getMessage());
+            }
 
             ResponseVo responseVo = null;
+            //取消款项冻结
             try {
-                //取消款项冻结
-                responseVo = ReturnUtil.success();//buyerPayment(userId, order.getPtbOrderId(), confirmOrderVO.getPassword(), confirmOrderVO.getDeviceTypeEnum().getDeviceType());
-                if(responseVo.getCode().equals("0")) {
-                    //上报用户中心交易成功
-                    ResponseVo responseVo1 = bindMediaApi.reportDealInfo(order.getSellerId(), order.getBuyerId(), 0);
-                    if(!responseVo1.getCode().equals("0")){
+                responseVo = buyerPayment(userId, order.getPtbOrderId(), confirmOrderVO.getPassword(), confirmOrderVO.getDeviceTypeEnum().getDeviceType());
+                if(!responseVo.getCode().equals("0")) {
+                    return ReturnUtil.error(responseVo.getCode(), responseVo.getMessage());
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                return ReturnUtil.error(ErrorCode.PAY_API_COMMMON_1000.getCode(), ErrorCode.PAY_API_COMMMON_1000.getMessage());
+            }
+
+            try {
+                //上报用户中心交易成功
+                ResponseVo responseVo1 = bindMediaApi.reportDealInfo(order.getSellerId(), order.getBuyerId(), 0);
+                if(!responseVo1.getCode().equals("0")){
+                    //更新失败 add message to bus
+                }
+                //更新商品计数
+                Long productId = orderDetailService.getProductIdByOrderNo(order.getOrderNo());
+                if(productId != null) {
+                    responseVo1 = productApi.updateProductDealNum(userId, productId);
+                    if (!responseVo1.getCode().equals("0")) {
                         //更新失败 add message to bus
+                        logger.error("productDealNum update error orderNo:" + order.getOrderNo() + " productId:" + productId);
                     }
-                    //更新商品计数
-                    Long productId = orderDetailService.getProductIdByOrderNo(order.getOrderNo());
-                    if(productId != null) {
-                        responseVo1 = productApi.updateProductDealNum(userId, productId);
-                        if (!responseVo1.getCode().equals("0")) {
-                            //更新失败 add message to bus
-                        }
-                    }else{
-                        logger.error("orderNo " + order.getOrderNo() + " not exists");
-                    }
-                    //更新相应状态
-                    boolean ret = orderService.buyerConfirmOrder(userId, order);
-                    if(!ret){
-                        //更新失败 add message to bus
-                    }
-                    return ReturnUtil.success(orderService.getSalerOrderStatus( ""+order.getOrderStatus()+order.getSellerStatus()+order.getBuyerStatus()));
+                }else{
+                    logger.error("orderNo " + order.getOrderNo() + " not exists");
+                }
+                //更新订单状态 与 订单操作日志
+                boolean ret = orderService.buyerConfirmOrder(userId, order);
+                if(!ret){
+                    //更新失败 add message to bus
+                    logger.error("order info and order log info update error orderNo:" + order.getOrderNo());
                 }
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            return ReturnUtil.error(responseVo.getCode(), responseVo.getMessage());
+            return ReturnUtil.success(orderService.getBuyerOrderStatus(""+order.getOrderStatus()+order.getSellerStatus()+order.getBuyerStatus()));
         }else{
             return ReturnUtil.error("","未知用户类型");
         }
@@ -489,6 +498,7 @@ public class OrderApiImpl implements IOrderApi {
         orderListVO.setTotalNum(orders.size());
         orderListVO.getOrderVOList().addAll(orders.stream().map(ConvertOrderUtil::convertOrderToOrderVO).skip(orderListReqVO.getStart()).limit(orderListReqVO.getEnd()-orderListReqVO.getStart()).collect(Collectors.toList()));
         final int finalUserType = userType;
+        List<String> orderNoList = new ArrayList<>();
         orderListVO.getOrderVOList().forEach(item->{
             Map<String, Object> map = finalUserType ==UserType.USER_IS_SELLER.getUserType()?orderService.getSalerOrderStatus( ""+item.getOrderStatus()+item.getSellerStatus()+item.getBuyerStatus()):orderService.getBuyerOrderStatus(""+item.getOrderStatus()+item.getSellerStatus()+item.getBuyerStatus());
             if (map.get("button") != null){
@@ -501,7 +511,34 @@ public class OrderApiImpl implements IOrderApi {
             }else {
                 item.setDesc(null);
             }
+            orderNoList.add(item.getOrderNo());
         });
+
+        //获取订单对应商品列表
+        if(!orderNoList.isEmpty()){
+            List<OrderDetail> details = orderDetailService.getOrderDetailList(orderNoList);
+            Map<String, OrderDetail> ordrNoMapProductId = new HashMap<>();//details.stream().collect(Collectors.toMap(OrderDetail::getOrderNo,(k)->k));
+            details.forEach(item->{
+                ordrNoMapProductId.put(item.getOrderNo(), item);
+            });
+            List<Long> pidlist = details.stream().map(OrderDetail::getProductId).collect(Collectors.toList());
+            if(!pidlist.isEmpty()) {
+                Map<Long, ProductVO> productIdMapProductVO = productMapper.selectByPtbProductID(pidlist).stream().map(ConvertProductUtil::convertProductToProductVO).collect(Collectors.toMap(ProductVO::getProductId, (k) -> k));
+                orderListVO.getOrderVOList().forEach(item -> {
+                    OrderDetail orderDetail = ordrNoMapProductId.get(item.getOrderNo());
+                    if (null == orderDetail) {
+                        logger.error("orderNo no detial " + item.getOrderNo());
+                        return;
+                    }
+                    ProductVO productVO = productIdMapProductVO.get(orderDetail.getProductId());
+                    if (null == productVO) {
+                        logger.error("orderNo no product " + item.getOrderNo());
+                        return;
+                    }
+                    item.setProductVOList(Collections.singletonList(productVO));
+                });
+            }
+        }
         return ReturnUtil.success(orderListVO);
     }
 
