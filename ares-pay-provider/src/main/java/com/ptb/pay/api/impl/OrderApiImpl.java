@@ -5,6 +5,7 @@ import com.alibaba.dubbo.common.json.JSON;
 import com.alibaba.dubbo.common.utils.CollectionUtils;
 import com.alibaba.dubbo.rpc.RpcContext;
 import com.alibaba.fastjson.JSONObject;
+import com.alipay.api.domain.OrderDetail;
 import com.ptb.account.api.IAccountApi;
 import com.ptb.account.vo.PtbAccountVo;
 import com.ptb.account.vo.param.AccountPayParam;
@@ -23,6 +24,7 @@ import com.ptb.pay.service.interfaces.IOrderDetailService;
 import com.ptb.pay.service.interfaces.IOrderService;
 import com.ptb.pay.service.interfaces.IProductService;
 import com.ptb.pay.vo.order.*;
+import com.ptb.pay.vo.product.ProductVO;
 import com.ptb.pay.vopo.ConvertOrderUtil;
 import com.ptb.ucenter.api.IBindMediaApi;
 import com.ptb.pay.vo.order.OrderDetailVO;
@@ -37,11 +39,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 import java.util.stream.Collectors;
+
+import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
 
 /**
  * Created by zuokui.fu on 2016/11/16.
@@ -315,7 +317,9 @@ public class OrderApiImpl implements IOrderApi {
 
         orderVO.setButton(map.get("button").toString());
         orderVO.setDesc(map.get("desc").toString());
-
+        OrderDetailVO orderDetail = orderDetailService.getOrderDetail(order.getOrderNo());
+        ResponseVo<ProductVO> responseVo = productApi.getProduct(userId, orderDetail.getProductId());
+        orderVO.setProductVOList(singletonList(responseVo.getData()));
         return ReturnUtil.success(orderVO);
     }
 
