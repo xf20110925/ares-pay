@@ -25,6 +25,16 @@
     from ptb_product
     where ptb_product_id = #{ptbProductId,jdbcType=BIGINT}
   </select>
+  <select id="selectByOrderNOList" resultMap="BaseResultMap" >
+    select
+    <include refid="Base_Column_List" />
+    from (select * from ptb_order_detail where order_no in <foreach item="item" index="index" collection="orderNos" open="(" separator="," close=")"> #{item}</foreach>) as pod JOIN ptb_product ON ptb_product.ptb_product_id=pod.product_id
+  </select>
+  <select id="selectByPtbProductID" resultMap="BaseResultMap" >
+    select
+    <include refid="Base_Column_List" />
+    from ptb_product where ptb_product_id in <foreach item="item" index="index" collection="ids" open="(" separator="," close=")"> #{item}</foreach>
+  </select>
   <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
     delete from ptb_product
     where ptb_product_id = #{ptbProductId,jdbcType=BIGINT}

@@ -9,6 +9,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 /**
  * Created by watson zhang on 2016/11/20.
  */
@@ -62,5 +64,10 @@ public class OrderDetailServiceImpl implements IOrderDetailService{
         if(null != orderDetail)
             return orderDetail.getProductId();
         return null;
+    }
+
+    @Override
+    public List<OrderDetail> getOrderDetailList(List<String> orderNoList) {
+        return orderDetailMapper.selectAllByOrderNos(orderNoList);
     }
 }

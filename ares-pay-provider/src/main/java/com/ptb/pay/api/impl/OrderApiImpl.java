@@ -1,11 +1,9 @@
 package com.ptb.pay.api.impl;
 
-import com.alibaba.druid.support.json.JSONParser;
 import com.alibaba.dubbo.common.json.JSON;
 import com.alibaba.dubbo.common.utils.CollectionUtils;
 import com.alibaba.dubbo.rpc.RpcContext;
 import com.alibaba.fastjson.JSONObject;
-import com.alipay.api.domain.OrderDetail;
 import com.ptb.account.api.IAccountApi;
 import com.ptb.account.vo.PtbAccountVo;
 import com.ptb.account.vo.param.AccountPayParam;
@@ -20,12 +18,13 @@ import com.ptb.pay.mapper.impl.OrderMapper;
 import com.ptb.pay.mapper.impl.ProductMapper;
 import com.ptb.pay.model.Order;
 import com.ptb.pay.model.Product;
+import com.ptb.pay.model.order.OrderDetail;
 import com.ptb.pay.service.interfaces.IOrderDetailService;
 import com.ptb.pay.service.interfaces.IOrderService;
-import com.ptb.pay.service.interfaces.IProductService;
 import com.ptb.pay.vo.order.*;
 import com.ptb.pay.vo.product.ProductVO;
 import com.ptb.pay.vopo.ConvertOrderUtil;
+import com.ptb.pay.vopo.ConvertProductUtil;
 import com.ptb.ucenter.api.IBindMediaApi;
 import com.ptb.pay.vo.order.OrderDetailVO;
 import com.ptb.utils.encrypt.SignUtil;
@@ -452,11 +451,34 @@ public class OrderApiImpl implements IOrderApi {
         orderListVO.setTotalNum(orders.size());
         orderListVO.getOrderVOList().addAll(orders.stream().map(ConvertOrderUtil::convertOrderToOrderVO).skip(orderListReqVO.getStart()).limit(orderListReqVO.getEnd()-orderListReqVO.getStart()).collect(Collectors.toList()));
         final int finalUserType = userType;
+        List<String> orderNoList = new ArrayList<>();
         orderListVO.getOrderVOList().forEach(item->{
             Map<String, Object> map = finalUserType ==UserType.USER_IS_SELLER.getUserType()?orderService.getSalerOrderStatus( ""+item.getOrderStatus()+item.getSellerStatus()+item.getBuyerStatus()):orderService.getBuyerOrderStatus(""+item.getOrderStatus()+item.getSellerStatus()+item.getBuyerStatus());
             item.setButton(map.get("button").toString());
             item.setDesc(map.get("desc").toString());
+            orderNoList.add(item.getOrderNo());
         });
+
+        //获取订单对应商品列表
+        if(!orderNoList.isEmpty()){
+            List<OrderDetail> details = orderDetailService.getOrderDetailList(orderNoList);
+            Map<String, OrderDetail> ordrNoMapProductId = details.stream().collect(Collectors.toMap(OrderDetail::getOrderNo,(k)->k));
+            List<Long> pidlist = details.stream().map(OrderDetail::getProductId).collect(Collectors.toList());
+            Map<Long, ProductVO> productIdMapProductVO = productMapper.selectByPtbProductID(pidlist).stream().map(ConvertProductUtil::convertProductToProductVO).collect(Collectors.toMap(ProductVO::getProductId,(k)->k));
+            orderListVO.getOrderVOList().forEach(item->{
+                OrderDetail orderDetail =ordrNoMapProductId.get(item.getOrderNo());
+                if(null == orderDetail) {
+                    logger.error("orderNo no detial " + item.getOrderNo());
+                    return;
+                }
+                ProductVO productVO = productIdMapProductVO.get(orderDetail.getProductId());
+                if(null == productVO){
+                    logger.error("orderNo no product " + item.getOrderNo());
+                    return;
+                }
+                item.setProductVOList(Collections.singletonList(productVO));
+            });
+        }
         return ReturnUtil.success(orderListVO);
     }
 
