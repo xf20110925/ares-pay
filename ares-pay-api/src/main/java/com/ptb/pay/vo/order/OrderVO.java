@@ -1,7 +1,10 @@
 package com.ptb.pay.vo.order;
 
+import com.ptb.pay.vo.product.ProductVO;
+
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 
 /**
  * Created by watson zhang on 2016/11/21.
@@ -38,6 +41,8 @@ public class OrderVO implements Serializable{
     private String button;
 
     private String desc;
+
+    private List<ProductVO> productVOList;
 
     public Long getPtbOrderId() {
         return ptbOrderId;
@@ -165,5 +170,13 @@ public class OrderVO implements Serializable{
 
     public void setDesc(String desc) {
         this.desc = desc;
+    }
+
+    public List<ProductVO> getProductVOList() {
+        return productVOList;
+    }
+
+    public void setProductVOList(List<ProductVO> productVOList) {
+        this.productVOList = productVOList;
     }
 }

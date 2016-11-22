@@ -62,6 +62,11 @@ public class OrderApiImplTest extends BaseTest {
     }
 
     @Test
+    public void getMediaDetailInfo(){
+        orderApi.getOrderInfo(10, 6L);
+    }
+
+    @Test
     public void submitOrderTest(){
         try {
             orderApi.submitOrder(112, 41, "test", 1);

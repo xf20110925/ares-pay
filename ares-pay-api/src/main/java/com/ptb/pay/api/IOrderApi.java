@@ -76,6 +76,14 @@ public interface IOrderApi {
     ResponseVo getOrderDetail(long userId, String orderNo);
 
     /**
+     * 获取订单真详情
+     * @param userId
+     * @param orderId
+     * @return
+     */
+    ResponseVo getOrderInfo(long userId, Long orderId);
+
+    /**
      * 买卖双方确认完成接口
      * @param userId
      * @param confirmOrderVO
