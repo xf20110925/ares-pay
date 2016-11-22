@@ -501,20 +501,22 @@ public class OrderApiImpl implements IOrderApi {
             List<OrderDetail> details = orderDetailService.getOrderDetailList(orderNoList);
             Map<String, OrderDetail> ordrNoMapProductId = details.stream().collect(Collectors.toMap(OrderDetail::getOrderNo,(k)->k));
             List<Long> pidlist = details.stream().map(OrderDetail::getProductId).collect(Collectors.toList());
-            Map<Long, ProductVO> productIdMapProductVO = productMapper.selectByPtbProductID(pidlist).stream().map(ConvertProductUtil::convertProductToProductVO).collect(Collectors.toMap(ProductVO::getProductId,(k)->k));
-            orderListVO.getOrderVOList().forEach(item->{
-                OrderDetail orderDetail =ordrNoMapProductId.get(item.getOrderNo());
-                if(null == orderDetail) {
-                    logger.error("orderNo no detial " + item.getOrderNo());
-                    return;
-                }
-                ProductVO productVO = productIdMapProductVO.get(orderDetail.getProductId());
-                if(null == productVO){
-                    logger.error("orderNo no product " + item.getOrderNo());
-                    return;
-                }
-                item.setProductVOList(Collections.singletonList(productVO));
-            });
+            if(!pidlist.isEmpty()) {
+                Map<Long, ProductVO> productIdMapProductVO = productMapper.selectByPtbProductID(pidlist).stream().map(ConvertProductUtil::convertProductToProductVO).collect(Collectors.toMap(ProductVO::getProductId, (k) -> k));
+                orderListVO.getOrderVOList().forEach(item -> {
+                    OrderDetail orderDetail = ordrNoMapProductId.get(item.getOrderNo());
+                    if (null == orderDetail) {
+                        logger.error("orderNo no detial " + item.getOrderNo());
+                        return;
+                    }
+                    ProductVO productVO = productIdMapProductVO.get(orderDetail.getProductId());
+                    if (null == productVO) {
+                        logger.error("orderNo no product " + item.getOrderNo());
+                        return;
+                    }
+                    item.setProductVOList(Collections.singletonList(productVO));
+                });
+            }
         }
         return ReturnUtil.success(orderListVO);
     }
