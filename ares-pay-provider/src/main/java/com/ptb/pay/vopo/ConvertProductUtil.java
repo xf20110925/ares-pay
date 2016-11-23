@@ -22,6 +22,8 @@ public class ConvertProductUtil {
         product.setProductType(productVO.getProductType());
         product.setRelevantId(productVO.getRelevantId());
         product.setStatus(productVO.getStatus());
+        product.setPmid(productVO.getPmid());
+        product.setMediaType(productVO.getMediaType());
         return product;
     }
     public static ProductVO convertProductToProductVO(Product product){
@@ -38,6 +40,8 @@ public class ConvertProductUtil {
         productVO.setRelevantId(product.getRelevantId());
         productVO.setStatus(product.getStatus());
         productVO.setProductId(product.getPtbProductId());
+        productVO.setPmid(product.getPmid());
+        productVO.setMediaType(product.getMediaType());
         return productVO;
     }
 }

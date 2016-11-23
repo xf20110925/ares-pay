@@ -169,21 +169,7 @@ public class ProductApiImpl implements IProductApi {
             logger.error("get product error! userId:{} productId:{}", userId, productId);
             return ReturnUtil.error("30001","get product error!");
         }
-        ProductVO productVO = new ProductVO();
-        productVO.setProductId(product.getPtbProductId());
-        productVO.setProductName(product.getProductName());
-        productVO.setProductType(product.getProductType());
-        productVO.setPrice(product.getPrice());
-        productVO.setCreateTime(product.getCreateTime().getTime());
-
-        productVO.setOwnerId(product.getOwnerId());
-        productVO.setOwnerType(product.getOwnerType());
-        productVO.setStatus(product.getStatus());
-        productVO.setDesc(product.getDesc());
-        productVO.setDealNum(product.getDealNum());
-        productVO.setRelevantId(product.getRelevantId());
-
-        return new ResponseVo<>("0","get product success",productVO);
+        return new ResponseVo<>("0","get product success",ConvertProductUtil.convertProductToProductVO(product));
     }
 
     @Override

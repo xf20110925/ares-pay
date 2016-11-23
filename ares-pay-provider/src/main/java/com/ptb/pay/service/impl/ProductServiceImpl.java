@@ -4,6 +4,7 @@ import com.ptb.pay.mapper.impl.ProductMapper;
 import com.ptb.pay.model.Product;
 import com.ptb.pay.service.interfaces.IProductService;
 import com.ptb.pay.vo.product.ProductVO;
+import com.ptb.pay.vopo.ConvertProductUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,21 +30,7 @@ public class ProductServiceImpl implements IProductService{
             return -1;
         }
 
-        Product product = new Product();
-        product.setProductName(productVO.getProductName());
-        product.setProductType(productVO.getProductType());
-        product.setPrice(productVO.getPrice());
-        product.setCreateTime(new Date(productVO.getCreateTime()));
-        product.setLastUpdateTime(new Date(productVO.getUpdateTime()));
-        product.setOwnerId(productVO.getOwnerId());
-        product.setOwnerType(productVO.getOwnerType());
-        product.setStatus(productVO.getStatus());
-        product.setDesc(productVO.getDesc());
-        product.setDealNum(productVO.getDealNum());
-        product.setRelevantId(productVO.getRelevantId());
-        product.setPmid( productVO.getPmid());
-        product.setMediaType( productVO.getMediaType());
-
+        Product product = ConvertProductUtil.convertProductVOToProduct(productVO);
         int insert = productMapper.insert(product);
         if (insert < 1){
             logger.error("insert product error! productVO:{}", productVO);
@@ -57,21 +44,6 @@ public class ProductServiceImpl implements IProductService{
         if ( null == product){
             return null;
         }
-        ProductVO productVO = new ProductVO();
-        productVO.setProductId(product.getPtbProductId());
-        productVO.setProductName(product.getProductName());
-        productVO.setProductType(product.getProductType());
-        productVO.setPrice(product.getPrice());
-        productVO.setCreateTime(product.getCreateTime().getTime());
-
-        productVO.setOwnerId(product.getOwnerId());
-        productVO.setOwnerType(product.getOwnerType());
-        productVO.setStatus(product.getStatus());
-        productVO.setDesc(product.getDesc());
-        productVO.setDealNum(product.getDealNum());
-        productVO.setRelevantId(product.getRelevantId());
-        productVO.setPmid( product.getPmid());
-        productVO.setMediaType( product.getMediaType());
-        return productVO;
+        return ConvertProductUtil.convertProductToProductVO(product);
     }
 }
