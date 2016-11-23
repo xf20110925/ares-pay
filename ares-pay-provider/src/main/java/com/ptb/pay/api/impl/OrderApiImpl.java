@@ -457,7 +457,7 @@ public class OrderApiImpl implements IOrderApi {
                 ResponseVo responseVo1 = bindMediaApi.reportDealInfo(order.getSellerId(), order.getBuyerId(), 0);
                 if(!responseVo1.getCode().equals("0")){
                     //更新失败 add message to bus
-                    logger.error("report deal success to bindMediaApi orderNo:" + order.getOrderNo() + " sellerId:" + order.getSellerId() + " buyerId:" + order.getBuyerId());
+                    logger.error("buyerConfirm, report dealSuccess to bindMediaApi orderNo:" + order.getOrderNo() + " sellerId:" + order.getSellerId() + " buyerId:" + order.getBuyerId());
                 }
                 //更新商品计数
                 Long productId = orderDetailService.getProductIdByOrderNo(order.getOrderNo());
@@ -465,16 +465,16 @@ public class OrderApiImpl implements IOrderApi {
                     responseVo1 = productApi.updateProductDealNum(userId, productId);
                     if (!responseVo1.getCode().equals("0")) {
                         //更新失败 add message to bus
-                        logger.error("update productDealNum error orderNo:" + order.getOrderNo() + " productId:" + productId);
+                        logger.error("buyerConfirm, update productDealNum error, orderNo:" + order.getOrderNo() + " productId:" + productId);
                     }
                 }else{
-                    logger.error("orderNo " + order.getOrderNo() + " not exists");
+                    logger.error("buyerConfirm, product not exists of orderNo:" + order.getOrderNo());
                 }
                 //更新订单状态 与 订单操作日志
                 boolean ret = orderService.buyerConfirmOrder(userId, order);
                 if(!ret){
                     //更新失败 add message to bus
-                    logger.error("order info and order log info update error orderNo:" + order.getOrderNo());
+                    logger.error("buyerConfirm, order info and order_log info update error, orderNo:" + order.getOrderNo());
                 }
             } catch (Exception e) {
                 e.printStackTrace();
