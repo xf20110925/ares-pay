@@ -1,6 +1,7 @@
 package com.ptb.pay.api.impl;
 
 import com.ptb.common.enums.DeviceTypeEnum;
+import com.ptb.common.enums.PlatformEnum;
 import com.ptb.common.vo.ResponseVo;
 import com.ptb.pay.BaseTest;
 import com.ptb.pay.api.IOrderApi;
@@ -103,12 +104,13 @@ public class OrderApiImplTest extends BaseTest {
     @Test
     public void buyerConfirmOrder(){
         ConfirmOrderReqVO confirmOrderReqVO = new ConfirmOrderReqVO();
-        confirmOrderReqVO.setOrderId(5);
-        confirmOrderReqVO.setUserId(1111);
+        confirmOrderReqVO.setOrderId(106);
+        confirmOrderReqVO.setUserId(544);
         confirmOrderReqVO.setUserType(UserType.USER_IS_BUYER.getUserType());
         confirmOrderReqVO.setDeviceTypeEnum(DeviceTypeEnum.android);
-        confirmOrderReqVO.setPassword("123123123");
-        orderApi.confirmOrder(1111, confirmOrderReqVO);
+        confirmOrderReqVO.setPlatformEnum(PlatformEnum.xiaomi);
+        confirmOrderReqVO.setPassword("123123123asdfasdf");
+        orderApi.confirmOrder(544, confirmOrderReqVO);
     }
 
 }

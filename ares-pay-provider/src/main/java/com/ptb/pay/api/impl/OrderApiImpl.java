@@ -8,6 +8,7 @@ import com.ptb.account.api.IAccountApi;
 import com.ptb.account.vo.PtbAccountVo;
 import com.ptb.account.vo.param.AccountPayParam;
 import com.ptb.account.vo.param.AccountRefundParam;
+import com.ptb.account.vo.param.AccountThawParam;
 import com.ptb.common.enums.DeviceTypeEnum;
 import com.ptb.common.enums.PlatformEnum;
 import com.ptb.common.vo.ResponseVo;
@@ -431,7 +432,18 @@ public class OrderApiImpl implements IOrderApi {
             ResponseVo responseVo = null;
             //取消款项冻结
             try {
-                responseVo = buyerPayment(userId, order.getPtbOrderId(), confirmOrderVO.getPassword(), confirmOrderVO.getDeviceTypeEnum().getDeviceType());
+                AccountThawParam accountThawParam = new AccountThawParam();
+                accountThawParam.setOrderNo(order.getOrderNo());
+                accountThawParam.setBuyerId(order.getBuyerId());
+                accountThawParam.setSalerId(order.getSellerId());
+                accountThawParam.setMoney(order.getPayablePrice());
+                accountThawParam.setPayPassword(confirmOrderVO.getPassword());
+                accountThawParam.setPlatform(confirmOrderVO.getPlatformEnum());
+                accountThawParam.setDeviceType(confirmOrderVO.getDeviceTypeEnum());
+                TreeMap toSign = JSONObject.parseObject(JSONObject.toJSONString(accountThawParam), TreeMap.class);
+                String sign = SignUtil.getSignKey(toSign);
+                RpcContext.getContext().setAttachment("key", sign);
+                responseVo = accountApi.thaw(accountThawParam);
                 if(!responseVo.getCode().equals("0")) {
                     return ReturnUtil.error(responseVo.getCode(), responseVo.getMessage());
                 }
