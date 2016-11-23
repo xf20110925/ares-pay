@@ -12,6 +12,7 @@ import java.util.Date;
 public class RechargeOrderVO implements Serializable{
 
     private static final long serialVersionUID = -2720046974034786258L;
+    private Long ptbRechargeOrderId;
     private Long orderId;
     private Long rechargeAmount;
     private Integer payMethod;
@@ -23,6 +24,14 @@ public class RechargeOrderVO implements Serializable{
     private Date createTime;
     private Date payTime;
     private String verificationCode;
+
+    public Long getPtbRechargeOrderId() {
+        return ptbRechargeOrderId;
+    }
+
+    public void setPtbRechargeOrderId(Long ptbRechargeOrderId) {
+        this.ptbRechargeOrderId = ptbRechargeOrderId;
+    }
 
     public static long getSerialVersionUID() {
         return serialVersionUID;

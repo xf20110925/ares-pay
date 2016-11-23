@@ -84,6 +84,7 @@ public class RechargeOrderApiImpl implements IRechargeOrderApi {
             orderVO.setVerificationCode(order.getVerificationCode());
             orderVO.setPayMethod(order.getPayMethod());
             orderVO.setRechargeOrderNo(order.getRechargeOrderNo());
+            orderVO.setPtbRechargeOrderId( order.getPtbRechargeOrderId());
             returnData.add(orderVO);
         }
         return ReturnUtil.success(returnData);
