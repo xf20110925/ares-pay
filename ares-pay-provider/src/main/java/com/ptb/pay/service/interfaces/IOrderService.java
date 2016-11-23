@@ -105,8 +105,20 @@ public interface IOrderService {
      */
     int changeOrderPrice(long userId, long orderId, long price);
 
+    /**
+     * 卖家确认完成 更新订单状态 增加订单操作日志
+     * @param seller
+     * @param order
+     * @return
+     */
     boolean sellerConfirmOrder(long seller, Order order);
 
+    /**
+     * 买家确认完成 更新订单状态 增加订单操作日志
+     * @param buyer
+     * @param order
+     * @return
+     */
     boolean buyerConfirmOrder(long buyer, Order order);
 
     int getOrderStatus(long orderId);
