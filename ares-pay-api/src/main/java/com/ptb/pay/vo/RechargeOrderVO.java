@@ -2,6 +2,7 @@ package com.ptb.pay.vo;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.Map;
 
 /**
  * Description: 充值订单VO
@@ -24,6 +25,7 @@ public class RechargeOrderVO implements Serializable{
     private Date createTime;
     private Date payTime;
     private String verificationCode;
+    private Map<String, Object> bankInfo;
 
     public Long getPtbRechargeOrderId() {
         return ptbRechargeOrderId;
@@ -123,5 +125,13 @@ public class RechargeOrderVO implements Serializable{
 
     public void setVerificationCode(String verificationCode) {
         this.verificationCode = verificationCode;
+    }
+
+    public Map<String, Object> getBankInfo() {
+        return bankInfo;
+    }
+
+    public void setBankInfo(Map<String, Object> bankInfo) {
+        this.bankInfo = bankInfo;
     }
 }

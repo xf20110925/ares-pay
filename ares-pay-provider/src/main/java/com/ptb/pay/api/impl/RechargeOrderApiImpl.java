@@ -4,6 +4,7 @@ import com.ptb.common.enums.RechargeOrderStatusEnum;
 import com.ptb.common.errorcode.CommonErrorCode;
 import com.ptb.common.vo.ResponseVo;
 import com.ptb.pay.api.IRechargeOrderApi;
+import com.ptb.pay.conf.payment.OfflinePaymentConfig;
 import com.ptb.pay.mapper.impl.RechargeOrderMapper;
 import com.ptb.pay.model.RechargeOrder;
 import com.ptb.pay.model.RechargeOrderExample;
@@ -20,6 +21,7 @@ import com.ptb.pay.vo.RechargeOrderParamsVO;
 import com.ptb.pay.vo.RechargeOrderVO;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -35,6 +37,8 @@ public class RechargeOrderApiImpl implements IRechargeOrderApi {
 
     @Autowired
     private RechargeOrderMapper rechargeOrderMapper;
+    @Autowired
+    private IRechargeOrderService rechargeOrderService;
 
     @Override
     public ResponseVo<Map<String, Object>> createRechargeOrder(RechargeOrderParamsVO paramsVO) throws Exception {
@@ -88,5 +92,31 @@ public class RechargeOrderApiImpl implements IRechargeOrderApi {
             returnData.add(orderVO);
         }
         return ReturnUtil.success(returnData);
+    }
+
+    @Override
+    public ResponseVo<RechargeOrderVO> getRechargeOrderDetail(Long rechargeOrderId) {
+        RechargeOrderVO orderVO = new RechargeOrderVO();
+        RechargeOrder order = rechargeOrderMapper.selectByPrimaryKey( rechargeOrderId);
+        orderVO.setPayTime(order.getPayTime());
+        orderVO.setPayType(order.getPayType());
+        orderVO.setCreateTime(order.getCreateTime());
+        orderVO.setUserId(order.getUserId());
+        orderVO.setDeviceType(order.getDeviceType());
+        orderVO.setOrderId(order.getPtbRechargeOrderId());
+        orderVO.setRechargeAmount(order.getTotalAmount());
+        orderVO.setStatus(order.getStatus());
+        orderVO.setVerificationCode(order.getVerificationCode());
+        orderVO.setPayMethod(order.getPayMethod());
+        orderVO.setRechargeOrderNo(order.getRechargeOrderNo());
+        orderVO.setPtbRechargeOrderId( order.getPtbRechargeOrderId());
+        OfflinePaymentConfig config = rechargeOrderService.getOfflinePaymentConfig();
+        Map<String, Object> bankInfo = new HashMap<>();
+        bankInfo.put("bankName", config.getBankName());
+        bankInfo.put("openAccountBankName", config.getOpenAccountBankName());
+        bankInfo.put("openAccountUserName", config.getOpenAccountUserName());
+        bankInfo.put("openAccountUserNum", config.getOpenAccountUserNum());
+        orderVO.setBankInfo( bankInfo);
+        return ReturnUtil.success( orderVO);
     }
 }
