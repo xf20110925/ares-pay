@@ -3,6 +3,7 @@ package com.ptb.pay.service.impl;
 import com.ptb.common.enums.AllCodeNameEnum;
 
 import com.ptb.pay.enums.*;
+import com.ptb.pay.mapper.impl.OrderDetailMapper;
 import com.ptb.pay.mapper.impl.OrderLogMapper;
 import com.ptb.pay.mapper.impl.OrderMapper;
 import com.ptb.pay.model.Order;
@@ -29,6 +30,8 @@ public class OrderServiceImpl implements IOrderService {
     private OrderMapper orderMapper;
     @Autowired
     private OrderLogMapper orderLogMapper;
+    @Autowired
+    private OrderDetailMapper orderDetailMapper;
 
     private static Map<String, Object> salerOrderStatusMap = new HashMap<>();
     private static Map<String, Object> buyerOrderStatusMap = new HashMap<>();
@@ -143,13 +146,25 @@ public class OrderServiceImpl implements IOrderService {
     @Override
     @Transactional
     public int changeOrderPrice(long userId, long orderId, long price) {
+        Order orderFirst = orderMapper.selectByPrimaryKey(orderId);
+        if (orderFirst == null){
+            logger.error("获取订单出错");
+            throw new RuntimeException("获取订单出错");
+        }
+
+        int ret = orderDetailMapper.updateProductPriceByOrderNo(orderFirst.getOrderNo(), price);
+        if (ret < 1){
+            logger.error("更新订单detail价格出错");
+            throw new RuntimeException("更新订单detail价格出错");
+        }
+
         int update = orderMapper.updateOrderPriceByOrderId(orderId, price);
         if (update < 1){
             logger.error("更新订单价格出错");
             throw new RuntimeException("更新订单价格出错");
         }
         Order order = orderMapper.selectByPrimaryKey(orderId);
-        String remarks = "卖家修改价格";
+        String remarks = String.format("卖家修改价格 price:%d", price);
         this.insertOrderLog(order.getOrderNo(), 6, new Date(), remarks, userId, AllCodeNameEnum.saler.getNum());
         return update;
     }
