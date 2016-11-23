@@ -43,5 +43,12 @@ public interface IRechargeOrderApi {
      * @version 1.0  2016-11-17 20:42 by wgh（guanhua.wang@pintuibao.cn）创建
      */
     ResponseVo<List<RechargeOrderVO>> getRechargeOrderList(Long userId, int start, int end) throws Exception;
+
+    /**
+     * 获取线下充值详情
+     * @param rechargeOrderId
+     * @return
+     */
+    public ResponseVo<RechargeOrderVO> getRechargeOrderDetail( Long rechargeOrderId);
 }
 

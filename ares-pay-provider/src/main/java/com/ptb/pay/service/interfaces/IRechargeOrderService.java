@@ -1,5 +1,6 @@
 package com.ptb.pay.service.interfaces;
 
+import com.ptb.pay.conf.payment.OfflinePaymentConfig;
 import com.ptb.pay.model.RechargeOrder;
 import com.ptb.pay.vo.RechargeOrderParamsVO;
 
@@ -30,4 +31,10 @@ public interface IRechargeOrderService {
      * @version 1.0  2016-11-08 11:30 by wgh（guanhua.wang@pintuibao.cn）创建
      */
     Map<String, Object> getReturnData(RechargeOrder rechargeOrder) throws Exception;
+
+    /**
+     * 获取线下支付信息
+     * @return
+     */
+    public OfflinePaymentConfig getOfflinePaymentConfig();
 }
