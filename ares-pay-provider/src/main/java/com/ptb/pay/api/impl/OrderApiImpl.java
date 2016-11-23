@@ -457,6 +457,7 @@ public class OrderApiImpl implements IOrderApi {
                 ResponseVo responseVo1 = bindMediaApi.reportDealInfo(order.getSellerId(), order.getBuyerId(), 0);
                 if(!responseVo1.getCode().equals("0")){
                     //更新失败 add message to bus
+                    logger.error("report deal success to bindMediaApi orderNo:" + order.getOrderNo() + " sellerId:" + order.getSellerId() + " buyerId:" + order.getBuyerId());
                 }
                 //更新商品计数
                 Long productId = orderDetailService.getProductIdByOrderNo(order.getOrderNo());
@@ -464,7 +465,7 @@ public class OrderApiImpl implements IOrderApi {
                     responseVo1 = productApi.updateProductDealNum(userId, productId);
                     if (!responseVo1.getCode().equals("0")) {
                         //更新失败 add message to bus
-                        logger.error("productDealNum update error orderNo:" + order.getOrderNo() + " productId:" + productId);
+                        logger.error("update productDealNum error orderNo:" + order.getOrderNo() + " productId:" + productId);
                     }
                 }else{
                     logger.error("orderNo " + order.getOrderNo() + " not exists");

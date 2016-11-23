@@ -109,7 +109,7 @@ public class OrderApiImplTest extends BaseTest {
         confirmOrderReqVO.setUserType(UserType.USER_IS_BUYER.getUserType());
         confirmOrderReqVO.setDeviceTypeEnum(DeviceTypeEnum.android);
         confirmOrderReqVO.setPlatformEnum(PlatformEnum.xiaomi);
-        confirmOrderReqVO.setPassword("123123123asdfasdf");
+        confirmOrderReqVO.setPassword("E10ADC3949BA59ABBE56E057F20F883E");
         orderApi.confirmOrder(544, confirmOrderReqVO);
     }
 
