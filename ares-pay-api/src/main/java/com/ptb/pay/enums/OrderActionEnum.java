@@ -5,7 +5,7 @@ package com.ptb.pay.enums;
  */
 public enum OrderActionEnum {
 
-
+    ORDER_BUILD(0, "创建"),
     BUYER_PAY( 1, "买家支付"),
     BUYER_APPLY_REFUND( 2, "买家申请退款"),
     BUYER_CANCEL_REFUND( 3, "买家取消申请退款"),
