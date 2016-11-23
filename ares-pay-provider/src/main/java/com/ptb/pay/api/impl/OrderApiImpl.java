@@ -170,8 +170,6 @@ public class OrderApiImpl implements IOrderApi {
                 //订单状态有误
                 return ReturnUtil.error(ErrorCode.ORDER_API_5002.getCode(), ErrorCode.ORDER_API_5002.getMessage());
             }
-            //更新订单状态并增加订单日志
-            orderService.updateStatusBuyerPayment(order.getPtbOrderId(),userId,order.getOrderNo());
 
             //调用dubbo付款消费虚拟币
             AccountPayParam param = new AccountPayParam();
@@ -192,6 +190,8 @@ public class OrderApiImpl implements IOrderApi {
                 logger.error( "虚拟账户付款dubbo接口调用失败。salerId:{}", userId);
                 throw new Exception();
             }
+            //更新订单状态并增加订单日志
+            orderService.updateStatusBuyerPayment(order.getPtbOrderId(),userId,order.getOrderNo());
             Order resultOrder = orderMapper.selectByPrimaryKey(orderId);
             Map<String, Object> buyerOrderStatus = orderService.getBuyerOrderStatus(resultOrder.getOrderStatus().toString() + resultOrder.getSellerStatus() + resultOrder.getBuyerStatus());
             ResponseVo responseVo1 = ReturnUtil.success("操作成功", buyerOrderStatus);
