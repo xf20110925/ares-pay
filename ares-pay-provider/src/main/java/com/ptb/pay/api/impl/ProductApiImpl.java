@@ -19,7 +19,9 @@ import org.springframework.util.CollectionUtils;
 
 import javax.annotation.Resource;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -183,8 +185,13 @@ public class ProductApiImpl implements IProductApi {
     }
 
     @Override
-    public ResponseVo<List<Long>> getMediaBindIdsByOrderNos(List<String> orderNos) {
-        List<Long> mediaBindIds = productMapper.getMediaBindIdsByOrderNos( orderNos);
-        return ReturnUtil.success( mediaBindIds);
+    public ResponseVo<Map<String, Object>> getProductNameByOrdreNos(List<String> orderNos) {
+        List<Map<String, Object>> list = productMapper.getProductNameByOrderNos( orderNos);
+        Map<String, Object> result = new HashMap<>();
+        for ( Map<String, Object> product : list){
+            result.put( String.valueOf(product.get("order_no")), product.get("product_name"));
+        }
+        return ReturnUtil.success( result);
     }
+
 }

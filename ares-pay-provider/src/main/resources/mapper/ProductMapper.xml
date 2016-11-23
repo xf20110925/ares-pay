@@ -29,7 +29,12 @@
     select relevant_id from ptb_product where ptb_product_id in ( select product_id from ptb_order_detail where order_no in
     <foreach item="item" index="index" collection="orderNos" open="(" separator="," close=")"> #{item}</foreach>
     )
-
+  </select>
+  <select id="getProductNameByOrderNos" resultType="java.util.Map">
+    select pod.order_no, pp.product_name from ptb_product pp left join ptb_order_detail pod
+    on pp.ptb_product_id = pod.product_id
+    where pod.order_no in
+    <foreach item="item" index="index" collection="orderNos" open="(" separator="," close=")"> #{item}</foreach>
   </select>
   <select id="selectByOrderNOList" resultMap="BaseResultMap" >
     select
