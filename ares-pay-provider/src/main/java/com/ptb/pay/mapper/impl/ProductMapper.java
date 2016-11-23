@@ -9,6 +9,7 @@ import org.apache.ibatis.annotations.Update;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 public interface ProductMapper extends MyMapper<Product>{
     int insertReturnId(Product record);
@@ -36,9 +37,17 @@ public interface ProductMapper extends MyMapper<Product>{
 
     public List<Long> getMediaBindIdsByOrderNos(@Param("orderNos")List<String> orderNos);
 
+    List<Map<String, Object>> getProductNameByOrderNos( @Param("orderNos")List<String> orderNos);
+
     @ResultMap("BaseResultMap")
     List<Product> selectByOrderNOList(@Param("orderNos") List<String> orderNoList);
 
     @ResultMap("BaseResultMap")
     List<Product> selectByPtbProductID(@Param("ids") List<Long> ids);
+
+    @Select("select pp.* from ptb_product pp left join ptb_order_detail pod" +
+            "    on pp.ptb_product_id = pod.product_id" +
+            "    where pod.order_no = #{orderNo}")
+    @ResultMap("BaseResultMap")
+    Product getProductByOrderNo( @Param("orderNo") String orderNo);
 }

@@ -7,12 +7,14 @@ import com.ptb.pay.vo.product.ProductVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.Date;
 
 /**
  * Created by watson zhang on 2016/11/19.
  */
+@Service("productService")
 public class ProductServiceImpl implements IProductService{
     private static Logger logger = LoggerFactory.getLogger(ProductServiceImpl.class);
 
@@ -39,6 +41,8 @@ public class ProductServiceImpl implements IProductService{
         product.setDesc(productVO.getDesc());
         product.setDealNum(productVO.getDealNum());
         product.setRelevantId(productVO.getRelevantId());
+        product.setPmid( productVO.getPmid());
+        product.setMediaType( productVO.getMediaType());
 
         int insert = productMapper.insert(product);
         if (insert < 1){
@@ -46,5 +50,28 @@ public class ProductServiceImpl implements IProductService{
             return -1;
         }
         return 0;
+    }
+
+    @Override
+    public ProductVO convertProductToVo(Product product) {
+        if ( null == product){
+            return null;
+        }
+        ProductVO productVO = new ProductVO();
+        productVO.setProductId(product.getPtbProductId());
+        productVO.setProductName(product.getProductName());
+        productVO.setProductType(product.getProductType());
+        productVO.setPrice(product.getPrice());
+        productVO.setCreateTime(product.getCreateTime().getTime());
+
+        productVO.setOwnerId(product.getOwnerId());
+        productVO.setOwnerType(product.getOwnerType());
+        productVO.setStatus(product.getStatus());
+        productVO.setDesc(product.getDesc());
+        productVO.setDealNum(product.getDealNum());
+        productVO.setRelevantId(product.getRelevantId());
+        productVO.setPmid( product.getPmid());
+        productVO.setMediaType( product.getMediaType());
+        return productVO;
     }
 }

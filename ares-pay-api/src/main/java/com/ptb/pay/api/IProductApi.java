@@ -9,6 +9,7 @@ import com.ptb.pay.vo.product.ProductListVO;
 import com.ptb.pay.vo.product.ProductVO;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 商品相关操作
@@ -88,9 +89,18 @@ public interface IProductApi {
     public ResponseVo<ProductVO> getProduct(long userId, long productId);
 
     /**
+     * 根据订单号获取商品信息
+     * @param orderNo
+     * @return
+     */
+    public ResponseVo<ProductVO> getProduct( String orderNo);
+
+    /**
      * 批量根据订单号，获取绑定媒体主键ID
      * @param orderNos
      * @return
      */
-    public ResponseVo<List<Long>> getMediaBindIdsByOrderNos( List<String> orderNos);
+//    public ResponseVo<List<Long>> getMediaBindIdsByOrderNos( List<String> orderNos);
+
+    public ResponseVo<Map<String, Object>> getProductNameByOrdreNos( List<String> orderNos);
 }

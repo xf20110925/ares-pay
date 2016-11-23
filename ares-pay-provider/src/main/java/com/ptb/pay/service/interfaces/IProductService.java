@@ -1,5 +1,6 @@
 package com.ptb.pay.service.interfaces;
 
+import com.ptb.pay.model.Product;
 import com.ptb.pay.vo.product.ProductVO;
 
 /**
@@ -8,4 +9,6 @@ import com.ptb.pay.vo.product.ProductVO;
 public interface IProductService {
 
     public int insertProduct(ProductVO productVO);
+
+    public ProductVO convertProductToVo(Product product);
 }
