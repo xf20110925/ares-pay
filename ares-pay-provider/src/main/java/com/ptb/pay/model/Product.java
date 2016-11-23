@@ -27,6 +27,10 @@ public class Product {
 
     private Long relevantId;
 
+    private String pmid;
+
+    private Integer mediaType;
+
     public Long getPtbProductId() {
         return ptbProductId;
     }
@@ -121,5 +125,29 @@ public class Product {
 
     public void setRelevantId(Long relevantId) {
         this.relevantId = relevantId;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getPmid() {
+        return pmid;
+    }
+
+    public void setPmid(String pmid) {
+        this.pmid = pmid;
+    }
+
+    public Integer getMediaType() {
+        return mediaType;
+    }
+
+    public void setMediaType(Integer mediaType) {
+        this.mediaType = mediaType;
     }
 }

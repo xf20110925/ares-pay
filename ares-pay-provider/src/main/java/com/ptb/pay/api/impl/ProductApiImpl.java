@@ -5,6 +5,7 @@ import com.ptb.pay.api.IProductApi;
 import com.ptb.pay.enums.ErrorCode;
 import com.ptb.pay.mapper.impl.ProductMapper;
 import com.ptb.pay.model.Product;
+import com.ptb.pay.service.interfaces.IProductService;
 import com.ptb.pay.vo.product.ProductListVO;
 import com.ptb.pay.vo.product.ProductState;
 import com.ptb.pay.vo.product.ProductVO;
@@ -17,7 +18,6 @@ import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
-import javax.annotation.Resource;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -33,6 +33,8 @@ public class ProductApiImpl implements IProductApi {
 
     @Autowired
     ProductMapper productMapper;
+    @Autowired
+    private IProductService productService;
 
     @SuppressWarnings("unchecked")
     @Override
@@ -182,6 +184,16 @@ public class ProductApiImpl implements IProductApi {
         productVO.setRelevantId(product.getRelevantId());
 
         return new ResponseVo<>("0","get product success",productVO);
+    }
+
+    @Override
+    public ResponseVo<ProductVO> getProduct(String orderNo) {
+        Product product = productMapper.getProductByOrderNo( orderNo);
+        if (product == null){
+            logger.error("get product error! orderNo:{}", orderNo);
+            return ReturnUtil.error("30001","get product error!");
+        }
+        return ReturnUtil.success( productService.convertProductToVo( product));
     }
 
     @Override

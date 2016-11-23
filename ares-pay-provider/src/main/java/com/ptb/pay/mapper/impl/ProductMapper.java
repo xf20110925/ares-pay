@@ -44,4 +44,10 @@ public interface ProductMapper extends MyMapper<Product>{
 
     @ResultMap("BaseResultMap")
     List<Product> selectByPtbProductID(@Param("ids") List<Long> ids);
+
+    @Select("select pp.* from ptb_product pp left join ptb_order_detail pod" +
+            "    on pp.ptb_product_id = pod.product_id" +
+            "    where pod.order_no = #{orderNo}")
+    @ResultMap("BaseResultMap")
+    Product getProductByOrderNo( @Param("orderNo") String orderNo);
 }

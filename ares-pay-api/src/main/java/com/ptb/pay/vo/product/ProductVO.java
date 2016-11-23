@@ -20,6 +20,8 @@ public class ProductVO implements Serializable {
     private Integer dealNum;
     private Long relevantId;
     private int deviceType;
+    private String pmid;
+    private Integer mediaType;
 
     public ProductVO(){}
 
@@ -138,5 +140,21 @@ public class ProductVO implements Serializable {
 
     public void setDeviceType(int deviceType) {
         this.deviceType = deviceType;
+    }
+
+    public String getPmid() {
+        return pmid;
+    }
+
+    public void setPmid(String pmid) {
+        this.pmid = pmid;
+    }
+
+    public Integer getMediaType() {
+        return mediaType;
+    }
+
+    public void setMediaType(Integer mediaType) {
+        this.mediaType = mediaType;
     }
 }

@@ -14,10 +14,12 @@
     <result column="description" property="description" jdbcType="VARCHAR" />
     <result column="deal_num" property="dealNum" jdbcType="INTEGER" />
     <result column="relevant_id" property="relevantId" jdbcType="BIGINT" />
+    <result column="pmid" property="pmid" jdbcType="VARCHAR" />
+    <result column="media_type" property="mediaType" jdbcType="INTEGER" />
   </resultMap>
   <sql id="Base_Column_List" >
     ptb_product_id, product_name, product_type, price, create_time, last_update_time, 
-    owner_id, owner_type, status, description, deal_num, relevant_id
+    owner_id, owner_type, status, description, deal_num, relevant_id, pmid, media_type
   </sql>
   <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
     select 
@@ -54,12 +56,12 @@
     insert into ptb_product (ptb_product_id, product_name, product_type, 
       price, create_time, last_update_time, 
       owner_id, owner_type, status, 
-      description, deal_num, relevant_id
+      description, deal_num, relevant_id, pmid, media_type
       )
     values (#{ptbProductId,jdbcType=BIGINT}, #{productName,jdbcType=VARCHAR}, #{productType,jdbcType=INTEGER}, 
       #{price,jdbcType=BIGINT}, #{createTime,jdbcType=TIMESTAMP}, #{lastUpdateTime,jdbcType=TIMESTAMP}, 
       #{ownerId,jdbcType=BIGINT}, #{ownerType,jdbcType=INTEGER}, #{status,jdbcType=INTEGER}, 
-      #{description,jdbcType=VARCHAR}, #{dealNum,jdbcType=INTEGER}, #{relevantId,jdbcType=BIGINT}
+      #{description,jdbcType=VARCHAR}, #{dealNum,jdbcType=INTEGER}, #{relevantId,jdbcType=BIGINT}, #{pmid,jdbcType=VARCHAR}, #{mediaType,jdbcType=VARCHAR}
       )
   </insert>
   <insert id="insertReturnId" parameterType="com.ptb.pay.model.Product"  useGeneratedKeys="true" keyProperty="ptbProductId" >

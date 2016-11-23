@@ -89,6 +89,13 @@ public interface IProductApi {
     public ResponseVo<ProductVO> getProduct(long userId, long productId);
 
     /**
+     * 根据订单号获取商品信息
+     * @param orderNo
+     * @return
+     */
+    public ResponseVo<ProductVO> getProduct( String orderNo);
+
+    /**
      * 批量根据订单号，获取绑定媒体主键ID
      * @param orderNos
      * @return
