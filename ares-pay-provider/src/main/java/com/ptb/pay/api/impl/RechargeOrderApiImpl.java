@@ -96,9 +96,9 @@ public class RechargeOrderApiImpl implements IRechargeOrderApi {
     }
 
     @Override
-    public ResponseVo<RechargeOrderVO> getRechargeOrderDetail(Long rechargeOrderId) {
+    public ResponseVo<RechargeOrderVO> getRechargeOrderDetail(Long rechargeOrderId, Long userId) {
         RechargeOrderVO orderVO = new RechargeOrderVO();
-        RechargeOrder order = rechargeOrderMapper.selectByPrimaryKey( rechargeOrderId);
+        RechargeOrder order = rechargeOrderMapper.selectByIdAndUserId( rechargeOrderId, userId);
         orderVO.setPayTime(order.getPayTime());
         orderVO.setPayType(order.getPayType());
         orderVO.setCreateTime(order.getCreateTime());
