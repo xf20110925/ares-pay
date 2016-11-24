@@ -99,7 +99,7 @@ public class OrderServiceImpl implements IOrderService {
         Date date = new Date();
         Order order = new Order();
         order.setOrderNo( orderId);
-        order.setOrderStatus( OrderActionEnum.ORDER_BUILD.getOrderAction());
+        order.setOrderStatus( OrderActionEnum.BUYER_SUBMIT_ORDER.getOrderAction());
         order.setSellerStatus( SellerStatusEnum.SELLER_STATUS_INIT.getStatus());
         order.setBuyerStatus( BuyerStatusEnum.BUYER_STATUS_INIT.getStatus());
         order.setOriginalPrice(price);
