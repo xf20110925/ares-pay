@@ -83,7 +83,7 @@ public class OrderApiImplTest extends BaseTest {
     @Test
     public void cancelOrderTest(){
         try {
-            ResponseVo responseVo = orderApi.cancelOrder(777l, 16);
+            ResponseVo responseVo = orderApi.cancelOrder(767, 166);
             System.out.println(responseVo.getMessage());
         }catch (Exception e){
 

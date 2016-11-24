@@ -139,7 +139,7 @@ public class OrderServiceImpl implements IOrderService {
             logger.error("get order by orderId error! orderId:{}", orderId);
             throw new RuntimeException("get order by orderId error!");
         }
-        this.insertOrderLog(order.getOrderNo(), OrderStatusEnum.ORDER_STATUS_DEAL_CLOSE.getStatus(), new Date(), remarks, buyerId, UserType.USER_IS_BUYER.getUserType());
+        this.insertOrderLog(order.getOrderNo(), OrderActionEnum.BUYER_CANCAL_ORDER.getOrderAction(), new Date(), remarks, buyerId, UserType.USER_IS_BUYER.getUserType());
 
         return order;
     }
