@@ -1,7 +1,5 @@
 package com.ptb.pay.service.impl;
 
-import com.ptb.common.enums.AllCodeNameEnum;
-
 import com.ptb.pay.enums.*;
 import com.ptb.pay.mapper.impl.OrderDetailMapper;
 import com.ptb.pay.mapper.impl.OrderLogMapper;
@@ -101,9 +99,9 @@ public class OrderServiceImpl implements IOrderService {
         Date date = new Date();
         Order order = new Order();
         order.setOrderNo( orderId);
-        order.setOrderStatus( AllCodeNameEnum.orderNoPayment.getNum());
-        order.setSellerStatus( AllCodeNameEnum.sellerOrig.getNum());
-        order.setBuyerStatus( AllCodeNameEnum.buyerOrig.getNum());
+        order.setOrderStatus( OrderActionEnum.ORDER_BUILD.getOrderAction());
+        order.setSellerStatus( SellerStatusEnum.SELLER_STATUS_INIT.getStatus());
+        order.setBuyerStatus( BuyerStatusEnum.BUYER_STATUS_INIT.getStatus());
         order.setOriginalPrice(price);
         order.setPayablePrice(price);
         order.setSellerId( sellerId);
@@ -117,7 +115,7 @@ public class OrderServiceImpl implements IOrderService {
             throw new Exception("更新订单状态失败");
         }
         String remarks = "买家提交订单";
-        this.insertOrderLog(orderId, AllCodeNameEnum.buyerOrig.getNum(), date, remarks, buyerId, AllCodeNameEnum.buyer.getNum());
+        this.insertOrderLog(orderId, BuyerStatusEnum.BUYER_STATUS_INIT.getStatus(), date, remarks, buyerId, UserType.USER_IS_BUYER.getUserType());
 
        return order;
     }
@@ -130,7 +128,7 @@ public class OrderServiceImpl implements IOrderService {
             return null;
         }
 
-        int update = orderMapper.updateOrderStateByOrderNo(orderId, AllCodeNameEnum.orderClosed.getNum(), AllCodeNameEnum.buyerCancelOrder.getNum());
+        int update = orderMapper.updateOrderStateByOrderNo(orderId, OrderStatusEnum.ORDER_STATUS_DEAL_CLOSE.getStatus(), BuyerStatusEnum.BUYER_STATUS_CANCLE_ORDER.getStatus());
         if (update < 1){
             logger.error("buyer cacle order error! buyer:{}  orderId:{}", buyerId, orderId);
             throw new RuntimeException("buyer cacle order error!");
@@ -141,7 +139,7 @@ public class OrderServiceImpl implements IOrderService {
             logger.error("get order by orderId error! orderId:{}", orderId);
             throw new RuntimeException("get order by orderId error!");
         }
-        this.insertOrderLog(order.getOrderNo(), AllCodeNameEnum.orderClosed.getNum(), new Date(), remarks, buyerId, AllCodeNameEnum.buyer.getNum());
+        this.insertOrderLog(order.getOrderNo(), OrderStatusEnum.ORDER_STATUS_DEAL_CLOSE.getStatus(), new Date(), remarks, buyerId, UserType.USER_IS_BUYER.getUserType());
 
         return order;
     }
@@ -178,7 +176,7 @@ public class OrderServiceImpl implements IOrderService {
         }
         Order order = orderMapper.selectByPrimaryKey(orderId);
         String remarks = String.format("卖家修改价格 price:%d", price);
-        this.insertOrderLog(order.getOrderNo(), 6, new Date(), remarks, userId, AllCodeNameEnum.saler.getNum());
+        this.insertOrderLog(order.getOrderNo(), 6, new Date(), remarks, userId, UserType.USER_IS_SELLER.getUserType());
         return update;
     }
 

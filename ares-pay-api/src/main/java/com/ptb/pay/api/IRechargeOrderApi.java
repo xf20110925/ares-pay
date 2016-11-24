@@ -49,6 +49,6 @@ public interface IRechargeOrderApi {
      * @param rechargeOrderId
      * @return
      */
-    public ResponseVo<RechargeOrderVO> getRechargeOrderDetail( Long rechargeOrderId);
+    public ResponseVo<RechargeOrderVO> getRechargeOrderDetail( Long rechargeOrderId, Long userId);
 }
 

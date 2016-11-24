@@ -8,8 +8,11 @@ import com.ptb.pay.conf.payment.OfflinePaymentConfig;
 import com.ptb.pay.mapper.impl.RechargeOrderMapper;
 import com.ptb.pay.model.RechargeOrder;
 import com.ptb.pay.model.RechargeOrderExample;
-import com.ptb.pay.service.interfaces.IRechargeOrderService;
 import com.ptb.pay.service.factory.RechargeOrderServiceFactory;
+import com.ptb.pay.service.interfaces.IPaymentService;
+import com.ptb.pay.service.interfaces.IRechargeOrderService;
+import com.ptb.pay.vo.RechargeOrderParamsVO;
+import com.ptb.pay.vo.RechargeOrderVO;
 import com.ptb.utils.db.Page;
 import com.ptb.utils.service.ReturnUtil;
 import org.slf4j.Logger;
@@ -17,8 +20,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
-import com.ptb.pay.vo.RechargeOrderParamsVO;
-import com.ptb.pay.vo.RechargeOrderVO;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -38,7 +39,7 @@ public class RechargeOrderApiImpl implements IRechargeOrderApi {
     @Autowired
     private RechargeOrderMapper rechargeOrderMapper;
     @Autowired
-    private IRechargeOrderService rechargeOrderService;
+    private IPaymentService paymentService;
 
     @Override
     public ResponseVo<Map<String, Object>> createRechargeOrder(RechargeOrderParamsVO paramsVO) throws Exception {
@@ -95,9 +96,9 @@ public class RechargeOrderApiImpl implements IRechargeOrderApi {
     }
 
     @Override
-    public ResponseVo<RechargeOrderVO> getRechargeOrderDetail(Long rechargeOrderId) {
+    public ResponseVo<RechargeOrderVO> getRechargeOrderDetail(Long rechargeOrderId, Long userId) {
         RechargeOrderVO orderVO = new RechargeOrderVO();
-        RechargeOrder order = rechargeOrderMapper.selectByPrimaryKey( rechargeOrderId);
+        RechargeOrder order = rechargeOrderMapper.selectByIdAndUserId( rechargeOrderId, userId);
         orderVO.setPayTime(order.getPayTime());
         orderVO.setPayType(order.getPayType());
         orderVO.setCreateTime(order.getCreateTime());
@@ -110,7 +111,7 @@ public class RechargeOrderApiImpl implements IRechargeOrderApi {
         orderVO.setPayMethod(order.getPayMethod());
         orderVO.setRechargeOrderNo(order.getRechargeOrderNo());
         orderVO.setPtbRechargeOrderId( order.getPtbRechargeOrderId());
-        OfflinePaymentConfig config = rechargeOrderService.getOfflinePaymentConfig();
+        OfflinePaymentConfig config = paymentService.getOfflinePaymentConfig();
         Map<String, Object> bankInfo = new HashMap<>();
         bankInfo.put("bankName", config.getBankName());
         bankInfo.put("openAccountBankName", config.getOpenAccountBankName());
