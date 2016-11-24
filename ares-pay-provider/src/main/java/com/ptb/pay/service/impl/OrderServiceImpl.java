@@ -99,7 +99,7 @@ public class OrderServiceImpl implements IOrderService {
         Date date = new Date();
         Order order = new Order();
         order.setOrderNo( orderId);
-        order.setOrderStatus( OrderActionEnum.BUYER_SUBMIT_ORDER.getOrderAction());
+        order.setOrderStatus( OrderStatusEnum.ORDER_STATUS_NEW_DEAL.getStatus());
         order.setSellerStatus( SellerStatusEnum.SELLER_STATUS_INIT.getStatus());
         order.setBuyerStatus( BuyerStatusEnum.BUYER_STATUS_INIT.getStatus());
         order.setOriginalPrice(price);
@@ -115,7 +115,7 @@ public class OrderServiceImpl implements IOrderService {
             throw new Exception("更新订单状态失败");
         }
         String remarks = "买家提交订单";
-        this.insertOrderLog(orderId, BuyerStatusEnum.BUYER_STATUS_INIT.getStatus(), date, remarks, buyerId, UserType.USER_IS_BUYER.getUserType());
+        this.insertOrderLog(orderId, OrderActionEnum.BUYER_SUBMIT_ORDER.getOrderAction(), date, remarks, buyerId, UserType.USER_IS_BUYER.getUserType());
 
        return order;
     }
