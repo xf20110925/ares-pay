@@ -15,11 +15,13 @@ import com.ptb.common.enums.PlatformEnum;
 import com.ptb.common.vo.ResponseVo;
 import com.ptb.pay.api.IOrderApi;
 import com.ptb.pay.api.IProductApi;
-import com.ptb.pay.enums.*;
+import com.ptb.pay.enums.ErrorCode;
+import com.ptb.pay.enums.OrderActionEnum;
+import com.ptb.pay.enums.OrderStatusEnum;
+import com.ptb.pay.enums.UserType;
 import com.ptb.pay.mapper.impl.OrderMapper;
 import com.ptb.pay.mapper.impl.ProductMapper;
 import com.ptb.pay.model.Order;
-import com.ptb.pay.model.OrderLog;
 import com.ptb.pay.model.Product;
 import com.ptb.pay.model.order.OrderDetail;
 import com.ptb.pay.service.interfaces.IOrderDetailService;
@@ -29,7 +31,6 @@ import com.ptb.pay.vo.product.ProductVO;
 import com.ptb.pay.vopo.ConvertOrderUtil;
 import com.ptb.pay.vopo.ConvertProductUtil;
 import com.ptb.ucenter.api.IBindMediaApi;
-import com.ptb.pay.vo.order.OrderDetailVO;
 import com.ptb.utils.encrypt.SignUtil;
 import com.ptb.utils.service.ReturnUtil;
 import com.ptb.utils.tool.GenerateOrderNoUtil;
@@ -44,7 +45,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 
 /**
@@ -236,7 +236,7 @@ public class OrderApiImpl implements IOrderApi {
 
     @Transactional (rollbackFor = RuntimeException.class, propagation = Propagation.REQUIRED)
     @Override
-    public ResponseVo submitOrder(long userId, long productId, String desc, int device) {
+    public ResponseVo submitOrder(long userId, long productId, String desc, String device) {
         logger.info("买家提交订单 userID:{}", userId);
 
         try {
@@ -246,7 +246,7 @@ public class OrderApiImpl implements IOrderApi {
                 return ReturnUtil.error("20002", "no product");
             }
             //生成订单号
-            String orderNo = GenerateOrderNoUtil.createOrderNo(2, device, 3);
+            String orderNo = GenerateOrderNoUtil.createOrderNo(device);
             if (orderNo == null){
                 logger.error("generate order no error! userId:{} productId:{}", userId, product.getPtbProductId());
                 return ReturnUtil.error("20002", "no product");
