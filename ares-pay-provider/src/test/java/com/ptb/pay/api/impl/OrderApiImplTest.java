@@ -74,7 +74,7 @@ public class OrderApiImplTest extends BaseTest {
     @Test
     public void submitOrderTest(){
         try {
-            orderApi.submitOrder(112, 41, "test", 1);
+            orderApi.submitOrder(112, 41, "test", "iphone");
         }catch (Exception e){
 
         }

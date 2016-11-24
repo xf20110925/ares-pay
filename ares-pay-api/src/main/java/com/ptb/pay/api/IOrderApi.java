@@ -58,7 +58,7 @@ public interface IOrderApi {
      * @param device
      * @return
      */
-    ResponseVo submitOrder(long userId, long productId, String desc, int device);
+    ResponseVo submitOrder(long userId, long productId, String desc, String device);
 
     /**
      * 买家取消订单

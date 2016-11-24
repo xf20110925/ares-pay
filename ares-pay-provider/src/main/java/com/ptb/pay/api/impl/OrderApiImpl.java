@@ -235,7 +235,7 @@ public class OrderApiImpl implements IOrderApi {
 
     @Transactional (rollbackFor = RuntimeException.class, propagation = Propagation.REQUIRED)
     @Override
-    public ResponseVo submitOrder(long userId, long productId, String desc, int device) {
+    public ResponseVo submitOrder(long userId, long productId, String desc, String device) {
         logger.info("买家提交订单 userID:{}", userId);
 
         try {
