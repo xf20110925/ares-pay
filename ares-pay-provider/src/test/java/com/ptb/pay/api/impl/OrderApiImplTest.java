@@ -49,11 +49,11 @@ public class OrderApiImplTest extends BaseTest {
         OrderListReqVO orderListReqVO = new OrderListReqVO();
         orderListReqVO.setStart(0);
         orderListReqVO.setEnd(10);
-        orderListReqVO.setUserId(517);
+        orderListReqVO.setUserId(776);
         orderListReqVO.setUserType(UserType.USER_IS_SELLER.getUserType());
         orderListReqVO.setDeviceTypeEnum(DeviceTypeEnum.android);
-        orderListReqVO.setOrderStatus(OrderStatusEnum.ORDER_STATUS_NEW_DEAL.getStatus());
-        orderApi.getOrderList(517, orderListReqVO);
+        orderListReqVO.setOrderStatus(OrderStatusEnum.ORDER_STATUS_DEAL_ALL.getStatus());
+        orderApi.getOrderList(776, orderListReqVO);
 
 /*        orderListReqVO.setOrderStatus(OrderStatusEnum.ORDER_STATUS_NEW_DEAL.getStatus());
         orderApi.getOrderList(777, orderListReqVO);

@@ -258,7 +258,6 @@ public class OrderServiceImpl implements IOrderService {
         OrderLog orderLog = new OrderLog();
         orderLog.setOrderNo( orderNo);
         orderLog.setActionType(actionType);
-        orderLog.setActionType( OrderActionEnum.SALER_AGREE_REFUND.getOrderAction());
         orderLog.setCreateTime( createTime);
         orderLog.setUserId( userID);
         orderLog.setUserType( userType);
