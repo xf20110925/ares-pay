@@ -18,7 +18,9 @@ public class ProductApiImplTest extends BaseTest {
 
     @Test
     public void generateProductTest(){
-        ProductVO productVO = new ProductVO(114, ProductOwnerType.USER_TYPE.getType(), "test2", ProductType.MEDIA_SERVICE_TYPE.getType(), 124);
+        ProductVO productVO = new ProductVO(1, ProductOwnerType.USER_TYPE.getType(), "test3", ProductType.MEDIA_SERVICE_TYPE.getType(), 1);
+        productVO.setPmid("aaaaaaaaaaaaaaaa");
+        productVO.setMediaType(123);
         ResponseVo responseVo = productApi.generateProduct(productVO);
         Assert.assertTrue(responseVo.getCode().equals("0"));
     }
@@ -37,7 +39,7 @@ public class ProductApiImplTest extends BaseTest {
 
     @Test
     public void updateProductInfoTest(){
-        ResponseVo responseVo = productApi.updateProductInfo(111, 37, null, 22220000L, 1);
+        ResponseVo responseVo = productApi.updateProductInfo(1, 79, null, 22220000L, 1);
         Assert.assertTrue(responseVo.getCode().equals("0"));
     }
 
