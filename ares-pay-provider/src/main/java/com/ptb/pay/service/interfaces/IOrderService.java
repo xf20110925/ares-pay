@@ -2,7 +2,9 @@ package com.ptb.pay.service.interfaces;
 
 import com.ptb.pay.enums.OrderActionEnum;
 import com.ptb.pay.model.Order;
+import com.ptb.pay.vo.order.OrderTimeAxis;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -122,4 +124,11 @@ public interface IOrderService {
     boolean buyerConfirmOrder(long buyer, Order order);
 
     int getOrderStatus(long orderId);
+
+    /**
+     * 获取订单操作日志时间轴
+     * @param orderNo
+     * @return
+     */
+    List<OrderTimeAxis> getOrderTimeAxises(String orderNo);
 }

@@ -18,6 +18,7 @@ import com.ptb.pay.enums.*;
 import com.ptb.pay.mapper.impl.OrderMapper;
 import com.ptb.pay.mapper.impl.ProductMapper;
 import com.ptb.pay.model.Order;
+import com.ptb.pay.model.OrderLog;
 import com.ptb.pay.model.Product;
 import com.ptb.pay.model.order.OrderDetail;
 import com.ptb.pay.service.interfaces.IOrderDetailService;
@@ -332,30 +333,30 @@ public class OrderApiImpl implements IOrderApi {
 
     @Override
     public ResponseVo getOrderInfo(long userId, Long orderId) {
+        //获取订单
         Order order = orderMapper.selectByPrimaryKey(orderId);
         if(null == order || (userId != order.getBuyerId() && userId != order.getSellerId()))
             return ReturnUtil.error(ErrorCode.ORDER_API_5005.getCode(), ErrorCode.ORDER_API_5005.getMessage());
         OrderVO orderVO = ConvertOrderUtil.convertOrderToOrderVO(order);
 
+        //生成按钮状态
         Map<String,Object> map = null;
         if(userId == order.getBuyerId())
             map = orderService.getBuyerOrderStatus("" +order.getOrderStatus() + order.getSellerStatus() + order.getBuyerStatus());
         else
             map = orderService.getSalerOrderStatus("" +order.getOrderStatus() + order.getSellerStatus() + order.getBuyerStatus());
 
-        if (map.get("button") != null){
-            orderVO.setButton(map.get("button").toString());
-        }else {
-            orderVO.setButton(null);
-        }
-        if (map.get("desc") != null){
-            orderVO.setDesc(map.get("desc").toString());
-        }else {
-            orderVO.setDesc(null);
-        }
+        orderVO.setDesc(map.get("desc") != null?map.get("desc").toString():null);
+        orderVO.setButton(map.get("button") != null?map.get("button").toString():null);
+
+        //获取商品
         OrderDetailVO orderDetail = orderDetailService.getOrderDetail(order.getOrderNo());
         ResponseVo<ProductVO> responseVo = productApi.getProduct(userId, orderDetail.getProductId());
         orderVO.setProductVOList(singletonList(responseVo.getData()));
+
+        //获取时间轴
+        orderVO.setTimeAxises(orderService.getOrderTimeAxises(order.getOrderNo()));
+
         return ReturnUtil.success(orderVO);
     }
 
@@ -518,16 +519,8 @@ public class OrderApiImpl implements IOrderApi {
         List<String> orderNoList = new ArrayList<>();
         orderListVO.getOrderVOList().forEach(item->{
             Map<String, Object> map = finalUserType ==UserType.USER_IS_SELLER.getUserType()?orderService.getSalerOrderStatus( ""+item.getOrderStatus()+item.getSellerStatus()+item.getBuyerStatus()):orderService.getBuyerOrderStatus(""+item.getOrderStatus()+item.getSellerStatus()+item.getBuyerStatus());
-            if (map.get("button") != null){
-                item.setButton(map.get("button").toString());
-            }else {
-                item.setButton(null);
-            }
-            if (map.get("desc") != null){
-                item.setDesc(map.get("desc").toString());
-            }else {
-                item.setDesc(null);
-            }
+            item.setDesc(map.get("desc") != null?map.get("desc").toString():null);
+            item.setButton(map.get("button") != null?map.get("button").toString():null);
             orderNoList.add(item.getOrderNo());
         });
 

@@ -9,6 +9,7 @@ import com.ptb.pay.mapper.impl.OrderMapper;
 import com.ptb.pay.model.Order;
 import com.ptb.pay.model.OrderLog;
 import com.ptb.pay.service.interfaces.IOrderService;
+import com.ptb.pay.vo.order.OrderTimeAxis;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +19,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Created by zuokui.fu on 2016/11/16.
@@ -35,6 +38,7 @@ public class OrderServiceImpl implements IOrderService {
 
     private static Map<String, Object> salerOrderStatusMap = new HashMap<>();
     private static Map<String, Object> buyerOrderStatusMap = new HashMap<>();
+    private static Map<Integer, String> orderActionTimeAxis = new HashMap<>();
 
     static {
         Map<String, Object> map =  new HashMap();map.put( "button", "6");   map.put( "desc", "等待买家付款");salerOrderStatusMap.put( "000", map);
@@ -58,6 +62,15 @@ public class OrderServiceImpl implements IOrderService {
         Map<String, Object> m7 = new HashMap();m7.put( "button", null);  m7.put( "desc", "已完成");buyerOrderStatusMap.put( "213", m7);
         Map<String, Object> m8 = new HashMap();m8.put( "button", "3");   m8.put( "desc", "进行中");buyerOrderStatusMap.put( "104", m8);
         Map<String, Object> m9 = new HashMap();m9.put( "button", "3,5"); m9.put( "desc", "卖家已投放完成");buyerOrderStatusMap.put( "114", m9);
+
+        orderActionTimeAxis.put(OrderActionEnum.BUYER_SUBMIT_ORDER.getOrderAction(), "创建");
+        orderActionTimeAxis.put(OrderActionEnum.BUYER_PAY.getOrderAction(), "付款");
+        orderActionTimeAxis.put(OrderActionEnum.BUYER_APPLY_REFUND.getOrderAction(), "申请退款");
+        orderActionTimeAxis.put(OrderActionEnum.BUYER_CANCEL_REFUND.getOrderAction(), "取消申请退款");
+        orderActionTimeAxis.put(OrderActionEnum.SALER_COMPLETE.getOrderAction(), "投放完成");
+        orderActionTimeAxis.put(OrderActionEnum.BUYER_COMPLETE.getOrderAction(), "订单完成");
+        orderActionTimeAxis.put(OrderActionEnum.SALER_AGREE_REFUND.getOrderAction(), "订单完成");
+        orderActionTimeAxis.put(OrderActionEnum.BUYER_CANCAL_ORDER.getOrderAction(), "订单完成");
 
     }
 
@@ -233,6 +246,14 @@ public class OrderServiceImpl implements IOrderService {
             return -1;
         }
         return order.getOrderStatus();
+    }
+
+    @Override
+    public List<OrderTimeAxis> getOrderTimeAxises(String orderNo) {
+        return  orderLogMapper.selectByOrderNo(orderNo).stream().map(item->{
+            String desc = orderActionTimeAxis.get(item.getActionType());
+            return desc == null?null:new OrderTimeAxis(item.getCreateTime().getTime(), desc);
+        }).filter(timePoint->timePoint!=null).collect(Collectors.toList());
     }
 
     public int insertOrderLog(String orderNo, int actionType, Date createTime, String remarks, long userID, int userType){

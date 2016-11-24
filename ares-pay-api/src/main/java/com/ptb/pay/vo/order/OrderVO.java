@@ -44,6 +44,8 @@ public class OrderVO implements Serializable{
 
     private List<ProductVO> productVOList;
 
+    private List<OrderTimeAxis> timeAxises;
+
     public Long getPtbOrderId() {
         return ptbOrderId;
     }
@@ -178,5 +180,13 @@ public class OrderVO implements Serializable{
 
     public void setProductVOList(List<ProductVO> productVOList) {
         this.productVOList = productVOList;
+    }
+
+    public List<OrderTimeAxis> getTimeAxises() {
+        return timeAxises;
+    }
+
+    public void setTimeAxises(List<OrderTimeAxis> timeAxises) {
+        this.timeAxises = timeAxises;
     }
 }
