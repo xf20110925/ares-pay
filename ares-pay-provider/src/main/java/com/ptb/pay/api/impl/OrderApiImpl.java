@@ -2,6 +2,7 @@ package com.ptb.pay.api.impl;
 
 import com.alibaba.dubbo.common.json.JSON;
 import com.alibaba.dubbo.common.utils.CollectionUtils;
+import com.alibaba.dubbo.common.utils.StringUtils;
 import com.alibaba.dubbo.rpc.RpcContext;
 import com.alibaba.fastjson.JSONObject;
 import com.ptb.account.api.IAccountApi;
@@ -423,7 +424,7 @@ public class OrderApiImpl implements IOrderApi {
                 return ReturnUtil.error(ErrorCode.ORDER_API_5004.getCode(), ErrorCode.ORDER_API_5004.getMessage());
 
             //密码不能为空
-            if(confirmOrderVO.getPassword() == null){
+            if(StringUtils.isBlank(confirmOrderVO.getPassword())){
                 return ReturnUtil.error(ErrorCode.PAY_API_COMMMON_1001.getCode(), ErrorCode.PAY_API_COMMMON_1001.getMessage());
             }
             if(!orderService.checkOrderStatus(OrderActionEnum.BUYER_COMPLETE, order.getOrderStatus(),order.getSellerStatus(), order.getBuyerStatus())){

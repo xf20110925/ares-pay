@@ -198,7 +198,7 @@ public class OrderServiceImpl implements IOrderService {
         orderLog.setActionType(OrderActionEnum.SALER_COMPLETE.getOrderAction());
         orderLog.setCreateTime(date);
         orderLog.setOrderNo(order.getOrderNo());
-        orderLog.setRemarks("卖家确认完成");
+        orderLog.setRemarks(OrderActionEnum.SALER_COMPLETE.getDesc());
         orderLog.setUserType(UserType.USER_IS_SELLER.getUserType());
         orderLog.setUserId(order.getSellerId());
         ia = orderLogMapper.insert(orderLog);
@@ -227,7 +227,7 @@ public class OrderServiceImpl implements IOrderService {
         orderLog.setActionType(OrderActionEnum.BUYER_COMPLETE.getOrderAction());
         orderLog.setCreateTime(date);
         orderLog.setOrderNo(order.getOrderNo());
-        orderLog.setRemarks("买家确认完成");
+        orderLog.setRemarks(OrderActionEnum.BUYER_COMPLETE.getDesc());
         orderLog.setUserType(UserType.USER_IS_BUYER.getUserType());
         orderLog.setUserId(order.getBuyerId());
         ia = orderLogMapper.insert(orderLog);
