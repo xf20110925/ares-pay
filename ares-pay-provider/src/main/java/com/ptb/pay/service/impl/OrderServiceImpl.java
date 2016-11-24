@@ -176,7 +176,7 @@ public class OrderServiceImpl implements IOrderService {
         }
         Order order = orderMapper.selectByPrimaryKey(orderId);
         String remarks = String.format("卖家修改价格 price:%d", price);
-        this.insertOrderLog(order.getOrderNo(), 6, new Date(), remarks, userId, UserType.USER_IS_SELLER.getUserType());
+        this.insertOrderLog(order.getOrderNo(), OrderActionEnum.SALER_MODIFY_PRICE.getOrderAction(), new Date(), remarks, userId, UserType.USER_IS_SELLER.getUserType());
         return update;
     }
 
