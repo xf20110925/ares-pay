@@ -19,6 +19,8 @@ import com.ptb.pay.model.vo.AccountRechargeParamMessageVO;
 import com.ptb.pay.service.BusService;
 import com.ptb.pay.service.ThirdPaymentNotifyLogService;
 import com.ptb.pay.service.interfaces.IOnlinePaymentService;
+import com.ptb.pay.utils.alipayweb.util.AlipaySubmit;
+import com.ptb.pay.vo.CheckPayResultVO;
 import com.ptb.service.api.ISystemConfigApi;
 import com.ptb.utils.encrypt.SignUtil;
 import com.ptb.utils.tool.ChangeMoneyUtil;
@@ -30,7 +32,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
-import com.ptb.pay.vo.CheckPayResultVO;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -85,6 +86,21 @@ public class AlipayOnlinePaymentServiceImpl implements IOnlinePaymentService {
      * 支付宝提供的公钥，用来验签的，跟上面的私钥不是一对
      */
     private static final String SYSTEM_CONFIG_ALIPAY_PUBLICKEY = "alipay.publicKey";
+
+    /**
+     * PC支付方式支付宝提供的公钥，用来验签的，跟上面的不一样
+     */
+    private static final String SYSTEM_CONFIG_ALIPAY_PC_PUBLICKEY = "alipay.pc.publicKey";
+
+    /**
+     * PC支付方式同步跳转页面地址
+     */
+    private static final String SYSTEM_CONFIG_ALIPAY_PC_RETURNURL = "alipay.pc.returnUrl";
+
+    /**
+     * PC支付方式异步通知地址
+     */
+    private static final String SYSTEM_CONFIG_ALIPAY_PC_NOTIFYURL = "alipay.pc.notifyUrl";
 
     private static AlipayConfig alipayConfig;
 
@@ -152,6 +168,34 @@ public class AlipayOnlinePaymentServiceImpl implements IOnlinePaymentService {
     }
 
     @Override
+    public String getPcPaymentInfo(String rechargeOrderNo, Long price) throws Exception {
+        AlipayConfig alipayConfig = getAlipayConfig();
+
+        //把请求参数打包成数组
+        Map<String, String> sParaTemp = new HashMap<String, String>();
+        sParaTemp.put("service", alipayConfig.getPcService());
+        sParaTemp.put("partner", alipayConfig.getPartner());
+        sParaTemp.put("seller_id", alipayConfig.getSellerId());
+        sParaTemp.put("_input_charset", alipayConfig.getCharset());
+        sParaTemp.put("payment_type", alipayConfig.getPaymentType());
+        sParaTemp.put("notify_url", alipayConfig.getPcNotifyUrl());
+        sParaTemp.put("return_url", alipayConfig.getPcReturnUrl());
+        sParaTemp.put("out_trade_no", rechargeOrderNo);
+        sParaTemp.put("qr_pay_mode", "2"); //二维码跳转模式
+        sParaTemp.put("subject", alipayConfig.getSubject());
+        sParaTemp.put("total_fee", ChangeMoneyUtil.fromFenToYuan(String.valueOf(price)));
+        sParaTemp.put("body", alipayConfig.getBody());
+        sParaTemp.put("extra_common_param", DeviceTypeEnum.PC.getDeviceType()); //扩展参数
+
+        //其他业务参数根据在线开发文档，添加参数.文档地址:https://doc.open.alipay.com/doc2/detail.htm?spm=a219a.7629140.0.0.O9yorI&treeId=62&articleId=103740&docType=1
+        //如sParaTemp.put("参数名","参数值");
+
+        //建立请求
+        String sHtmlText = AlipaySubmit.buildRequest(sParaTemp, "get", "确认", alipayConfig.getPrivateKey(), alipayConfig.getCharset());
+        return sHtmlText;
+    }
+
+    @Override
     public CheckPayResultVO checkPayResult(String payResult) throws Exception {
         CheckPayResultVO resultVO = new CheckPayResultVO();
         if (StringUtils.isBlank(payResult)) {
@@ -195,8 +239,14 @@ public class AlipayOnlinePaymentServiceImpl implements IOnlinePaymentService {
         boolean checkResult = true;
         CheckPayResultVO resultVO = new CheckPayResultVO();
 
+        String deviceType = params.get("extra_common_param");
         String rechargeOrderNo = params.get("out_trade_no");
-        String rechargeAmount = params.get("total_amount");
+        String rechargeAmount = "";
+        if(DeviceTypeEnum.PC.getDeviceType().equalsIgnoreCase(deviceType)){ //pc跟app支付不一样
+            rechargeAmount = params.get("total_fee");
+        } else {
+            rechargeAmount = params.get("total_amount");
+        }
         String sellerId = params.get("seller_id");
         String appId = params.get("app_id");
 
@@ -224,12 +274,15 @@ public class AlipayOnlinePaymentServiceImpl implements IOnlinePaymentService {
             resultVO.setPayResult(checkResult);
             return resultVO;
         }
-        //验证APPID
-        String ourAppId = alipayConfig.getAppId();
-        if (!appId.equals(ourAppId)) {
-            checkResult = false;
-            resultVO.setPayResult(checkResult);
-            return resultVO;
+
+        if(!DeviceTypeEnum.PC.getDeviceType().equalsIgnoreCase(deviceType)){
+            //验证APPID
+            String ourAppId = alipayConfig.getAppId();
+            if (!appId.equals(ourAppId)) {
+                checkResult = false;
+                resultVO.setPayResult(checkResult);
+                return resultVO;
+            }
         }
 
         resultVO.setPayResult(checkResult);
@@ -245,7 +298,13 @@ public class AlipayOnlinePaymentServiceImpl implements IOnlinePaymentService {
         String tradeStatus = params.get("trade_status");
         if ("TRADE_FINISHED".equals(tradeStatus) || "TRADE_SUCCESS".equals(tradeStatus)) {
             AlipayConfig alipayConfig = getAlipayConfig();
-            String publickKey = alipayConfig.getPublicKey();
+            String publickKey = "";
+            String deviceType = params.get("extra_common_param");
+            if(DeviceTypeEnum.PC.getDeviceType().equalsIgnoreCase(deviceType)){
+                publickKey = alipayConfig.getPcPublickKey();
+            } else {
+                publickKey = alipayConfig.getPublicKey();
+            }
             boolean checkResult = AlipaySignature.rsaCheckV1(params, publickKey, alipayConfig.getCharset());
             if (checkResult) {
                 CheckPayResultVO resultVO = checkPayResponse(params);
@@ -331,6 +390,10 @@ public class AlipayOnlinePaymentServiceImpl implements IOnlinePaymentService {
             params.add(SYSTEM_CONFIG_ALIPAY_RETURNURL);
             params.add(SYSTEM_CONFIG_ALIPAY_PRIVATEKEY);
             params.add(SYSTEM_CONFIG_ALIPAY_PUBLICKEY);
+            params.add(SYSTEM_CONFIG_ALIPAY_PC_PUBLICKEY);
+            params.add(SYSTEM_CONFIG_ALIPAY_PC_RETURNURL);
+            params.add(SYSTEM_CONFIG_ALIPAY_PC_NOTIFYURL);
+
             ResponseVo<Map<String, String>> result = systemConfigApi.getConfigs(params);
             if (result == null || CollectionUtils.isEmpty(result.getData())) {
                 return null;
@@ -345,6 +408,10 @@ public class AlipayOnlinePaymentServiceImpl implements IOnlinePaymentService {
             alipayConfig.setReturnUrl(alipayInfo.get(SYSTEM_CONFIG_ALIPAY_RETURNURL));
             alipayConfig.setPrivateKey(alipayInfo.get(SYSTEM_CONFIG_ALIPAY_PRIVATEKEY));
             alipayConfig.setPublicKey(alipayInfo.get(SYSTEM_CONFIG_ALIPAY_PUBLICKEY));
+
+            alipayConfig.setPcPublickKey(alipayInfo.get(SYSTEM_CONFIG_ALIPAY_PC_PUBLICKEY));
+            alipayConfig.setPcReturnUrl(alipayInfo.get(SYSTEM_CONFIG_ALIPAY_PC_RETURNURL));
+            alipayConfig.setPcNotifyUrl(alipayInfo.get(SYSTEM_CONFIG_ALIPAY_PC_NOTIFYURL));
         }
         return alipayConfig;
     }

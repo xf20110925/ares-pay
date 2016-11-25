@@ -22,6 +22,14 @@ public class AlipayConfig {
     private String method = "alipay.trade.app.pay";
     private String signType = "RSA";
     private String productCode = "QUICK_MSECURITY_PAY";
+//    -------------------pc start------------------------------------
+    private String pcNotifyUrl;
+    private String pcReturnUrl;
+    private String pcPublickKey;
+    // 支付类型 ，无需修改
+    private String paymentType = "1";
+    // 调用的接口名，无需修改
+    private String pcService = "create_direct_pay_by_user";
 
     public String getVersion() {
         return version;
@@ -133,5 +141,45 @@ public class AlipayConfig {
 
     public void setCharset(String charset) {
         this.charset = charset;
+    }
+
+    public String getPcNotifyUrl() {
+        return pcNotifyUrl;
+    }
+
+    public void setPcNotifyUrl(String pcNotifyUrl) {
+        this.pcNotifyUrl = pcNotifyUrl;
+    }
+
+    public String getPcReturnUrl() {
+        return pcReturnUrl;
+    }
+
+    public void setPcReturnUrl(String pcReturnUrl) {
+        this.pcReturnUrl = pcReturnUrl;
+    }
+
+    public String getPaymentType() {
+        return paymentType;
+    }
+
+    public void setPaymentType(String paymentType) {
+        this.paymentType = paymentType;
+    }
+
+    public String getPcService() {
+        return pcService;
+    }
+
+    public void setPcService(String pcService) {
+        this.pcService = pcService;
+    }
+
+    public String getPcPublickKey() {
+        return pcPublickKey;
+    }
+
+    public void setPcPublickKey(String pcPublickKey) {
+        this.pcPublickKey = pcPublickKey;
     }
 }

@@ -19,6 +19,11 @@ public class WxpayOnlinePaymentServiceImpl implements IOnlinePaymentService{
     }
 
     @Override
+    public String getPcPaymentInfo(String rechargeOrderNo, Long price) throws Exception {
+        return null;
+    }
+
+    @Override
     public CheckPayResultVO checkPayResult(String payResult) throws Exception {
         return null;
     }

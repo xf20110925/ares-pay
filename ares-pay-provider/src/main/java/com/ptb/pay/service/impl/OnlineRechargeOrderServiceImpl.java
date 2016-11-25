@@ -1,5 +1,6 @@
 package com.ptb.pay.service.impl;
 
+import com.ptb.common.enums.DeviceTypeEnum;
 import com.ptb.common.enums.RechargeOrderStatusEnum;
 import com.ptb.pay.mapper.impl.RechargeOrderMapper;
 import com.ptb.pay.model.RechargeOrder;
@@ -50,7 +51,12 @@ public class OnlineRechargeOrderServiceImpl implements IRechargeOrderService{
     @Override
     public Map<String, Object> getReturnData(RechargeOrder rechargeOrder) throws Exception {
         IOnlinePaymentService onlinePaymentService = OnlinePaymentServiceFactory.createService(rechargeOrder.getPayType());
-        String orderInfo = onlinePaymentService.getPaymentInfo(rechargeOrder.getRechargeOrderNo(), rechargeOrder.getTotalAmount());
+        String orderInfo = null;
+        if(DeviceTypeEnum.PC.getDeviceType().equalsIgnoreCase(rechargeOrder.getDeviceType())){
+            orderInfo = onlinePaymentService.getPcPaymentInfo(rechargeOrder.getRechargeOrderNo(), rechargeOrder.getTotalAmount());
+        } else {
+            orderInfo = onlinePaymentService.getPaymentInfo(rechargeOrder.getRechargeOrderNo(), rechargeOrder.getTotalAmount());
+        }
         Map<String, Object> returnData = new HashMap<String, Object>();
         returnData.put("rechargeOrderNo", rechargeOrder.getRechargeOrderNo());
         returnData.put("orderInfo", orderInfo);

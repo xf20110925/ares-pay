@@ -22,6 +22,15 @@ public interface IOnlinePaymentService {
     String getPaymentInfo(String rechargeOrderNo, Long price) throws Exception;
 
     /**
+     * Description: 获取第三方支付PC端所需的参数
+     * All Rights Reserved.
+     * @param
+     * @return 
+     * @version 1.0  2016-11-25 14:23 by wgh（guanhua.wang@pintuibao.cn）创建
+     */ 
+    String getPcPaymentInfo(String rechargeOrderNo, Long price) throws Exception;
+
+    /**
      * Description: 校验线上支付结果
      * All Rights Reserved.
      * @param
