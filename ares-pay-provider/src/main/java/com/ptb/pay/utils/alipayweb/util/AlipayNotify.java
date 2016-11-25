@@ -52,7 +52,7 @@ public class AlipayNotify {
         //String sWord = "responseTxt=" + responseTxt + "\n isSign=" + isSign + "\n 返回回来的参数：" + AlipayCore.createLinkString(params);
 	    //AlipayCore.logResult(sWord);
 
-        if (isSign && responseTxt.equals("true")) {
+        if (isSign && "true".equals(responseTxt)) {
             return true;
         } else {
             return false;
