@@ -39,7 +39,7 @@ public class ProductApiImplTest extends BaseTest {
 
     @Test
     public void updateProductInfoTest(){
-        ResponseVo responseVo = productApi.updateProductInfo(1, 79, null, 22220000L, 1);
+        ResponseVo responseVo = productApi.updateProductInfo(1, 24, null, null, 1);
         Assert.assertTrue(responseVo.getCode().equals("0"));
     }
 

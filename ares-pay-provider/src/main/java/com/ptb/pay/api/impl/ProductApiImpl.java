@@ -92,7 +92,9 @@ public class ProductApiImpl implements IProductApi {
             return ReturnUtil.error(ErrorCode.PRODUCT_API_NO_EXISTS.getCode(), ErrorCode.PRODUCT_API_NO_EXISTS.getMessage());
         }
 
-        if(state == ProductState.PRODUCT_ON_SELL.getStatus() && ( prince == null || prince < 1) && product.getPrice() < 1)
+        if(state == ProductState.PRODUCT_ON_SELL.getStatus() &&
+                (( prince == null && product.getPrice() < 1) || (prince != null && prince < 1 && product.getPrice() <1))
+                )
             return ReturnUtil.error(ErrorCode.PRODUCT_API_PRICE_LESS_ONE.getCode(), ErrorCode.PRODUCT_API_PRICE_LESS_ONE.getMessage());
 
         product.setDesc(desc);
