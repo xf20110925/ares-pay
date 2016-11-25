@@ -45,6 +45,10 @@ public class RechargeOrderApiImpl implements IRechargeOrderApi {
     public ResponseVo<Map<String, Object>> createRechargeOrder(RechargeOrderParamsVO paramsVO) throws Exception {
         IRechargeOrderService rechargeOrderService = RechargeOrderServiceFactory.createService(paramsVO.getPayMethod());
         RechargeOrder rechargeOrder = rechargeOrderService.createRechargeOrder(paramsVO);
+        if(rechargeOrder == null){
+            return ReturnUtil.error(CommonErrorCode.COMMMON_ERROR_ARGSERROR.getCode(),
+                    CommonErrorCode.COMMMON_ERROR_ARGSERROR.getMessage());
+        }
         return ReturnUtil.success(rechargeOrderService.getReturnData(rechargeOrder));
     }
 
