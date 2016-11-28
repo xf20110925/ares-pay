@@ -103,25 +103,27 @@ public class RechargeOrderApiImpl implements IRechargeOrderApi {
     public ResponseVo<RechargeOrderVO> getRechargeOrderDetail(Long rechargeOrderId, Long userId) {
         RechargeOrderVO orderVO = new RechargeOrderVO();
         RechargeOrder order = rechargeOrderMapper.selectByIdAndUserId( rechargeOrderId, userId);
-        orderVO.setPayTime(order.getPayTime());
-        orderVO.setPayType(order.getPayType());
-        orderVO.setCreateTime(order.getCreateTime());
-        orderVO.setUserId(order.getUserId());
-        orderVO.setDeviceType(order.getDeviceType());
-        orderVO.setOrderId(order.getPtbRechargeOrderId());
-        orderVO.setRechargeAmount(order.getTotalAmount());
-        orderVO.setStatus(order.getStatus());
-        orderVO.setVerificationCode(order.getVerificationCode());
-        orderVO.setPayMethod(order.getPayMethod());
-        orderVO.setRechargeOrderNo(order.getRechargeOrderNo());
-        orderVO.setPtbRechargeOrderId( order.getPtbRechargeOrderId());
-        OfflinePaymentConfig config = paymentService.getOfflinePaymentConfig();
-        Map<String, Object> bankInfo = new HashMap<>();
-        bankInfo.put("bankName", config.getBankName());
-        bankInfo.put("openAccountBankName", config.getOpenAccountBankName());
-        bankInfo.put("openAccountUserName", config.getOpenAccountUserName());
-        bankInfo.put("openAccountUserNum", config.getOpenAccountUserNum());
-        orderVO.setBankInfo( bankInfo);
+        if ( null != order) {
+            orderVO.setPayTime(order.getPayTime());
+            orderVO.setPayType(order.getPayType());
+            orderVO.setCreateTime(order.getCreateTime());
+            orderVO.setUserId(order.getUserId());
+            orderVO.setDeviceType(order.getDeviceType());
+            orderVO.setOrderId(order.getPtbRechargeOrderId());
+            orderVO.setRechargeAmount(order.getTotalAmount());
+            orderVO.setStatus(order.getStatus());
+            orderVO.setVerificationCode(order.getVerificationCode());
+            orderVO.setPayMethod(order.getPayMethod());
+            orderVO.setRechargeOrderNo(order.getRechargeOrderNo());
+            orderVO.setPtbRechargeOrderId(order.getPtbRechargeOrderId());
+            OfflinePaymentConfig config = paymentService.getOfflinePaymentConfig();
+            Map<String, Object> bankInfo = new HashMap<>();
+            bankInfo.put("bankName", config.getBankName());
+            bankInfo.put("openAccountBankName", config.getOpenAccountBankName());
+            bankInfo.put("openAccountUserName", config.getOpenAccountUserName());
+            bankInfo.put("openAccountUserNum", config.getOpenAccountUserNum());
+            orderVO.setBankInfo(bankInfo);
+        }
         return ReturnUtil.success( orderVO);
     }
 }
