@@ -257,7 +257,7 @@ public class OrderApiImpl implements IOrderApi {
             OrderVO orderVO = JSON.parse(json, OrderVO.class);
 
             //添加订单详情
-            OrderDetailVO orderDetailVO = orderDetailService.convertOrderDetailVO(orderNo, product.getPrice(), 0, product.getPtbProductId());
+            OrderDetailVO orderDetailVO = orderDetailService.convertOrderDetailVO(orderNo, product.getPrice(), product.getPrice(), product.getPtbProductId());
             int insert = orderDetailService.insertOrderDetail(orderDetailVO);
             if (insert < 1){
                 logger.error("insert order detail error! orderNo:{} product iD:{}", orderNo, product.getPtbProductId());
