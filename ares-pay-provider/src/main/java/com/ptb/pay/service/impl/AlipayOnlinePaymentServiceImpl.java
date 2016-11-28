@@ -22,9 +22,11 @@ import com.ptb.pay.service.interfaces.IOnlinePaymentService;
 import com.ptb.pay.utils.alipayweb.util.AlipayNotify;
 import com.ptb.pay.utils.alipayweb.util.AlipaySubmit;
 import com.ptb.pay.vo.CheckPayResultVO;
+import com.ptb.service.api.IBaiduPushApi;
 import com.ptb.service.api.ISystemConfigApi;
 import com.ptb.utils.encrypt.SignUtil;
 import com.ptb.utils.tool.ChangeMoneyUtil;
+import enums.MessageTypeEnum;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.DateFormatUtils;
 import org.slf4j.Logger;
@@ -33,6 +35,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
+import vo.PushMessageVO;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -121,6 +124,9 @@ public class AlipayOnlinePaymentServiceImpl implements IOnlinePaymentService {
 
     @Autowired
     private BusService busService;
+
+    @Autowired
+    private IBaiduPushApi baiduPushApi;
 
     @Override
     public String getPaymentInfo(String rechargeOrderNo, Long price) throws Exception {
@@ -345,6 +351,16 @@ public class AlipayOnlinePaymentServiceImpl implements IOnlinePaymentService {
                         sendRetryMessage(rechargeParam);
                     } else {
                         LOGGER.info("充值订单号：" + rechargeOrderNo + "充值成功!");
+                        //推送消息
+                        PushMessageVO pushMessageVO = new PushMessageVO();
+                        pushMessageVO.setUserId( rechargeOrder.getUserId());
+                        pushMessageVO.setDeviceType( DeviceTypeEnum.getDeviceTypeEnum(rechargeOrder.getDeviceType()));
+                        pushMessageVO.setTitle( "充值成功（在线充值）");
+                        pushMessageVO.setMessage( "恭喜您，成功充值"+rechargeOrder.getTotalAmount()/100+"元，已自动转入钱包余额");
+                        pushMessageVO.setMessageType(MessageTypeEnum.ONLINE_RECHARGE.getMessageType());
+                        Map<String, Object> param = new HashMap<>();
+                        param.put("id", rechargeOrder.getPtbRechargeOrderId());
+                        baiduPushApi.pushMessage( pushMessageVO);
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
