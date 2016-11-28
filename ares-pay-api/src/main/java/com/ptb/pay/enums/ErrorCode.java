@@ -21,6 +21,7 @@ public enum ErrorCode {
     PRODUCT_API_REPEAT("6000", "相同用户商品重复"),
     PRODUCT_API_NO_EXISTS("6001", "商品不存在"),
     PRODUCT_API_PARAMETER_ERROR("6002", "参数错误"),
+    PRODUCT_API_PRICE_LESS_ONE("6003", "价格不能小于1分"),
     ;
 
 

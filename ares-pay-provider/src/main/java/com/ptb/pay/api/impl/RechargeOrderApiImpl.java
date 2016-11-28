@@ -45,6 +45,10 @@ public class RechargeOrderApiImpl implements IRechargeOrderApi {
     public ResponseVo<Map<String, Object>> createRechargeOrder(RechargeOrderParamsVO paramsVO) throws Exception {
         IRechargeOrderService rechargeOrderService = RechargeOrderServiceFactory.createService(paramsVO.getPayMethod());
         RechargeOrder rechargeOrder = rechargeOrderService.createRechargeOrder(paramsVO);
+        if(rechargeOrder == null){
+            return ReturnUtil.error(CommonErrorCode.COMMMON_ERROR_ARGSERROR.getCode(),
+                    CommonErrorCode.COMMMON_ERROR_ARGSERROR.getMessage());
+        }
         return ReturnUtil.success(rechargeOrderService.getReturnData(rechargeOrder));
     }
 
@@ -99,6 +103,9 @@ public class RechargeOrderApiImpl implements IRechargeOrderApi {
     public ResponseVo<RechargeOrderVO> getRechargeOrderDetail(Long rechargeOrderId, Long userId) {
         RechargeOrderVO orderVO = new RechargeOrderVO();
         RechargeOrder order = rechargeOrderMapper.selectByIdAndUserId( rechargeOrderId, userId);
+        if ( null == order) {
+            return ReturnUtil.success( null);
+        }
         orderVO.setPayTime(order.getPayTime());
         orderVO.setPayType(order.getPayType());
         orderVO.setCreateTime(order.getCreateTime());
@@ -110,14 +117,14 @@ public class RechargeOrderApiImpl implements IRechargeOrderApi {
         orderVO.setVerificationCode(order.getVerificationCode());
         orderVO.setPayMethod(order.getPayMethod());
         orderVO.setRechargeOrderNo(order.getRechargeOrderNo());
-        orderVO.setPtbRechargeOrderId( order.getPtbRechargeOrderId());
+        orderVO.setPtbRechargeOrderId(order.getPtbRechargeOrderId());
         OfflinePaymentConfig config = paymentService.getOfflinePaymentConfig();
         Map<String, Object> bankInfo = new HashMap<>();
         bankInfo.put("bankName", config.getBankName());
         bankInfo.put("openAccountBankName", config.getOpenAccountBankName());
         bankInfo.put("openAccountUserName", config.getOpenAccountUserName());
         bankInfo.put("openAccountUserNum", config.getOpenAccountUserNum());
-        orderVO.setBankInfo( bankInfo);
+        orderVO.setBankInfo(bankInfo);
         return ReturnUtil.success( orderVO);
     }
 }

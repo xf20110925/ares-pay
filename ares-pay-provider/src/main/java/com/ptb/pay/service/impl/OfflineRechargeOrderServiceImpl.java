@@ -9,6 +9,7 @@ import com.ptb.pay.service.interfaces.IRechargeOrderService;
 import com.ptb.pay.vo.RechargeOrderParamsVO;
 import com.ptb.utils.tool.GenerateOrderNoUtil;
 import org.apache.commons.lang.RandomStringUtils;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,12 +35,17 @@ public class OfflineRechargeOrderServiceImpl implements IRechargeOrderService {
 
     @Override
     public RechargeOrder createRechargeOrder(RechargeOrderParamsVO paramsVO) throws Exception {
+
+        String rechargeOrderNo = GenerateOrderNoUtil.createRechargeOrderNo(paramsVO.getDeviceType(), paramsVO.getPayMethod());
+        if(StringUtils.isBlank(rechargeOrderNo)){
+            return null;
+        }
         Date now = new Date();
         RechargeOrder rechargeOrder = new RechargeOrder();
         rechargeOrder.setCreateTime(now);
         rechargeOrder.setOrderNo(paramsVO.getOrderNo());
         rechargeOrder.setPayMethod(paramsVO.getPayMethod());
-        rechargeOrder.setRechargeOrderNo(GenerateOrderNoUtil.createRechargeOrderNo(paramsVO.getDeviceType(), paramsVO.getPayMethod()));
+        rechargeOrder.setRechargeOrderNo(rechargeOrderNo);
         rechargeOrder.setStatus(RechargeOrderStatusEnum.review.getRechargeOrderStatus());
         rechargeOrder.setTotalAmount(paramsVO.getRechargeAmount());
         rechargeOrder.setVerificationCode(RandomStringUtils.randomNumeric(6));
