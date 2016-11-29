@@ -70,13 +70,6 @@ public class PaymentApiImpl implements IPaymentApi {
     }
 
     @Override
-    public ResponseVo<Map<String, Object>> createRechargeOrder(RechargeOrderParamsVO paramsVO) throws Exception {
-        IRechargeOrderService rechargeOrderService = RechargeOrderServiceFactory.createService(paramsVO.getPayMethod());
-        RechargeOrder rechargeOrder = rechargeOrderService.createRechargeOrder(paramsVO);
-        return ReturnUtil.success(rechargeOrderService.getReturnData(rechargeOrder));
-    }
-
-    @Override
     public ResponseVo<CheckPayResultVO> checkOnlinePayResult(RechargeOrderParamsVO paramsVO) throws Exception {
         IOnlinePaymentService onlinePaymentService = OnlinePaymentServiceFactory.createService(paramsVO.getPayType());
         CheckPayResultVO resultVO = onlinePaymentService.checkPayResult(paramsVO.getPayResult());
