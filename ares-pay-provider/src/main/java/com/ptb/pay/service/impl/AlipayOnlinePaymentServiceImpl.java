@@ -35,7 +35,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
-import vo.PushMessageVO;
+import vo.param.PushMessageParam;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -352,15 +352,15 @@ public class AlipayOnlinePaymentServiceImpl implements IOnlinePaymentService {
                     } else {
                         LOGGER.info("充值订单号：" + rechargeOrderNo + "充值成功!");
                         //推送消息
-                        PushMessageVO pushMessageVO = new PushMessageVO();
-                        pushMessageVO.setUserId( rechargeOrder.getUserId());
-                        pushMessageVO.setDeviceType( DeviceTypeEnum.getDeviceTypeEnum(rechargeOrder.getDeviceType()));
-                        pushMessageVO.setTitle( "充值成功（在线充值）");
-                        pushMessageVO.setMessage( "恭喜您，成功充值"+rechargeOrder.getTotalAmount()/100+"元，已自动转入钱包余额");
-                        pushMessageVO.setMessageType(MessageTypeEnum.ONLINE_RECHARGE.getMessageType());
-                        Map<String, Object> param = new HashMap<>();
-                        param.put("id", rechargeOrder.getPtbRechargeOrderId());
-                        baiduPushApi.pushMessage( pushMessageVO);
+                        PushMessageParam param = new PushMessageParam();
+                        param.setUserId( rechargeOrder.getUserId());
+                        param.setDeviceType( DeviceTypeEnum.getDeviceTypeEnum(rechargeOrder.getDeviceType()));
+                        param.setTitle( "充值成功（在线充值）");
+                        param.setMessage( "恭喜您，成功充值"+rechargeOrder.getTotalAmount()/100+"元，已自动转入钱包余额");
+                        param.setMessageType(MessageTypeEnum.ONLINE_RECHARGE.getMessageType());
+                        Map<String, Object> keyMap = new HashMap<>();
+                        keyMap.put("id", rechargeOrder.getPtbRechargeOrderId());
+                        baiduPushApi.pushMessage( param);
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
