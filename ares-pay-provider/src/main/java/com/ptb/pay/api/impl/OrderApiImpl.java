@@ -24,6 +24,7 @@ import com.ptb.pay.mapper.impl.ProductMapper;
 import com.ptb.pay.model.Order;
 import com.ptb.pay.model.Product;
 import com.ptb.pay.model.order.OrderDetail;
+import com.ptb.pay.service.interfaces.IMessagePushService;
 import com.ptb.pay.service.interfaces.IOrderDetailService;
 import com.ptb.pay.service.interfaces.IOrderService;
 import com.ptb.pay.vo.order.*;
@@ -69,6 +70,8 @@ public class OrderApiImpl implements IOrderApi {
     private IProductApi productApi;
     @Autowired
     private IBindMediaApi bindMediaApi;
+    @Autowired
+    private IMessagePushService messagePushService;
 
     @Transactional( rollbackFor = Exception.class, propagation = Propagation.REQUIRED)
     @Override
@@ -263,6 +266,9 @@ public class OrderApiImpl implements IOrderApi {
                 logger.error("insert order detail error! orderNo:{} product iD:{}", orderNo, product.getPtbProductId());
                 throw new RuntimeException("order detail error!");
             }
+            //消息推送
+            if(!messagePushService.pushOrderMessage(userId, order.getSellerId(), order.getPtbOrderId(), OrderActionEnum.BUYER_SUBMIT_ORDER, DeviceTypeEnum.getDeviceTypeEnum(device)))
+                logger.error("send buyer generate order message fail userId:" + userId + " orderNo:" + order.getOrderNo());
 
             Map<String, Object> map = orderService.getBuyerOrderStatus( ""+order.getOrderStatus()+order.getSellerStatus()+order.getBuyerStatus());
             if (map.get("button") != null){
@@ -306,6 +312,9 @@ public class OrderApiImpl implements IOrderApi {
             e.printStackTrace();
             return ReturnUtil.error("30010","取消订单失败");
         }
+        //消息推送
+        if(!messagePushService.pushOrderMessage(userId, order.getSellerId(), orderId, OrderActionEnum.BUYER_CANCAL_ORDER, null));
+            logger.error("send buyer cancel order message fail userId:" + userId + " orderNo:" + order.getOrderNo());
 
         BaseOrderResVO baseOrderResVO = new BaseOrderResVO();
         Map<String, Object> map = orderService.getBuyerOrderStatus( ""+order.getOrderStatus()+order.getSellerStatus()+order.getBuyerStatus());
@@ -385,7 +394,14 @@ public class OrderApiImpl implements IOrderApi {
         int update = orderService.changeOrderPrice(userId, orderId, price);
         if (update < 1){
             logger.error("卖家更新价格出错!");
+            return ReturnUtil.error("30004","[ERROR] 用户修改价格失败!");
         }
+
+        Order order = orderMapper.selectByPrimaryKey(orderId);
+        //消息推送
+        if(!messagePushService.pushOrderMessage(userId, order.getBuyerId(), orderId, OrderActionEnum.SALER_MODIFY_PRICE, null))
+            logger.error("send buyer change order price message fail userId:" + userId + " orderNo:" + order.getOrderNo());
+
         return new ResponseVo("0","更新成功",null);
     }
 
@@ -408,9 +424,17 @@ public class OrderApiImpl implements IOrderApi {
             if(orderService.checkOrderStatus(OrderActionEnum.SALER_COMPLETE, order.getOrderStatus(),order.getSellerStatus(), order.getBuyerStatus())){
                 //修改相关状态
                 boolean ret = orderService.sellerConfirmOrder(userId, order);
-                return ret?
-                        ReturnUtil.success(orderService.getSalerOrderStatus( ""+order.getOrderStatus()+order.getSellerStatus()+order.getBuyerStatus())):
-                        ReturnUtil.error(ErrorCode.PAY_API_COMMMON_1000.getCode(),ErrorCode.PAY_API_COMMMON_1000.getMessage());
+                if(ret){
+                    //消息推送
+                    if(!messagePushService.pushOrderMessage(userId, order.getBuyerId(), order.getPtbOrderId(), OrderActionEnum.SALER_COMPLETE, confirmOrderVO.getDeviceTypeEnum())) {
+                        logger.error("send seller confirm order message fail userId:" + userId + " orderNo:" + order.getOrderNo());
+                        System.out.println("1111111111111111111111111111111111111111111111111111111111111111111");
+                    }
+                    ReturnUtil.success(orderService.getSalerOrderStatus( ""+order.getOrderStatus()+order.getSellerStatus()+order.getBuyerStatus()));
+                }else{
+                    ReturnUtil.error(ErrorCode.PAY_API_COMMMON_1000.getCode(),ErrorCode.PAY_API_COMMMON_1000.getMessage());
+                }
+
             }else{
                 //买家未付款, 操作失败
                 return ReturnUtil.error(ErrorCode.ORDER_API_5002.getCode(), ErrorCode.ORDER_API_5002.getMessage());
@@ -455,6 +479,10 @@ public class OrderApiImpl implements IOrderApi {
             }
 
             try {
+                //消息推送
+                if(!messagePushService.pushOrderMessage(userId, order.getSellerId(), order.getPtbOrderId(), OrderActionEnum.BUYER_COMPLETE, confirmOrderVO.getDeviceTypeEnum()))
+                    logger.error("send buyer confirm order message fail userId:" + userId + " orderNo:" + order.getOrderNo());
+
                 //上报用户中心交易成功
                 ResponseVo responseVo1 = bindMediaApi.reportDealInfo(order.getSellerId(), order.getBuyerId(), 0);
                 if(!responseVo1.getCode().equals("0")){
@@ -485,6 +513,7 @@ public class OrderApiImpl implements IOrderApi {
         }else{
             return ReturnUtil.error("","未知用户类型");
         }
+        return null;
     }
 
     @Override

@@ -32,4 +32,8 @@
 	<dubbo:reference interface="com.ptb.ucenter.api.IBindMediaApi"
 					 id="bindMediaApi"  owner="alan" version="1.0"
 					 protocol="dubbo" retries="0" />
+	<!-- 消息推送 -->
+	<dubbo:reference interface="com.ptb.service.api.IBaiduPushApi"
+					 id="baiduPushApi"  owner="fzk" version="1.0"
+					 protocol="dubbo" retries="0" />
 </beans>
