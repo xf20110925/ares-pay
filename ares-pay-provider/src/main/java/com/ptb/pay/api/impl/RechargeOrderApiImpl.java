@@ -68,6 +68,7 @@ public class RechargeOrderApiImpl implements IRechargeOrderApi {
                 param.setMessageType(MessageTypeEnum.OFFLINE_RECHARGE.getMessageType());
                 Map<String, Object> keyMap = new HashMap<>();
                 keyMap.put("id", rechargeOrder.getPtbRechargeOrderId());
+                param.setContentParam( keyMap);
                 baiduPushApi.pushMessage(param);
             }catch (Exception e){
                 logger.error( "线下打款消息推送失败。errorMsg:{}", e.getMessage());

@@ -361,6 +361,7 @@ public class AlipayOnlinePaymentServiceImpl implements IOnlinePaymentService {
                             param.setMessageType(MessageTypeEnum.ONLINE_RECHARGE.getMessageType());
                             Map<String, Object> keyMap = new HashMap<>();
                             keyMap.put("id", rechargeOrder.getPtbRechargeOrderId());
+                            param.setContentParam( keyMap);
                             baiduPushApi.pushMessage(param);
                         }catch (Exception e){
                             LOGGER.error( "线上充值消息推送失败。errorMsg:{}", e.getMessage());
