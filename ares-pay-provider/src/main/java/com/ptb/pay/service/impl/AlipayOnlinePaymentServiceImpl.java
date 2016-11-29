@@ -351,16 +351,20 @@ public class AlipayOnlinePaymentServiceImpl implements IOnlinePaymentService {
                         sendRetryMessage(rechargeParam);
                     } else {
                         LOGGER.info("充值订单号：" + rechargeOrderNo + "充值成功!");
-                        //推送消息
-                        PushMessageParam param = new PushMessageParam();
-                        param.setUserId( rechargeOrder.getUserId());
-                        param.setDeviceType( DeviceTypeEnum.getDeviceTypeEnum(rechargeOrder.getDeviceType()));
-                        param.setTitle( "充值成功（在线充值）");
-                        param.setMessage( "恭喜您，成功充值"+rechargeOrder.getTotalAmount()/100+"元，已自动转入钱包余额");
-                        param.setMessageType(MessageTypeEnum.ONLINE_RECHARGE.getMessageType());
-                        Map<String, Object> keyMap = new HashMap<>();
-                        keyMap.put("id", rechargeOrder.getPtbRechargeOrderId());
-                        baiduPushApi.pushMessage( param);
+                        try {
+                            //推送消息
+                            PushMessageParam param = new PushMessageParam();
+                            param.setUserId(rechargeOrder.getUserId());
+                            param.setDeviceType(DeviceTypeEnum.getDeviceTypeEnum(rechargeOrder.getDeviceType()));
+                            param.setTitle("充值成功（在线充值）");
+                            param.setMessage("恭喜您，成功充值" + rechargeOrder.getTotalAmount() / 100 + "元，已自动转入钱包余额");
+                            param.setMessageType(MessageTypeEnum.ONLINE_RECHARGE.getMessageType());
+                            Map<String, Object> keyMap = new HashMap<>();
+                            keyMap.put("id", rechargeOrder.getPtbRechargeOrderId());
+                            baiduPushApi.pushMessage(param);
+                        }catch (Exception e){
+                            LOGGER.error( "线上充值消息推送失败。errorMsg:{}", e.getMessage());
+                        }
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
