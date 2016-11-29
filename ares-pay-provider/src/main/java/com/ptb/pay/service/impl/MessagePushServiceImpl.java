@@ -32,7 +32,7 @@ public class MessagePushServiceImpl implements IMessagePushService {
 
         String title = "订单状态更新", message = null;
         Map<String, Object> keyMap = new HashMap<>();
-        keyMap.put("orderId", orderId);
+        keyMap.put("id", orderId);
 
         if(orderActionEnum.getOrderAction() == OrderActionEnum.BUYER_SUBMIT_ORDER.getOrderAction()){
             message = "买家已拍下媒体，等待付款中";

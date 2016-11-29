@@ -94,11 +94,11 @@ public class OrderApiImplTest extends BaseTest {
     public void sellerConfirmOrder(){
         ConfirmOrderReqVO confirmOrderReqVO = new ConfirmOrderReqVO();
         confirmOrderReqVO.setOrderId(5);
-        confirmOrderReqVO.setUserId(777);
+        confirmOrderReqVO.setUserId(1111);
         confirmOrderReqVO.setUserType(UserType.USER_IS_SELLER.getUserType());
         confirmOrderReqVO.setDeviceTypeEnum(DeviceTypeEnum.android);
         confirmOrderReqVO.setPassword("123123123");
-        orderApi.confirmOrder(777, confirmOrderReqVO);
+        orderApi.confirmOrder(1111, confirmOrderReqVO);
     }
 
     @Test
