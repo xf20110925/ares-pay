@@ -189,10 +189,12 @@ public class ProductApiImpl implements IProductApi {
 
     @Override
     public ResponseVo<Map<String, Object>> getProductNameByOrdreNos(List<String> orderNos) {
-        List<Map<String, Object>> list = productMapper.getProductNameByOrderNos( orderNos);
         Map<String, Object> result = new HashMap<>();
-        for ( Map<String, Object> product : list){
-            result.put( String.valueOf(product.get("order_no")), product.get("product_name"));
+        if ( !CollectionUtils.isEmpty( orderNos)) {
+            List<Map<String, Object>> list = productMapper.getProductNameByOrderNos(orderNos);
+            for (Map<String, Object> product : list) {
+                result.put(String.valueOf(product.get("order_no")), product.get("product_name"));
+            }
         }
         return ReturnUtil.success( result);
     }
