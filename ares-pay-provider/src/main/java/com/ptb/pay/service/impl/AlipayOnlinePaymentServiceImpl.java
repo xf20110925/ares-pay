@@ -357,7 +357,7 @@ public class AlipayOnlinePaymentServiceImpl implements IOnlinePaymentService {
                             param.setUserId(rechargeOrder.getUserId());
                             param.setDeviceType(DeviceTypeEnum.getDeviceTypeEnum(rechargeOrder.getDeviceType()));
                             param.setTitle("充值成功（在线充值）");
-                            param.setMessage("恭喜您，成功充值" + rechargeOrder.getTotalAmount() / 100 + "元，已自动转入钱包余额");
+                            param.setMessage("恭喜您，成功充值" + ChangeMoneyUtil.fromFenToYuan(rechargeOrder.getTotalAmount()) + "元，已自动转入钱包余额");
                             param.setMessageType(MessageTypeEnum.ONLINE_RECHARGE.getMessageType());
                             Map<String, Object> keyMap = new HashMap<>();
                             keyMap.put("id", rechargeOrder.getPtbRechargeOrderId());

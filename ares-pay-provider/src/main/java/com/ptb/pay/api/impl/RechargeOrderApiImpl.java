@@ -18,6 +18,7 @@ import com.ptb.pay.vo.RechargeOrderVO;
 import com.ptb.service.api.IBaiduPushApi;
 import com.ptb.utils.db.Page;
 import com.ptb.utils.service.ReturnUtil;
+import com.ptb.utils.tool.ChangeMoneyUtil;
 import enums.MessageTypeEnum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,7 +65,7 @@ public class RechargeOrderApiImpl implements IRechargeOrderApi {
                 param.setUserId(paramsVO.getUserId());
                 param.setDeviceType(DeviceTypeEnum.getDeviceTypeEnum(paramsVO.getDeviceType()));
                 param.setTitle("审核中（线下打款）");
-                param.setMessage("提交成功，充值金额" + rechargeOrder.getTotalAmount() / 100 + "元，请尽快给平台账户进行打款，便于系统审核");
+                param.setMessage("提交成功，充值金额" + ChangeMoneyUtil.fromFenToYuan(rechargeOrder.getTotalAmount()) + "元，请尽快给平台账户进行打款，便于系统审核");
                 param.setMessageType(MessageTypeEnum.OFFLINE_RECHARGE.getMessageType());
                 Map<String, Object> keyMap = new HashMap<>();
                 keyMap.put("id", rechargeOrder.getPtbRechargeOrderId());
