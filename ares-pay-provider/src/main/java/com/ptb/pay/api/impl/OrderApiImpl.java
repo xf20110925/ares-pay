@@ -421,9 +421,13 @@ public class OrderApiImpl implements IOrderApi {
                 return ReturnUtil.error(ErrorCode.ORDER_API_5001.getCode(), ErrorCode.ORDER_API_5001.getMessage());
 
             //卖家确认
-            if(orderService.checkOrderStatus(OrderActionEnum.SALER_COMPLETE, order.getOrderStatus(),order.getSellerStatus(), order.getBuyerStatus())) {
+            if(!orderService.checkOrderStatus(OrderActionEnum.SALER_COMPLETE, order.getOrderStatus(),order.getSellerStatus(), order.getBuyerStatus())) {
                 //买家未付款, 操作失败
                 return ReturnUtil.error(ErrorCode.ORDER_API_5002.getCode(), ErrorCode.ORDER_API_5002.getMessage());
+            }
+            //消息推送
+            if(!messagePushService.pushOrderMessage(userId, order.getBuyerId(), order.getPtbOrderId(), OrderActionEnum.SALER_COMPLETE, confirmOrderVO.getDeviceTypeEnum())) {
+                logger.error("send seller confirm order message fail userId:" + userId + " orderNo:" + order.getOrderNo());
             }
 
             //修改相关状态
@@ -431,10 +435,7 @@ public class OrderApiImpl implements IOrderApi {
             if(!ret) {
                 return ReturnUtil.error(ErrorCode.PAY_API_COMMMON_1000.getCode(),ErrorCode.PAY_API_COMMMON_1000.getMessage());
             }
-            //消息推送
-            if(!messagePushService.pushOrderMessage(userId, order.getBuyerId(), order.getPtbOrderId(), OrderActionEnum.SALER_COMPLETE, confirmOrderVO.getDeviceTypeEnum())) {
-                logger.error("send seller confirm order message fail userId:" + userId + " orderNo:" + order.getOrderNo());
-            }
+
             return ReturnUtil.success(orderService.getSalerOrderStatus( ""+order.getOrderStatus()+order.getSellerStatus()+order.getBuyerStatus()));
 
         }else if(confirmOrderVO.getUserType() == UserType.USER_IS_BUYER.getUserType()){ //当前用户是买家
