@@ -1,6 +1,7 @@
 package com.ptb.pay.service;
 
 import com.alibaba.dubbo.rpc.RpcContext;
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.ptb.account.api.IAccountApi;
 import com.ptb.account.vo.PtbAccountVo;
@@ -9,6 +10,9 @@ import com.ptb.common.vo.ResponseVo;
 import com.ptb.gaia.bus.Bus;
 import com.ptb.gaia.bus.kafka.KafkaBus;
 import com.ptb.gaia.bus.message.Message;
+import com.ptb.pay.enums.RechargeFailedLogStatusEnum;
+import com.ptb.pay.mapper.impl.RechargeFailedLogMapper;
+import com.ptb.pay.model.RechargeFailedLog;
 import com.ptb.pay.model.vo.AccountRechargeParamMessageVO;
 import com.ptb.utils.encrypt.SignUtil;
 import com.ptb.utils.tool.ShellUtil;
@@ -21,6 +25,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+import java.util.Date;
 import java.util.TreeMap;
 
 /**
@@ -45,6 +50,9 @@ public class BusService {
 
     @Autowired
     private IAccountApi accountApi;
+
+    @Autowired
+    private RechargeFailedLogMapper rechargeFailedLogMapper;
 
     private static Logger LOGGER = LoggerFactory.getLogger(BusService.class);
 
@@ -92,7 +100,18 @@ public class BusService {
     public void sendAccountRechargeRetryMessage(AccountRechargeParamMessageVO messageVO) {
         if (messageVO.getSendTimes() >= MESSAGE_RETRY_MAX_TIMES) {
             LOGGER.error("重试次数超过阀值，发送微信报警触发人工处理！ message:" + JSONObject.toJSONString(messageVO));
-            ShellUtil.sendWeixinAlarm("充值失败", "充值失败,速处理！订单号：" + messageVO.getAccountRechargeParam().getOrderNo());
+            AccountRechargeParam params = messageVO.getAccountRechargeParam();
+            String rechargeOrderNo = params.getOrderNo();
+            //发送微信报警
+            ShellUtil.sendWeixinAlarm("充值失败", "充值失败,速处理！订单号：" + rechargeOrderNo);
+            //记录日志,人工处理后要修改日志状态
+            RechargeFailedLog log = new RechargeFailedLog();
+            log.setCreateTime(new Date());
+            log.setRechargeOrderNo(rechargeOrderNo);
+            log.setRechargeParams(JSON.toJSONString(params));
+            log.setStatus(RechargeFailedLogStatusEnum.UNDEAL.getStatus());
+            log.setTotalAmount(params.getMoney());
+            rechargeFailedLogMapper.insert(log);
         } else {
             int sendTimes = messageVO.getSendTimes();
             try {
