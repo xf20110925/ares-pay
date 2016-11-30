@@ -1,5 +1,6 @@
 package com.ptb.pay.service.impl;
 
+import com.alibaba.fastjson.JSON;
 import com.ptb.common.enums.DeviceTypeEnum;
 import com.ptb.common.vo.ResponseVo;
 import com.ptb.pay.enums.OrderActionEnum;
@@ -48,9 +49,14 @@ public class MessagePushServiceImpl implements IMessagePushService {
             logger.error("Unknown message OrderActionEnum");
             return false;
         }
-
-        responseVo = baiduPushApi.pushMessage(
-                generateMessageParam(toUserId, deviceTypeEnum, title, message, MessageTypeEnum.ORDER_TIP, keyMap));
+        PushMessageParam param = null;
+        try {
+            param = generateMessageParam(toUserId, deviceTypeEnum, title, message, MessageTypeEnum.ORDER_TIP, keyMap);
+            responseVo = baiduPushApi.pushMessage(param);
+        }catch (Exception ee){
+            logger.error("push order message error args:" + JSON.toJSONString(param) + " error:" + ee.getMessage());
+            return false;
+        }
         return responseVo.getCode().equals("0");
 
     }
