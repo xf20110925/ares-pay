@@ -6,7 +6,7 @@ import com.ptb.common.vo.ResponseVo;
 import com.ptb.pay.BaseTest;
 import com.ptb.pay.api.IOrderApi;
 import com.ptb.pay.enums.OrderStatusEnum;
-import com.ptb.pay.enums.UserType;
+import com.ptb.pay.enums.UserTypeEnum;
 import com.ptb.pay.vo.order.ConfirmOrderReqVO;
 import com.ptb.pay.vo.order.OrderListReqVO;
 import org.junit.Test;
@@ -50,7 +50,7 @@ public class OrderApiImplTest extends BaseTest {
         orderListReqVO.setStart(0);
         orderListReqVO.setEnd(10);
         orderListReqVO.setUserId(776);
-        orderListReqVO.setUserType(UserType.USER_IS_SELLER.getUserType());
+        orderListReqVO.setUserType(UserTypeEnum.USER_IS_SELLER.getUserType());
         orderListReqVO.setDeviceTypeEnum(DeviceTypeEnum.android);
         orderListReqVO.setOrderStatus(OrderStatusEnum.ORDER_STATUS_DEAL_ALL.getStatus());
         orderApi.getOrderList(776, orderListReqVO);
@@ -95,7 +95,7 @@ public class OrderApiImplTest extends BaseTest {
         ConfirmOrderReqVO confirmOrderReqVO = new ConfirmOrderReqVO();
         confirmOrderReqVO.setOrderId(5);
         confirmOrderReqVO.setUserId(1111);
-        confirmOrderReqVO.setUserType(UserType.USER_IS_SELLER.getUserType());
+        confirmOrderReqVO.setUserType(UserTypeEnum.USER_IS_SELLER.getUserType());
         confirmOrderReqVO.setDeviceTypeEnum(DeviceTypeEnum.android);
         confirmOrderReqVO.setPassword("123123123");
         orderApi.confirmOrder(1111, confirmOrderReqVO);
@@ -106,7 +106,7 @@ public class OrderApiImplTest extends BaseTest {
         ConfirmOrderReqVO confirmOrderReqVO = new ConfirmOrderReqVO();
         confirmOrderReqVO.setOrderId(5);
         confirmOrderReqVO.setUserId(1111);
-        confirmOrderReqVO.setUserType(UserType.USER_IS_BUYER.getUserType());
+        confirmOrderReqVO.setUserType(UserTypeEnum.USER_IS_BUYER.getUserType());
         confirmOrderReqVO.setDeviceTypeEnum(DeviceTypeEnum.android);
         confirmOrderReqVO.setPlatformEnum(PlatformEnum.xiaomi);
         confirmOrderReqVO.setPassword("E10ADC3949BA59ABBE56E057F20F883E");

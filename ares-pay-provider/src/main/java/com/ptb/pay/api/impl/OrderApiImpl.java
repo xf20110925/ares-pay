@@ -18,7 +18,7 @@ import com.ptb.pay.api.IProductApi;
 import com.ptb.pay.enums.ErrorCode;
 import com.ptb.pay.enums.OrderActionEnum;
 import com.ptb.pay.enums.OrderStatusEnum;
-import com.ptb.pay.enums.UserType;
+import com.ptb.pay.enums.UserTypeEnum;
 import com.ptb.pay.mapper.impl.OrderMapper;
 import com.ptb.pay.mapper.impl.ProductMapper;
 import com.ptb.pay.model.Order;
@@ -413,7 +413,7 @@ public class OrderApiImpl implements IOrderApi {
         if(null == order)
             return ReturnUtil.error(ErrorCode.ORDER_API_5005.getCode(), ErrorCode.ORDER_API_5005.getMessage());
 
-        if(confirmOrderVO.getUserType() == UserType.USER_IS_SELLER.getUserType()){ //当前用户是卖家
+        if(confirmOrderVO.getUserType() == UserTypeEnum.USER_IS_SELLER.getUserType()){ //当前用户是卖家
 
 
             //用户与订单是否匹配
@@ -438,7 +438,7 @@ public class OrderApiImpl implements IOrderApi {
 
             return ReturnUtil.success(orderService.getSalerOrderStatus( ""+order.getOrderStatus()+order.getSellerStatus()+order.getBuyerStatus()));
 
-        }else if(confirmOrderVO.getUserType() == UserType.USER_IS_BUYER.getUserType()){ //当前用户是买家
+        }else if(confirmOrderVO.getUserType() == UserTypeEnum.USER_IS_BUYER.getUserType()){ //当前用户是买家
 
             //用户与订单是否匹配
             if(userId != order.getBuyerId())
@@ -519,13 +519,13 @@ public class OrderApiImpl implements IOrderApi {
         if(userId != orderListReqVO.getUserId())
             return ReturnUtil.success(orderListVO);
 
-        int userType = UserType.USER_IS_BUYER.getUserType();
+        int userType = UserTypeEnum.USER_IS_BUYER.getUserType();
         //获取用户所有订单
         List<Order> orders = null;
-        if(orderListReqVO.getUserType() == UserType.USER_IS_BUYER.getUserType())
+        if(orderListReqVO.getUserType() == UserTypeEnum.USER_IS_BUYER.getUserType())
             orders = orderMapper.selectByBuyerUid(orderListReqVO.getUserId());
         else {
-            userType = UserType.USER_IS_SELLER.getUserType();
+            userType = UserTypeEnum.USER_IS_SELLER.getUserType();
             orders = orderMapper.selectBySellerUid(orderListReqVO.getUserId());
         }
 
@@ -544,7 +544,7 @@ public class OrderApiImpl implements IOrderApi {
         final int finalUserType = userType;
         List<String> orderNoList = new ArrayList<>();
         orderListVO.getOrderVOList().forEach(item->{
-            Map<String, Object> map = finalUserType ==UserType.USER_IS_SELLER.getUserType()?orderService.getSalerOrderStatus( ""+item.getOrderStatus()+item.getSellerStatus()+item.getBuyerStatus()):orderService.getBuyerOrderStatus(""+item.getOrderStatus()+item.getSellerStatus()+item.getBuyerStatus());
+            Map<String, Object> map = finalUserType == UserTypeEnum.USER_IS_SELLER.getUserType()?orderService.getSalerOrderStatus( ""+item.getOrderStatus()+item.getSellerStatus()+item.getBuyerStatus()):orderService.getBuyerOrderStatus(""+item.getOrderStatus()+item.getSellerStatus()+item.getBuyerStatus());
             item.setDesc(map.get("desc") != null?map.get("desc").toString():null);
             item.setButton(map.get("button") != null?map.get("button").toString():null);
             orderNoList.add(item.getOrderNo());
