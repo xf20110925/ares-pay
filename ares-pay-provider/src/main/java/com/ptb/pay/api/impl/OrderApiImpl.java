@@ -169,7 +169,7 @@ public class OrderApiImpl implements IOrderApi {
             Order order = orderMapper.selectByPrimaryKey(orderId);
             //检查订单是否有误
             if (null!= order && order.getBuyerId().longValue() != userId.longValue()){
-                return ReturnUtil.error(ErrorCode.ORDER_API_5001.getCode(), ErrorCode.ORDER_API_5001.getMessage());
+                return ReturnUtil.error(ErrorCode.ORDER_API_5004.getCode(), ErrorCode.ORDER_API_5004.getMessage());
             }
             if (!orderService.checkOrderStatus(OrderActionEnum.BUYER_PAY, order.getOrderStatus(), order.getSellerStatus(), order.getBuyerStatus())) {
                 //订单状态有误
@@ -193,7 +193,7 @@ public class OrderApiImpl implements IOrderApi {
             if (responseVo.getCode().equals("6002"))return responseVo;
             if ( !"0".equals( responseVo.getCode())){
                 logger.error( "虚拟账户付款dubbo接口调用失败。salerId:{}", userId);
-                throw new Exception();
+                return responseVo;
             }
             //更新订单状态并增加订单日志
             orderService.updateStatusBuyerPayment(order.getPtbOrderId(),userId,order.getOrderNo());
