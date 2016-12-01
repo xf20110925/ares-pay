@@ -190,10 +190,12 @@ public class OrderApiImpl implements IOrderApi {
             String sign = SignUtil.getSignKey(toSign);
             RpcContext.getContext().setAttachment("key", sign);
             ResponseVo<PtbAccountVo> responseVo = accountApi.pay(param);
-            if (responseVo.getCode().equals("6002"))return responseVo;
+            if (responseVo.getCode().equals(ErrorCode.PRODUCT_API_PARAMETER_ERROR.getCode()))return responseVo;
+            if (responseVo.getCode().equals(ErrorCode.ORDER_API_5004.getCode()))
+                return ReturnUtil.error(ErrorCode.PAYPASSWORD_5006.getCode(), ErrorCode.PAYPASSWORD_5006.getMessage());
             if ( !"0".equals( responseVo.getCode())){
                 logger.error( "虚拟账户付款dubbo接口调用失败。salerId:{}", userId);
-                return responseVo;
+                throw new Exception();
             }
             //更新订单状态并增加订单日志
             orderService.updateStatusBuyerPayment(order.getPtbOrderId(),userId,order.getOrderNo());
