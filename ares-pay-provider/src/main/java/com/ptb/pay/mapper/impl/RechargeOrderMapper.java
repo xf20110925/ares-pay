@@ -33,4 +33,6 @@ public interface RechargeOrderMapper extends MyMapper<RechargeOrder> {
     @Select("select * from ptb_recharge_order where ptb_recharge_order_id = #{rechargeOrderId} and user_id = #{userId}")
     @ResultMap("BaseResultMap")
     RechargeOrder selectByIdAndUserId( @Param("rechargeOrderId")Long rechargeOrderId, @Param("userId") Long userId);
+
+    RechargeOrder selectOne( @Param("rechargeOrderId")Long rechargeOrderId, @Param("rechargeOrderNo") String rechargeOrderNo, @Param("userId") Long userId);
 }

@@ -46,9 +46,11 @@ public interface IRechargeOrderApi {
 
     /**
      * 获取线下充值详情
-     * @param rechargeOrderId
+     * @param rechargeOrderId 充值ID
+     * @param rechargeOrderNo 充值订单号
+     * @param userId 用户编号
      * @return
      */
-    public ResponseVo<RechargeOrderVO> getRechargeOrderDetail( Long rechargeOrderId, Long userId);
+    public ResponseVo<RechargeOrderVO> getRechargeOrderDetail( Long rechargeOrderId, String rechargeOrderNo, Long userId);
 }
 

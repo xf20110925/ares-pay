@@ -126,9 +126,9 @@ public class RechargeOrderApiImpl implements IRechargeOrderApi {
     }
 
     @Override
-    public ResponseVo<RechargeOrderVO> getRechargeOrderDetail(Long rechargeOrderId, Long userId) {
+    public ResponseVo<RechargeOrderVO> getRechargeOrderDetail(Long rechargeOrderId, String rechargeOrderNo, Long userId) {
         RechargeOrderVO orderVO = new RechargeOrderVO();
-        RechargeOrder order = rechargeOrderMapper.selectByIdAndUserId( rechargeOrderId, userId);
+        RechargeOrder order = rechargeOrderMapper.selectOne( rechargeOrderId, rechargeOrderNo, userId);
         if ( null == order) {
             return ReturnUtil.success( null);
         }
