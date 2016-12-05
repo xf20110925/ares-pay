@@ -60,7 +60,7 @@
             <!--<columnOverride column="action_type" javaType="java.lang.Integer" jdbcType="INTEGER" />-->
             <!--<columnOverride column="user_type" javaType="java.lang.Integer" jdbcType="INTEGER" />-->
         <!--</table>-->
-        <table tableName="ptb_recharge_failed_log" domainObjectName="RechargeFailedLog" enableCountByExample="false" enableSelectByExample="true" enableUpdateByExample="true" enableDeleteByExample="true" />
+        <table tableName="ptb_recharge_order" domainObjectName="RechargeOrder" enableCountByExample="false" enableSelectByExample="true" enableUpdateByExample="true" enableDeleteByExample="true" />
         <!--<table tableName="media_channel" enableCountByExample="false" enableSelectByExample="false" enableUpdateByExample="false" enableDeleteByExample="false" />-->
         <!--<table tableName="media_channel_detail" enableCountByExample="false" enableSelectByExample="false" enableUpdateByExample="false" enableDeleteByExample="false">-->
         <!--<table tableName="wb_topic" enableCountByExample="false" enableSelectByExample="false" enableUpdateByExample="false" enableDeleteByExample="false">-->

@@ -1,5 +1,6 @@
 package com.ptb.pay.api.impl;
 
+import com.github.pagehelper.PageHelper;
 import com.ptb.common.enums.DeviceTypeEnum;
 import com.ptb.common.enums.PaymentMethodEnum;
 import com.ptb.common.enums.RechargeOrderStatusEnum;
@@ -13,13 +14,15 @@ import com.ptb.pay.model.RechargeOrderExample;
 import com.ptb.pay.service.factory.RechargeOrderServiceFactory;
 import com.ptb.pay.service.interfaces.IPaymentService;
 import com.ptb.pay.service.interfaces.IRechargeOrderService;
-import com.ptb.pay.vo.RechargeOrderParamsVO;
-import com.ptb.pay.vo.RechargeOrderVO;
+import com.ptb.pay.vo.recharge.RechargeOrderParamsVO;
+import com.ptb.pay.vo.recharge.RechargeOrderQueryVO;
+import com.ptb.pay.vo.recharge.RechargeOrderVO;
 import com.ptb.service.api.IBaiduPushApi;
 import com.ptb.utils.db.Page;
 import com.ptb.utils.service.ReturnUtil;
 import com.ptb.utils.tool.ChangeMoneyUtil;
 import enums.MessageTypeEnum;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -120,6 +123,72 @@ public class RechargeOrderApiImpl implements IRechargeOrderApi {
             orderVO.setPayMethod(order.getPayMethod());
             orderVO.setRechargeOrderNo(order.getRechargeOrderNo());
             orderVO.setPtbRechargeOrderId( order.getPtbRechargeOrderId());
+            returnData.add(orderVO);
+        }
+        return ReturnUtil.success(returnData);
+    }
+
+    @Override
+    public ResponseVo<List<RechargeOrderVO>> getRechargeOrderListByPage(int pageNum, int pageSize, RechargeOrderQueryVO rechargeOrderQueryVO) throws Exception {
+        RechargeOrderExample example = new RechargeOrderExample();
+
+        RechargeOrderExample.Criteria c = example.createCriteria();
+        //充值订单号
+        if(StringUtils.isNotBlank(rechargeOrderQueryVO.getRechargeOrderNo())){
+            c.andRechargeOrderNoEqualTo(rechargeOrderQueryVO.getRechargeOrderNo());
+        }
+        //验证码
+        if(StringUtils.isNotBlank(rechargeOrderQueryVO.getVerificationCode())){
+            c.andVerificationCodeEqualTo(rechargeOrderQueryVO.getVerificationCode());
+        }
+        //充值类型
+        if(rechargeOrderQueryVO.getPayMethod() != null){
+            c.andPayMethodEqualTo(rechargeOrderQueryVO.getPayMethod());
+        }
+        //充值状态
+        if(rechargeOrderQueryVO.getStatus() != null){
+            c.andStatusEqualTo(rechargeOrderQueryVO.getStatus());
+        }
+        //发票状态
+        if(rechargeOrderQueryVO.getInvoiceStatus() != null){
+            c.andInvoiceStatusEqualTo(rechargeOrderQueryVO.getInvoiceStatus());
+        }
+        //发票ID
+        if(rechargeOrderQueryVO.getInvoiceId() != null){
+            c.andInvoiceIdEqualTo(rechargeOrderQueryVO.getInvoiceId());
+        }
+        //创建时间
+        if(rechargeOrderQueryVO.getStartTime() != null){
+            c.andCreateTimeGreaterThanOrEqualTo(rechargeOrderQueryVO.getStartTime());
+        }
+        //创建时间
+        if(rechargeOrderQueryVO.getEndTime() != null){
+            c.andCreateTimeLessThanOrEqualTo(rechargeOrderQueryVO.getEndTime());
+        }
+
+        example.setOrderByClause("create_time desc");
+
+        PageHelper.startPage(pageNum, pageSize); //开启分页查询，通过拦截器实现，紧接着执行的sql会被拦截
+        List<RechargeOrder> orders = rechargeOrderMapper.selectByExample(example);
+        List<RechargeOrderVO> returnData = new ArrayList<RechargeOrderVO>();
+        if(CollectionUtils.isEmpty(orders)){
+            return ReturnUtil.success(returnData);
+        }
+        for (RechargeOrder order : orders) {
+            RechargeOrderVO orderVO = new RechargeOrderVO();
+            orderVO.setPayTime(order.getPayTime());
+            orderVO.setPayType(order.getPayType());
+            orderVO.setCreateTime(order.getCreateTime());
+            orderVO.setUserId(order.getUserId());
+            orderVO.setDeviceType(order.getDeviceType());
+            orderVO.setOrderId(order.getPtbRechargeOrderId());
+            orderVO.setRechargeAmount(order.getTotalAmount());
+            orderVO.setStatus(order.getStatus());
+            orderVO.setVerificationCode(order.getVerificationCode());
+            orderVO.setPayMethod(order.getPayMethod());
+            orderVO.setRechargeOrderNo(order.getRechargeOrderNo());
+            orderVO.setPtbRechargeOrderId( order.getPtbRechargeOrderId());
+            orderVO.setInvoiceId(order.getInvoiceId());
             returnData.add(orderVO);
         }
         return ReturnUtil.success(returnData);

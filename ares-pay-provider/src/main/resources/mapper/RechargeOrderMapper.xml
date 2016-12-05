@@ -12,10 +12,12 @@
     <result column="processing_amount" property="processingAmount" jdbcType="BIGINT" />
     <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
     <result column="pay_time" property="payTime" jdbcType="TIMESTAMP" />
-    <result column="status" property="status" jdbcType="BIT" />
+    <result column="status" property="status" jdbcType="INTEGER" />
     <result column="order_no" property="orderNo" jdbcType="VARCHAR" />
     <result column="verification_code" property="verificationCode" jdbcType="VARCHAR" />
     <result column="device_type" property="deviceType" jdbcType="VARCHAR" />
+    <result column="invoice_status" property="invoiceStatus" jdbcType="INTEGER" />
+    <result column="invoice_id" property="invoiceId" jdbcType="BIGINT" />
   </resultMap>
   <sql id="Example_Where_Clause" >
     <where >
@@ -78,21 +80,8 @@
   <sql id="Base_Column_List" >
     ptb_recharge_order_id, recharge_order_no, pay_type, user_id, pay_method, total_amount, 
     receipt_amount, processing_amount, create_time, pay_time, status, order_no, verification_code, 
-    device_type
+    device_type, invoice_status, invoice_id
   </sql>
-  <select id="selectOne" resultMap="BaseResultMap" >
-    select <include refid="Base_Column_List"/>
-    from ptb_recharge_order where 1=1
-    <if test="rechargeOrderId != null and rechargeOrderId != 0">
-      and ptb_recharge_order_id = #{rechargeOrderId}
-    </if>
-    <if test="userId != null">
-      and user_id = #{userId}
-    </if>
-    <if test="rechargeOrderNo != null and rechargeOrderNo != ''">
-      and recharge_order_no = #{rechargeOrderNo}
-    </if>
-  </select>
   <select id="selectByExample" resultMap="BaseResultMap" parameterType="com.ptb.pay.model.RechargeOrderExample" >
     select
     <if test="distinct" >
@@ -105,9 +94,6 @@
     </if>
     <if test="orderByClause != null" >
       order by ${orderByClause}
-    </if>
-    <if test="page != null">
-      limit ${page.offset}, ${page.limit}
     </if>
   </select>
   <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
@@ -131,19 +117,14 @@
       pay_type, user_id, pay_method, 
       total_amount, receipt_amount, processing_amount, 
       create_time, pay_time, status, 
-      order_no, verification_code, device_type
-      )
+      order_no, verification_code, device_type, 
+      invoice_status, invoice_id)
     values (#{ptbRechargeOrderId,jdbcType=BIGINT}, #{rechargeOrderNo,jdbcType=VARCHAR}, 
       #{payType,jdbcType=TINYINT}, #{userId,jdbcType=BIGINT}, #{payMethod,jdbcType=TINYINT}, 
       #{totalAmount,jdbcType=BIGINT}, #{receiptAmount,jdbcType=BIGINT}, #{processingAmount,jdbcType=BIGINT}, 
-      #{createTime,jdbcType=TIMESTAMP}, #{payTime,jdbcType=TIMESTAMP}, #{status,jdbcType=BIT}, 
-      #{orderNo,jdbcType=VARCHAR}, #{verificationCode,jdbcType=VARCHAR}, #{deviceType,jdbcType=VARCHAR}
-      )
-    <selectKey resultType="java.lang.Long" keyProperty="ptbRechargeOrderId" keyColumn="ptb_recharge_order_id">
-      <![CDATA[
-          SELECT LAST_INSERT_ID() AS id
-      ]]>
-    </selectKey>
+      #{createTime,jdbcType=TIMESTAMP}, #{payTime,jdbcType=TIMESTAMP}, #{status,jdbcType=INTEGER}, 
+      #{orderNo,jdbcType=VARCHAR}, #{verificationCode,jdbcType=VARCHAR}, #{deviceType,jdbcType=VARCHAR}, 
+      #{invoiceStatus,jdbcType=INTEGER}, #{invoiceId,jdbcType=BIGINT})
   </insert>
   <insert id="insertSelective" parameterType="com.ptb.pay.model.RechargeOrder" >
     insert into ptb_recharge_order
@@ -190,6 +171,12 @@
       <if test="deviceType != null" >
         device_type,
       </if>
+      <if test="invoiceStatus != null" >
+        invoice_status,
+      </if>
+      <if test="invoiceId != null" >
+        invoice_id,
+      </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides="," >
       <if test="ptbRechargeOrderId != null" >
@@ -223,7 +210,7 @@
         #{payTime,jdbcType=TIMESTAMP},
       </if>
       <if test="status != null" >
-        #{status,jdbcType=BIT},
+        #{status,jdbcType=INTEGER},
       </if>
       <if test="orderNo != null" >
         #{orderNo,jdbcType=VARCHAR},
@@ -233,6 +220,12 @@
       </if>
       <if test="deviceType != null" >
         #{deviceType,jdbcType=VARCHAR},
+      </if>
+      <if test="invoiceStatus != null" >
+        #{invoiceStatus,jdbcType=INTEGER},
+      </if>
+      <if test="invoiceId != null" >
+        #{invoiceId,jdbcType=BIGINT},
       </if>
     </trim>
   </insert>
@@ -270,7 +263,7 @@
         pay_time = #{record.payTime,jdbcType=TIMESTAMP},
       </if>
       <if test="record.status != null" >
-        status = #{record.status,jdbcType=BIT},
+        status = #{record.status,jdbcType=INTEGER},
       </if>
       <if test="record.orderNo != null" >
         order_no = #{record.orderNo,jdbcType=VARCHAR},
@@ -280,6 +273,12 @@
       </if>
       <if test="record.deviceType != null" >
         device_type = #{record.deviceType,jdbcType=VARCHAR},
+      </if>
+      <if test="record.invoiceStatus != null" >
+        invoice_status = #{record.invoiceStatus,jdbcType=INTEGER},
+      </if>
+      <if test="record.invoiceId != null" >
+        invoice_id = #{record.invoiceId,jdbcType=BIGINT},
       </if>
     </set>
     <if test="_parameter != null" >
@@ -298,10 +297,12 @@
       processing_amount = #{record.processingAmount,jdbcType=BIGINT},
       create_time = #{record.createTime,jdbcType=TIMESTAMP},
       pay_time = #{record.payTime,jdbcType=TIMESTAMP},
-      status = #{record.status,jdbcType=BIT},
+      status = #{record.status,jdbcType=INTEGER},
       order_no = #{record.orderNo,jdbcType=VARCHAR},
       verification_code = #{record.verificationCode,jdbcType=VARCHAR},
-      device_type = #{record.deviceType,jdbcType=VARCHAR}
+      device_type = #{record.deviceType,jdbcType=VARCHAR},
+      invoice_status = #{record.invoiceStatus,jdbcType=INTEGER},
+      invoice_id = #{record.invoiceId,jdbcType=BIGINT}
     <if test="_parameter != null" >
       <include refid="Update_By_Example_Where_Clause" />
     </if>
@@ -337,7 +338,7 @@
         pay_time = #{payTime,jdbcType=TIMESTAMP},
       </if>
       <if test="status != null" >
-        status = #{status,jdbcType=BIT},
+        status = #{status,jdbcType=INTEGER},
       </if>
       <if test="orderNo != null" >
         order_no = #{orderNo,jdbcType=VARCHAR},
@@ -347,6 +348,12 @@
       </if>
       <if test="deviceType != null" >
         device_type = #{deviceType,jdbcType=VARCHAR},
+      </if>
+      <if test="invoiceStatus != null" >
+        invoice_status = #{invoiceStatus,jdbcType=INTEGER},
+      </if>
+      <if test="invoiceId != null" >
+        invoice_id = #{invoiceId,jdbcType=BIGINT},
       </if>
     </set>
     where ptb_recharge_order_id = #{ptbRechargeOrderId,jdbcType=BIGINT}
@@ -362,10 +369,12 @@
       processing_amount = #{processingAmount,jdbcType=BIGINT},
       create_time = #{createTime,jdbcType=TIMESTAMP},
       pay_time = #{payTime,jdbcType=TIMESTAMP},
-      status = #{status,jdbcType=BIT},
+      status = #{status,jdbcType=INTEGER},
       order_no = #{orderNo,jdbcType=VARCHAR},
       verification_code = #{verificationCode,jdbcType=VARCHAR},
-      device_type = #{deviceType,jdbcType=VARCHAR}
+      device_type = #{deviceType,jdbcType=VARCHAR},
+      invoice_status = #{invoiceStatus,jdbcType=INTEGER},
+      invoice_id = #{invoiceId,jdbcType=BIGINT}
     where ptb_recharge_order_id = #{ptbRechargeOrderId,jdbcType=BIGINT}
   </update>
 </mapper>

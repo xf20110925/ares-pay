@@ -1,4 +1,4 @@
-package com.ptb.pay.vo;
+package com.ptb.pay.vo.recharge;
 
 import java.io.Serializable;
 
