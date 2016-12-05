@@ -69,7 +69,7 @@ public class RechargeOrderApiImpl implements IRechargeOrderApi {
                 param.setDeviceType(DeviceTypeEnum.getDeviceTypeEnum(paramsVO.getDeviceType()));
                 param.setTitle("审核中（线下打款）");
                 param.setMessage("提交成功，充值金额" + ChangeMoneyUtil.fromFenToYuan(rechargeOrder.getTotalAmount()) + "元，请尽快给平台账户进行打款，便于系统审核");
-                param.setMessageType(MessageTypeEnum.OFFLINE_RECHARGE.getMessageType());
+                param.setMessageType(MessageTypeEnum.XXDKSQ.getMessageType());
                 Map<String, Object> keyMap = new HashMap<>();
                 keyMap.put("id", rechargeOrder.getPtbRechargeOrderId());
                 param.setContentParam( keyMap);
