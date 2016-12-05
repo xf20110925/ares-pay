@@ -73,7 +73,7 @@ public class AlipaySubmit {
 
         StringBuffer sbHtml = new StringBuffer();
 
-        sbHtml.append("<form id=\"alipaysubmit\" name=\"alipaysubmit\" action=\"" + ALIPAY_GATEWAY_NEW
+        sbHtml.append("<form id=\"alipaysubmit\" target=\"_blank\" name=\"alipaysubmit\" action=\"" + ALIPAY_GATEWAY_NEW
                       + "_input_charset=" + charset + "\" method=\"" + strMethod
                       + "\">");
 
