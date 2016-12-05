@@ -54,7 +54,7 @@ public interface IRechargeOrderApi {
      * @return 
      * @version 1.0  2016-12-05 17:47 by wgh（guanhua.wang@pintuibao.cn）创建
      */ 
-    ResponseVo<List<RechargeOrderVO>> getRechargeOrderListByPage(int pageNum, int pageSize, RechargeOrderQueryVO rechargeOrderQueryVO) throws Exception;
+    ResponseVo<Object> getRechargeOrderListByPage(int pageNum, int pageSize, RechargeOrderQueryVO rechargeOrderQueryVO) throws Exception;
 
     /**
      * 获取线下充值详情

@@ -1,6 +1,7 @@
 package com.ptb.pay.api.impl;
 
 import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import com.ptb.common.enums.DeviceTypeEnum;
 import com.ptb.common.enums.PaymentMethodEnum;
 import com.ptb.common.enums.RechargeOrderStatusEnum;
@@ -129,7 +130,7 @@ public class RechargeOrderApiImpl implements IRechargeOrderApi {
     }
 
     @Override
-    public ResponseVo<List<RechargeOrderVO>> getRechargeOrderListByPage(int pageNum, int pageSize, RechargeOrderQueryVO rechargeOrderQueryVO) throws Exception {
+    public ResponseVo<Object> getRechargeOrderListByPage(int pageNum, int pageSize, RechargeOrderQueryVO rechargeOrderQueryVO) throws Exception {
         RechargeOrderExample example = new RechargeOrderExample();
 
         RechargeOrderExample.Criteria c = example.createCriteria();
@@ -171,6 +172,7 @@ public class RechargeOrderApiImpl implements IRechargeOrderApi {
         PageHelper.startPage(pageNum, pageSize); //开启分页查询，通过拦截器实现，紧接着执行的sql会被拦截
         List<RechargeOrder> orders = rechargeOrderMapper.selectByExample(example);
         List<RechargeOrderVO> returnData = new ArrayList<RechargeOrderVO>();
+        PageInfo pageInfo = new PageInfo(orders);
         if(CollectionUtils.isEmpty(orders)){
             return ReturnUtil.success(returnData);
         }
@@ -187,11 +189,12 @@ public class RechargeOrderApiImpl implements IRechargeOrderApi {
             orderVO.setVerificationCode(order.getVerificationCode());
             orderVO.setPayMethod(order.getPayMethod());
             orderVO.setRechargeOrderNo(order.getRechargeOrderNo());
-            orderVO.setPtbRechargeOrderId( order.getPtbRechargeOrderId());
+            orderVO.setPtbRechargeOrderId(order.getPtbRechargeOrderId());
             orderVO.setInvoiceId(order.getInvoiceId());
             returnData.add(orderVO);
         }
-        return ReturnUtil.success(returnData);
+        pageInfo.setList(returnData);
+        return ReturnUtil.success(pageInfo);
     }
 
     @Override
