@@ -144,13 +144,16 @@ public class RechargeOrderApiImpl implements IRechargeOrderApi {
         orderVO.setPayMethod(order.getPayMethod());
         orderVO.setRechargeOrderNo(order.getRechargeOrderNo());
         orderVO.setPtbRechargeOrderId(order.getPtbRechargeOrderId());
-        OfflinePaymentConfig config = paymentService.getOfflinePaymentConfig();
-        Map<String, Object> bankInfo = new HashMap<>();
-        bankInfo.put("bankName", config.getBankName());
-        bankInfo.put("openAccountBankName", config.getOpenAccountBankName());
-        bankInfo.put("openAccountUserName", config.getOpenAccountUserName());
-        bankInfo.put("openAccountUserNum", config.getOpenAccountUserNum());
-        orderVO.setBankInfo(bankInfo);
+        //线下充值展示收款行信息
+        if ( 2 == order.getPayMethod().intValue()) {
+            OfflinePaymentConfig config = paymentService.getOfflinePaymentConfig();
+            Map<String, Object> bankInfo = new HashMap<>();
+            bankInfo.put("bankName", config.getBankName());
+            bankInfo.put("openAccountBankName", config.getOpenAccountBankName());
+            bankInfo.put("openAccountUserName", config.getOpenAccountUserName());
+            bankInfo.put("openAccountUserNum", config.getOpenAccountUserNum());
+            orderVO.setBankInfo(bankInfo);
+        }
         return ReturnUtil.success( orderVO);
     }
 }
