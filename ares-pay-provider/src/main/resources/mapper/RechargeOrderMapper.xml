@@ -89,7 +89,7 @@
     <if test="userId != null">
       and user_id = #{userId}
     </if>
-    <if test="rechargeOrderNo != null and rechargeOrderNo != 0">
+    <if test="rechargeOrderNo != null and rechargeOrderNo != ''">
       and recharge_order_no = #{rechargeOrderNo}
     </if>
   </select>
