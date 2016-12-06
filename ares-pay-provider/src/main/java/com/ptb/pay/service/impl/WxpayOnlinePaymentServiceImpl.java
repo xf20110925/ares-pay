@@ -1,17 +1,38 @@
 package com.ptb.pay.service.impl;
 
+import com.alibaba.dubbo.rpc.RpcContext;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+import com.ptb.account.api.IAccountApi;
+import com.ptb.account.vo.PtbAccountVo;
+import com.ptb.account.vo.param.AccountRechargeParam;
+import com.ptb.common.enums.DeviceTypeEnum;
+import com.ptb.common.enums.PlatformEnum;
+import com.ptb.common.enums.RechargeOrderStatusEnum;
 import com.ptb.common.vo.ResponseVo;
-import com.ptb.pay.conf.payment.AlipayConfig;
+import com.ptb.pay.mapper.impl.RechargeOrderMapper;
+import com.ptb.pay.model.RechargeOrder;
+import com.ptb.pay.model.RechargeOrderExample;
+import com.ptb.pay.model.vo.AccountRechargeParamMessageVO;
+import com.ptb.pay.service.BusService;
+import com.ptb.pay.service.ThirdPaymentNotifyLogService;
 import com.ptb.pay.service.interfaces.IOnlinePaymentService;
 import com.ptb.pay.utils.wxpay.GetWxOrderno;
 import com.ptb.pay.utils.wxpay.RequestHandler;
 import com.ptb.pay.vo.CheckPayResultVO;
+import com.ptb.service.api.IBaiduPushApi;
 import com.ptb.service.api.ISystemConfigApi;
 import com.ptb.utils.date.DateUtil;
+import com.ptb.utils.encrypt.SignUtil;
+import com.ptb.utils.tool.ChangeMoneyUtil;
 import com.ptb.utils.tool.RandomUtil;
+import enums.MessageTypeEnum;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import vo.param.PushMessageParam;
 
 import java.util.*;
 
@@ -24,6 +45,8 @@ import java.util.*;
 @Service
 public class WxpayOnlinePaymentServiceImpl implements IOnlinePaymentService{
 
+    private static Logger LOGGER = LoggerFactory.getLogger(WxpayOnlinePaymentServiceImpl.class);
+
     private static final String SYSTEM_CONFIG_WXPAY_APPID = "wxpay.appid";
     private static final String SYSTEM_CONFIG_WXPAY_MCH_ID = "wxpay.mch_id";
     private static final String SYSTEM_CONFIG_WXPAY_NOTIFY_URL = "wxpay.notify.url";
@@ -32,6 +55,14 @@ public class WxpayOnlinePaymentServiceImpl implements IOnlinePaymentService{
 
     @Autowired
     private ISystemConfigApi systemConfigApi;
+    @Autowired
+    private RechargeOrderMapper rechargeOrderMapper;
+    @Autowired
+    private IAccountApi accountApi;
+    @Autowired
+    private IBaiduPushApi baiduPushApi;
+    @Autowired
+    private BusService busService;
 
     @Override
     public String getPaymentInfo(String rechargeOrderNo, Long price) throws Exception{
@@ -58,6 +89,7 @@ public class WxpayOnlinePaymentServiceImpl implements IOnlinePaymentService{
         packageParams.put("nonce_str", nonceStr);
         packageParams.put("notify_url", notifyUrl);
         packageParams.put("out_trade_no", rechargeOrderNo);
+        //TODO 客户端IP非必填参数
 //        packageParams.put("spbill_create_ip", spbill_create_ip);
         packageParams.put("total_fee", String.valueOf(price));
         packageParams.put("trade_type", tradeType);
@@ -110,7 +142,111 @@ public class WxpayOnlinePaymentServiceImpl implements IOnlinePaymentService{
 
     @Override
     public boolean notifyPayResult(Map<String, String> params) throws Exception {
-        return false;
+        String msgxml = params.get("xml");
+        Map map =  new GetWxOrderno().doXMLParse(msgxml);
+        String result_code=(String) map.get("result_code");
+        String out_trade_no  = (String) map.get("out_trade_no");
+        String sign  = (String) map.get("sign");
+        String sn=out_trade_no.split("\\|")[0];//获取订单编号
+        RechargeOrderExample example = new RechargeOrderExample();
+        example.createCriteria().andRechargeOrderNoEqualTo(sn);
+        List<RechargeOrder> rechargeOrders = rechargeOrderMapper.selectByExample(example);
+        if(result_code.equals("SUCCESS") && !CollectionUtils.isEmpty( rechargeOrders)){
+            RechargeOrder rechargeOrder = rechargeOrders.get( 0);
+            //总金额以分为单位，不带小数点
+            String order_total_fee = String.valueOf(rechargeOrder.getReceiptAmount());
+            String fee_type  = (String) map.get("fee_type");
+            String bank_type  = (String) map.get("bank_type");
+            String cash_fee  = (String) map.get("cash_fee");
+            String is_subscribe  = (String) map.get("is_subscribe");
+            String nonce_str  = (String) map.get("nonce_str");
+            String openid  = (String) map.get("openid");
+            String return_code  = (String) map.get("return_code");
+            String sub_mch_id  = (String) map.get("sub_mch_id");
+            String time_end  = (String) map.get("time_end");
+            String trade_type  = (String) map.get("trade_type");
+            String transaction_id  = (String) map.get("transaction_id");
+            Map<String, String> config = getWXPayConfig();
+            String appid = config.get(SYSTEM_CONFIG_WXPAY_APPID);
+            String mchId = config.get(SYSTEM_CONFIG_WXPAY_MCH_ID);
+            String apiKey = config.get(SYSTEM_CONFIG_WXPAY_API_KEY);
+            //需要对以下字段进行签名
+            SortedMap<String, String> packageParams = new TreeMap<String, String>();
+            packageParams.put("appid", appid);
+            packageParams.put("bank_type", bank_type);
+            packageParams.put("cash_fee", cash_fee);
+            packageParams.put("fee_type", fee_type);
+            packageParams.put("is_subscribe", is_subscribe);
+            packageParams.put("mch_id", mchId);
+            packageParams.put("nonce_str", nonce_str);
+            packageParams.put("openid", openid);
+            packageParams.put("out_trade_no", out_trade_no);
+            packageParams.put("result_code", result_code);
+            packageParams.put("return_code", return_code);
+            packageParams.put("sub_mch_id", sub_mch_id);
+            packageParams.put("time_end", time_end);
+            packageParams.put("total_fee", order_total_fee);    //用自己系统的数据：订单金额
+            packageParams.put("trade_type", trade_type);
+            packageParams.put("transaction_id", transaction_id);
+            RequestHandler reqHandler = new RequestHandler(apiKey);
+            String endsign = reqHandler.createSign(packageParams);
+            if(!sign.equals(endsign)){//验证签名是否正确  官方签名工具地址：https://pay.weixin.qq.com/wiki/tools/signverify/
+                LOGGER.error( "微信充值，验签失败。sign:{} params:{}", sign, JSON.toJSONString( packageParams));
+                return false;
+            }
+            AccountRechargeParam rechargeParam = new AccountRechargeParam();
+            try {
+                rechargeParam.setDeviceType(DeviceTypeEnum.getDeviceTypeEnum(rechargeOrder.getDeviceType()));
+                rechargeParam.setMoney(rechargeOrder.getTotalAmount());
+                rechargeParam.setUserId(rechargeOrder.getUserId());
+                rechargeParam.setPayType(rechargeOrder.getPayType());
+                rechargeParam.setPayMethod(rechargeOrder.getPayMethod());
+                rechargeParam.setPlatformNo(PlatformEnum.xiaomi);
+                rechargeParam.setOrderNo(sn);
+                //隐式加密
+                TreeMap toSign = JSONObject.parseObject(JSONObject.toJSONString(rechargeParam), TreeMap.class);
+                String signKey = SignUtil.getSignKey(toSign);
+                RpcContext.getContext().setAttachment("key", signKey);
+
+                ResponseVo<PtbAccountVo> repsonseVO = accountApi.recharge(rechargeParam);
+                if (repsonseVO == null || !"0".equals(repsonseVO.getCode())) {
+                    sendRetryMessage(rechargeParam);
+                } else {
+                    LOGGER.info("充值订单号：{} 充值成功!", sn);
+                    try {
+                        //推送消息
+                        PushMessageParam param = new PushMessageParam();
+                        param.setUserId(rechargeOrder.getUserId());
+                        param.setDeviceType(DeviceTypeEnum.getDeviceTypeEnum(rechargeOrder.getDeviceType()));
+                        param.setTitle("充值成功（在线充值）");
+                        param.setMessage("恭喜您，成功充值" + ChangeMoneyUtil.fromFenToYuan(rechargeOrder.getTotalAmount()) + "元，已自动转入钱包余额");
+                        param.setMessageType(MessageTypeEnum.ONLINE_RECHARGE.getMessageType());
+                        Map<String, Object> keyMap = new HashMap<>();
+                        keyMap.put("id", rechargeOrder.getPtbRechargeOrderId());
+                        param.setContentParam( keyMap);
+                        baiduPushApi.pushMessage(param);
+                    }catch (Exception e){
+                        LOGGER.error( "线上充值消息推送失败。errorMsg:{}", e.getMessage());
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                sendRetryMessage(rechargeParam);
+                LOGGER.error("微信充值失败，放入消息队列重试,params:" + JSONObject.toJSONString(params));
+            } finally {
+                rechargeOrder.setStatus(RechargeOrderStatusEnum.paid.getRechargeOrderStatus());
+                rechargeOrder.setPayTime(new Date());
+                rechargeOrderMapper.updateByPrimaryKey(rechargeOrder);
+            }
+        }
+        return true;
+    }
+
+    private void sendRetryMessage(AccountRechargeParam rechargeParam) {
+        AccountRechargeParamMessageVO messageVO = new AccountRechargeParamMessageVO();
+        messageVO.setAccountRechargeParam(rechargeParam);
+        LOGGER.info("发送重试充值消息：" + JSONObject.toJSONString(messageVO));
+        busService.sendAccountRechargeRetryMessage(messageVO);
     }
 
     public Map<String, String> getWXPayConfig() {
