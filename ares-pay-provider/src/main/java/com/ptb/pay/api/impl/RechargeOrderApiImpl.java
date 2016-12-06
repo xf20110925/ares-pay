@@ -121,6 +121,10 @@ public class RechargeOrderApiImpl implements IRechargeOrderApi {
         if(rechargeOrderQueryVO.getEndTime() != null){
             c.andCreateTimeLessThanOrEqualTo(rechargeOrderQueryVO.getEndTime());
         }
+        //充值订单ID
+        if(!CollectionUtils.isEmpty(rechargeOrderQueryVO.getRechargeOrderIds())){
+            c.andPtbRechargeOrderIdIn(rechargeOrderQueryVO.getRechargeOrderIds());
+        }
 
         example.setOrderByClause("create_time desc");
 
@@ -146,6 +150,7 @@ public class RechargeOrderApiImpl implements IRechargeOrderApi {
             orderVO.setRechargeOrderNo(order.getRechargeOrderNo());
             orderVO.setPtbRechargeOrderId(order.getPtbRechargeOrderId());
             orderVO.setInvoiceId(order.getInvoiceId());
+            orderVO.setInvoiceStatus(order.getInvoiceStatus());
             returnData.add(orderVO);
         }
         pageInfo.setList(returnData);

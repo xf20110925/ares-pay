@@ -2,6 +2,7 @@ package com.ptb.pay.vo.recharge;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 
 /**
  * Description: 充值订单查询VO
@@ -12,7 +13,7 @@ import java.util.Date;
 public class RechargeOrderQueryVO  implements Serializable {
 
     private static final long serialVersionUID = -6077002763918956443L;
-    private Long ptbRechargeOrderId;
+    private Long rechargeOrderId;
     private Integer payMethod;
     private Integer payType;
     private String rechargeOrderNo;
@@ -24,6 +25,15 @@ public class RechargeOrderQueryVO  implements Serializable {
     private Date startTime;
     private Date endTime;
     private String verificationCode;
+    private List<Long> rechargeOrderIds;
+
+    public List<Long> getRechargeOrderIds() {
+        return rechargeOrderIds;
+    }
+
+    public void setRechargeOrderIds(List<Long> rechargeOrderIds) {
+        this.rechargeOrderIds = rechargeOrderIds;
+    }
 
     public Long getInvoiceId() {
         return invoiceId;
@@ -41,12 +51,12 @@ public class RechargeOrderQueryVO  implements Serializable {
         this.invoiceStatus = invoiceStatus;
     }
 
-    public Long getPtbRechargeOrderId() {
-        return ptbRechargeOrderId;
+    public Long getRechargeOrderId() {
+        return rechargeOrderId;
     }
 
-    public void setPtbRechargeOrderId(Long ptbRechargeOrderId) {
-        this.ptbRechargeOrderId = ptbRechargeOrderId;
+    public void setRechargeOrderId(Long rechargeOrderId) {
+        this.rechargeOrderId = rechargeOrderId;
     }
 
     public Integer getPayMethod() {
