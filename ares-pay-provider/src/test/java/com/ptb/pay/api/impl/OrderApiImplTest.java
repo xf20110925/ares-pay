@@ -50,7 +50,7 @@ public class OrderApiImplTest extends BaseTest {
         OrderQueryVO orderQueryVO = new OrderQueryVO();
         //orderQueryVO.setStartTime(new Date(new Date().getTime() - 5 * 24 * 60 * 60 * 1000));
         //orderQueryVO.setEndTime(new Date(new Date().getTime() - 3 * 24 * 60 * 60 * 1000));
-        orderQueryVO.setOrderStatus(OrderStatusEnum.ORDER_STATUS_DEALING.getStatus());
+        //orderQueryVO.setOrderStatus(OrderStatusEnum.ORDER_STATUS_DEALING.getStatus());
         orderApi.getOrderListByPage(1, 10, orderQueryVO);
     }
 

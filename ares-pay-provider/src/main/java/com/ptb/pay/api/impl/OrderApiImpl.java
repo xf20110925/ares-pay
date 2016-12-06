@@ -590,8 +590,9 @@ public class OrderApiImpl implements IOrderApi {
         List<Order> orders = orderMapper.selectDynamics(orderQueryVO);
         //订单为空返回
         if(CollectionUtils.isEmpty(orders))
-            return ReturnUtil.success(orders);
-
-        return ReturnUtil.success(new PageInfo(orders));
+            return ReturnUtil.success(new PageInfo<>(orders));
+        PageInfo pageInfo = new PageInfo<>(orders);
+        pageInfo.setList(orders.stream().map(ConvertOrderUtil::convertOrderToOrderVO).collect(Collectors.toList()));
+        return ReturnUtil.success(pageInfo);
     }
 }
