@@ -62,7 +62,6 @@ public class RechargeOrderApiImpl implements IRechargeOrderApi {
         if ( PaymentMethodEnum.offline.getPaymentMethod() == paramsVO.getPayMethod()){
             //推送消息
             try {
-                //推送消息
                 PushMessageParam param = new PushMessageParam();
                 param.setUserId(paramsVO.getUserId());
                 param.setDeviceType(DeviceTypeEnum.getDeviceTypeEnum(paramsVO.getDeviceType()));
