@@ -82,6 +82,19 @@
     receipt_amount, processing_amount, create_time, pay_time, status, order_no, verification_code, 
     device_type, invoice_status, invoice_id
   </sql>
+  <select id="selectOne" resultMap="BaseResultMap" >
+    select <include refid="Base_Column_List"/>
+    from ptb_recharge_order where 1=1
+    <if test="rechargeOrderId != null and rechargeOrderId != 0">
+      and ptb_recharge_order_id = #{rechargeOrderId}
+    </if>
+    <if test="userId != null">
+      and user_id = #{userId}
+    </if>
+    <if test="rechargeOrderNo != null and rechargeOrderNo != ''">
+      and recharge_order_no = #{rechargeOrderNo}
+    </if>
+  </select>
   <select id="selectByExample" resultMap="BaseResultMap" parameterType="com.ptb.pay.model.RechargeOrderExample" >
     select
     <if test="distinct" >
