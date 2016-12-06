@@ -11,9 +11,17 @@ public class RechargeOrderExample {
 
     protected boolean distinct;
 
+    protected List<Criteria> oredCriteria;
+
     private Page page;
 
-    protected List<Criteria> oredCriteria;
+    public Page getPage() {
+        return page;
+    }
+
+    public void setPage(Page page) {
+        this.page = page;
+    }
 
     public RechargeOrderExample() {
         oredCriteria = new ArrayList<Criteria>();
@@ -66,14 +74,6 @@ public class RechargeOrderExample {
         oredCriteria.clear();
         orderByClause = null;
         distinct = false;
-    }
-
-    public Page getPage() {
-        return page;
-    }
-
-    public void setPage(Page page) {
-        this.page = page;
     }
 
     protected abstract static class GeneratedCriteria {
@@ -257,52 +257,52 @@ public class RechargeOrderExample {
             return (Criteria) this;
         }
 
-        public Criteria andPayTypeEqualTo(Byte value) {
+        public Criteria andPayTypeEqualTo(Integer value) {
             addCriterion("pay_type =", value, "payType");
             return (Criteria) this;
         }
 
-        public Criteria andPayTypeNotEqualTo(Byte value) {
+        public Criteria andPayTypeNotEqualTo(Integer value) {
             addCriterion("pay_type <>", value, "payType");
             return (Criteria) this;
         }
 
-        public Criteria andPayTypeGreaterThan(Byte value) {
+        public Criteria andPayTypeGreaterThan(Integer value) {
             addCriterion("pay_type >", value, "payType");
             return (Criteria) this;
         }
 
-        public Criteria andPayTypeGreaterThanOrEqualTo(Byte value) {
+        public Criteria andPayTypeGreaterThanOrEqualTo(Integer value) {
             addCriterion("pay_type >=", value, "payType");
             return (Criteria) this;
         }
 
-        public Criteria andPayTypeLessThan(Byte value) {
+        public Criteria andPayTypeLessThan(Integer value) {
             addCriterion("pay_type <", value, "payType");
             return (Criteria) this;
         }
 
-        public Criteria andPayTypeLessThanOrEqualTo(Byte value) {
+        public Criteria andPayTypeLessThanOrEqualTo(Integer value) {
             addCriterion("pay_type <=", value, "payType");
             return (Criteria) this;
         }
 
-        public Criteria andPayTypeIn(List<Byte> values) {
+        public Criteria andPayTypeIn(List<Integer> values) {
             addCriterion("pay_type in", values, "payType");
             return (Criteria) this;
         }
 
-        public Criteria andPayTypeNotIn(List<Byte> values) {
+        public Criteria andPayTypeNotIn(List<Integer> values) {
             addCriterion("pay_type not in", values, "payType");
             return (Criteria) this;
         }
 
-        public Criteria andPayTypeBetween(Byte value1, Byte value2) {
+        public Criteria andPayTypeBetween(Integer value1, Integer value2) {
             addCriterion("pay_type between", value1, value2, "payType");
             return (Criteria) this;
         }
 
-        public Criteria andPayTypeNotBetween(Byte value1, Byte value2) {
+        public Criteria andPayTypeNotBetween(Integer value1, Integer value2) {
             addCriterion("pay_type not between", value1, value2, "payType");
             return (Criteria) this;
         }
@@ -377,52 +377,52 @@ public class RechargeOrderExample {
             return (Criteria) this;
         }
 
-        public Criteria andPayMethodEqualTo(Byte value) {
+        public Criteria andPayMethodEqualTo(Integer value) {
             addCriterion("pay_method =", value, "payMethod");
             return (Criteria) this;
         }
 
-        public Criteria andPayMethodNotEqualTo(Byte value) {
+        public Criteria andPayMethodNotEqualTo(Integer value) {
             addCriterion("pay_method <>", value, "payMethod");
             return (Criteria) this;
         }
 
-        public Criteria andPayMethodGreaterThan(Byte value) {
+        public Criteria andPayMethodGreaterThan(Integer value) {
             addCriterion("pay_method >", value, "payMethod");
             return (Criteria) this;
         }
 
-        public Criteria andPayMethodGreaterThanOrEqualTo(Byte value) {
+        public Criteria andPayMethodGreaterThanOrEqualTo(Integer value) {
             addCriterion("pay_method >=", value, "payMethod");
             return (Criteria) this;
         }
 
-        public Criteria andPayMethodLessThan(Byte value) {
+        public Criteria andPayMethodLessThan(Integer value) {
             addCriterion("pay_method <", value, "payMethod");
             return (Criteria) this;
         }
 
-        public Criteria andPayMethodLessThanOrEqualTo(Byte value) {
+        public Criteria andPayMethodLessThanOrEqualTo(Integer value) {
             addCriterion("pay_method <=", value, "payMethod");
             return (Criteria) this;
         }
 
-        public Criteria andPayMethodIn(List<Byte> values) {
+        public Criteria andPayMethodIn(List<Integer> values) {
             addCriterion("pay_method in", values, "payMethod");
             return (Criteria) this;
         }
 
-        public Criteria andPayMethodNotIn(List<Byte> values) {
+        public Criteria andPayMethodNotIn(List<Integer> values) {
             addCriterion("pay_method not in", values, "payMethod");
             return (Criteria) this;
         }
 
-        public Criteria andPayMethodBetween(Byte value1, Byte value2) {
+        public Criteria andPayMethodBetween(Integer value1, Integer value2) {
             addCriterion("pay_method between", value1, value2, "payMethod");
             return (Criteria) this;
         }
 
-        public Criteria andPayMethodNotBetween(Byte value1, Byte value2) {
+        public Criteria andPayMethodNotBetween(Integer value1, Integer value2) {
             addCriterion("pay_method not between", value1, value2, "payMethod");
             return (Criteria) this;
         }
@@ -994,6 +994,126 @@ public class RechargeOrderExample {
 
         public Criteria andDeviceTypeNotBetween(String value1, String value2) {
             addCriterion("device_type not between", value1, value2, "deviceType");
+            return (Criteria) this;
+        }
+
+        public Criteria andInvoiceStatusIsNull() {
+            addCriterion("invoice_status is null");
+            return (Criteria) this;
+        }
+
+        public Criteria andInvoiceStatusIsNotNull() {
+            addCriterion("invoice_status is not null");
+            return (Criteria) this;
+        }
+
+        public Criteria andInvoiceStatusEqualTo(Integer value) {
+            addCriterion("invoice_status =", value, "invoiceStatus");
+            return (Criteria) this;
+        }
+
+        public Criteria andInvoiceStatusNotEqualTo(Integer value) {
+            addCriterion("invoice_status <>", value, "invoiceStatus");
+            return (Criteria) this;
+        }
+
+        public Criteria andInvoiceStatusGreaterThan(Integer value) {
+            addCriterion("invoice_status >", value, "invoiceStatus");
+            return (Criteria) this;
+        }
+
+        public Criteria andInvoiceStatusGreaterThanOrEqualTo(Integer value) {
+            addCriterion("invoice_status >=", value, "invoiceStatus");
+            return (Criteria) this;
+        }
+
+        public Criteria andInvoiceStatusLessThan(Integer value) {
+            addCriterion("invoice_status <", value, "invoiceStatus");
+            return (Criteria) this;
+        }
+
+        public Criteria andInvoiceStatusLessThanOrEqualTo(Integer value) {
+            addCriterion("invoice_status <=", value, "invoiceStatus");
+            return (Criteria) this;
+        }
+
+        public Criteria andInvoiceStatusIn(List<Integer> values) {
+            addCriterion("invoice_status in", values, "invoiceStatus");
+            return (Criteria) this;
+        }
+
+        public Criteria andInvoiceStatusNotIn(List<Integer> values) {
+            addCriterion("invoice_status not in", values, "invoiceStatus");
+            return (Criteria) this;
+        }
+
+        public Criteria andInvoiceStatusBetween(Integer value1, Integer value2) {
+            addCriterion("invoice_status between", value1, value2, "invoiceStatus");
+            return (Criteria) this;
+        }
+
+        public Criteria andInvoiceStatusNotBetween(Integer value1, Integer value2) {
+            addCriterion("invoice_status not between", value1, value2, "invoiceStatus");
+            return (Criteria) this;
+        }
+
+        public Criteria andInvoiceIdIsNull() {
+            addCriterion("invoice_id is null");
+            return (Criteria) this;
+        }
+
+        public Criteria andInvoiceIdIsNotNull() {
+            addCriterion("invoice_id is not null");
+            return (Criteria) this;
+        }
+
+        public Criteria andInvoiceIdEqualTo(Long value) {
+            addCriterion("invoice_id =", value, "invoiceId");
+            return (Criteria) this;
+        }
+
+        public Criteria andInvoiceIdNotEqualTo(Long value) {
+            addCriterion("invoice_id <>", value, "invoiceId");
+            return (Criteria) this;
+        }
+
+        public Criteria andInvoiceIdGreaterThan(Long value) {
+            addCriterion("invoice_id >", value, "invoiceId");
+            return (Criteria) this;
+        }
+
+        public Criteria andInvoiceIdGreaterThanOrEqualTo(Long value) {
+            addCriterion("invoice_id >=", value, "invoiceId");
+            return (Criteria) this;
+        }
+
+        public Criteria andInvoiceIdLessThan(Long value) {
+            addCriterion("invoice_id <", value, "invoiceId");
+            return (Criteria) this;
+        }
+
+        public Criteria andInvoiceIdLessThanOrEqualTo(Long value) {
+            addCriterion("invoice_id <=", value, "invoiceId");
+            return (Criteria) this;
+        }
+
+        public Criteria andInvoiceIdIn(List<Long> values) {
+            addCriterion("invoice_id in", values, "invoiceId");
+            return (Criteria) this;
+        }
+
+        public Criteria andInvoiceIdNotIn(List<Long> values) {
+            addCriterion("invoice_id not in", values, "invoiceId");
+            return (Criteria) this;
+        }
+
+        public Criteria andInvoiceIdBetween(Long value1, Long value2) {
+            addCriterion("invoice_id between", value1, value2, "invoiceId");
+            return (Criteria) this;
+        }
+
+        public Criteria andInvoiceIdNotBetween(Long value1, Long value2) {
+            addCriterion("invoice_id not between", value1, value2, "invoiceId");
             return (Criteria) this;
         }
     }

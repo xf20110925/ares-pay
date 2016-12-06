@@ -6,7 +6,7 @@ import com.ptb.pay.mapper.impl.RechargeOrderMapper;
 import com.ptb.pay.model.RechargeOrder;
 import com.ptb.pay.service.interfaces.IPaymentService;
 import com.ptb.pay.service.interfaces.IRechargeOrderService;
-import com.ptb.pay.vo.RechargeOrderParamsVO;
+import com.ptb.pay.vo.recharge.RechargeOrderParamsVO;
 import com.ptb.utils.tool.GenerateOrderNoUtil;
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.lang.StringUtils;

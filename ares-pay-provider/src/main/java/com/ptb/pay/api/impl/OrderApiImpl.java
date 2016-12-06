@@ -169,7 +169,7 @@ public class OrderApiImpl implements IOrderApi {
             Order order = orderMapper.selectByPrimaryKey(orderId);
             //检查订单是否有误
             if (null!= order && order.getBuyerId().longValue() != userId.longValue()){
-                return ReturnUtil.error(ErrorCode.ORDER_API_5001.getCode(), ErrorCode.ORDER_API_5001.getMessage());
+                return ReturnUtil.error(ErrorCode.ORDER_API_5004.getCode(), ErrorCode.ORDER_API_5004.getMessage());
             }
             if (!orderService.checkOrderStatus(OrderActionEnum.BUYER_PAY, order.getOrderStatus(), order.getSellerStatus(), order.getBuyerStatus())) {
                 //订单状态有误
@@ -190,7 +190,9 @@ public class OrderApiImpl implements IOrderApi {
             String sign = SignUtil.getSignKey(toSign);
             RpcContext.getContext().setAttachment("key", sign);
             ResponseVo<PtbAccountVo> responseVo = accountApi.pay(param);
-            if (responseVo.getCode().equals("6002"))return responseVo;
+            if (responseVo.getCode().equals(ErrorCode.PRODUCT_API_PARAMETER_ERROR.getCode()))return responseVo;
+            if (responseVo.getCode().equals(ErrorCode.ORDER_API_5004.getCode()))
+                return ReturnUtil.error(ErrorCode.PAYPASSWORD_5006.getCode(), ErrorCode.PAYPASSWORD_5006.getMessage());
             if ( !"0".equals( responseVo.getCode())){
                 logger.error( "虚拟账户付款dubbo接口调用失败。salerId:{}", userId);
                 throw new Exception();
