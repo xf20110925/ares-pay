@@ -22,6 +22,16 @@ public class RequestHandler {
      * 创建md5摘要,规则是:按参数名称a-z排序,遇到空值的参数不参加签名。
      */
     public String createSign(SortedMap<String, String> packageParams) {
+        StringBuffer sb = createParamStr( packageParams);
+        sb.append("key=" + this.getApiKey());
+//        System.out.println("md5 sb:" + sb);
+        String sign = MD5Util.MD5Encode(sb.toString(), this.charset)
+                .toUpperCase();
+//        System.out.println("packge签名:" + sign);
+        return sign;
+    }
+
+    public StringBuffer createParamStr(SortedMap<String, String> packageParams){
         StringBuffer sb = new StringBuffer();
         Set es = packageParams.entrySet();
         Iterator it = es.iterator();
@@ -34,13 +44,7 @@ public class RequestHandler {
                 sb.append(k + "=" + v + "&");
             }
         }
-        sb.append("key=" + this.getApiKey());
-        //System.out.println("md5 sb:" + sb);
-        String sign = MD5Util.MD5Encode(sb.toString(), this.charset)
-                .toUpperCase();
-        //System.out.println("packge签名:" + sign);
-        return sign;
-
+        return sb;
     }
 
     public String getCharset() {

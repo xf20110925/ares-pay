@@ -10,6 +10,7 @@ import com.ptb.service.api.ISystemConfigApi;
 import com.ptb.utils.date.DateUtil;
 import com.ptb.utils.tool.RandomUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import java.util.*;
@@ -20,6 +21,7 @@ import java.util.*;
  *
  * @version 1.0  2016-11-08 13:12  by wgh（guanhua.wang@pintuibao.cn）创建
  */
+@Service
 public class WxpayOnlinePaymentServiceImpl implements IOnlinePaymentService{
 
     private static final String SYSTEM_CONFIG_WXPAY_APPID = "wxpay.appid";
@@ -34,11 +36,12 @@ public class WxpayOnlinePaymentServiceImpl implements IOnlinePaymentService{
     @Override
     public String getPaymentInfo(String rechargeOrderNo, Long price) throws Exception{
         Map<String, String> config = getWXPayConfig();
-        String appid = config.get("SYSTEM_CONFIG_WXPAY_APPID");
-        String mchId = config.get("SYSTEM_CONFIG_WXPAY_MCH_ID");
-        String notifyUrl = config.get("SYSTEM_CONFIG_WXPAY_NOTIFY_URL");
-        String apiKey = config.get("SYSTEM_CONFIG_WXPAY_API_KEY");
-        String createOrderURL = config.get("SYSTEM_CONFIG_WXPAY_CREATE_ORDER_URL");
+        String appid = config.get(SYSTEM_CONFIG_WXPAY_APPID);
+        String mchId = config.get(SYSTEM_CONFIG_WXPAY_MCH_ID);
+        String notifyUrl = config.get(SYSTEM_CONFIG_WXPAY_NOTIFY_URL);
+        String apiKey = config.get(SYSTEM_CONFIG_WXPAY_API_KEY);
+        String createOrderURL = config.get(SYSTEM_CONFIG_WXPAY_CREATE_ORDER_URL);
+        String partnerid = mchId;
         String currTime = DateUtil.getCurrTime();
         //8位日期
         String strTime = currTime.substring(8, currTime.length());
@@ -48,7 +51,6 @@ public class WxpayOnlinePaymentServiceImpl implements IOnlinePaymentService{
         String nonceStr = strTime + strRandom;
         String body = "品推宝小蜜-充值";
         String tradeType = "APP";
-        //IP地址
         SortedMap<String, String> packageParams = new TreeMap<String, String>();
         packageParams.put("appid", appid);
         packageParams.put("body", body);
@@ -82,7 +84,18 @@ public class WxpayOnlinePaymentServiceImpl implements IOnlinePaymentService{
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return null;
+
+        //获取到prepayid后对以下字段进行签名最终发送给app
+        SortedMap<String, String> finalpackage = new TreeMap<String, String>();
+        String timestamp = DateUtil.getTimeStamp();
+        finalpackage.put("appid", appid);
+        finalpackage.put("timestamp", timestamp);
+        finalpackage.put("noncestr", nonceStr);
+        finalpackage.put("partnerid", partnerid);
+        finalpackage.put("package", "Sign=WXPay");
+        finalpackage.put("prepayid", prepay_id);
+        String finalsign = reqHandler.createSign(finalpackage);
+        return reqHandler.createParamStr( finalpackage).append("sign=").append( finalsign).toString();
     }
 
     @Override

@@ -172,6 +172,7 @@ public class RechargeOrderApiImpl implements IRechargeOrderApi {
         orderVO.setPayMethod(order.getPayMethod());
         orderVO.setRechargeOrderNo(order.getRechargeOrderNo());
         orderVO.setPtbRechargeOrderId(order.getPtbRechargeOrderId());
+        orderVO.setInvoiceStatus( order.getInvoiceStatus());
         //线下充值展示收款行信息
         if ( PaymentMethodEnum.offline.getPaymentMethod() == order.getPayMethod().intValue()) {
             OfflinePaymentConfig config = paymentService.getOfflinePaymentConfig();
