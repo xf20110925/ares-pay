@@ -4,7 +4,6 @@ import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.ptb.common.enums.DeviceTypeEnum;
 import com.ptb.common.enums.PaymentMethodEnum;
-import com.ptb.common.enums.RechargeOrderStatusEnum;
 import com.ptb.common.errorcode.CommonErrorCode;
 import com.ptb.common.vo.ResponseVo;
 import com.ptb.pay.api.IRechargeOrderApi;
@@ -19,7 +18,6 @@ import com.ptb.pay.vo.recharge.RechargeOrderParamsVO;
 import com.ptb.pay.vo.recharge.RechargeOrderQueryVO;
 import com.ptb.pay.vo.recharge.RechargeOrderVO;
 import com.ptb.service.api.IBaiduPushApi;
-import com.ptb.utils.db.Page;
 import com.ptb.utils.service.ReturnUtil;
 import com.ptb.utils.tool.ChangeMoneyUtil;
 import enums.MessageTypeEnum;
@@ -83,53 +81,6 @@ public class RechargeOrderApiImpl implements IRechargeOrderApi {
     }
 
     @Override
-    public ResponseVo<List<RechargeOrderVO>> getRechargeOrderList(Long userId) throws Exception {
-        return getRechargeOrderList(userId, 0, 10000);
-    }
-
-    @Override
-    public ResponseVo<List<RechargeOrderVO>> getRechargeOrderList(Long userId, int start, int end) throws Exception {
-        if(userId == null){
-            return ReturnUtil.error(CommonErrorCode.COMMMON_ERROR_ARGSERROR.getCode(),
-                    CommonErrorCode.COMMMON_ERROR_ARGSERROR.getMessage());
-        }
-
-        RechargeOrderExample example = new RechargeOrderExample();
-
-        List<Integer> status = new ArrayList<Integer>();
-        status.add(RechargeOrderStatusEnum.paid.getRechargeOrderStatus());
-        status.add(RechargeOrderStatusEnum.review.getRechargeOrderStatus());
-        example.createCriteria().andUserIdEqualTo(userId).andStatusIn(status);
-        example.setOrderByClause("create_time desc");
-        Page page = new Page();
-        page.setLimit(start);
-        page.setLimit(end - start);
-        example.setPage(page);
-        List<RechargeOrder> orders = rechargeOrderMapper.selectByExample(example);
-        List<RechargeOrderVO> returnData = new ArrayList<RechargeOrderVO>();
-        if(CollectionUtils.isEmpty(orders)){
-            return ReturnUtil.success(returnData);
-        }
-        for (RechargeOrder order : orders) {
-            RechargeOrderVO orderVO = new RechargeOrderVO();
-            orderVO.setPayTime(order.getPayTime());
-            orderVO.setPayType(order.getPayType());
-            orderVO.setCreateTime(order.getCreateTime());
-            orderVO.setUserId(order.getUserId());
-            orderVO.setDeviceType(order.getDeviceType());
-            orderVO.setOrderId(order.getPtbRechargeOrderId());
-            orderVO.setRechargeAmount(order.getTotalAmount());
-            orderVO.setStatus(order.getStatus());
-            orderVO.setVerificationCode(order.getVerificationCode());
-            orderVO.setPayMethod(order.getPayMethod());
-            orderVO.setRechargeOrderNo(order.getRechargeOrderNo());
-            orderVO.setPtbRechargeOrderId( order.getPtbRechargeOrderId());
-            returnData.add(orderVO);
-        }
-        return ReturnUtil.success(returnData);
-    }
-
-    @Override
     public ResponseVo<Object> getRechargeOrderListByPage(int pageNum, int pageSize, RechargeOrderQueryVO rechargeOrderQueryVO) throws Exception {
         RechargeOrderExample example = new RechargeOrderExample();
 
@@ -174,7 +125,7 @@ public class RechargeOrderApiImpl implements IRechargeOrderApi {
         List<RechargeOrderVO> returnData = new ArrayList<RechargeOrderVO>();
         PageInfo pageInfo = new PageInfo(orders);
         if(CollectionUtils.isEmpty(orders)){
-            return ReturnUtil.success(returnData);
+            return ReturnUtil.success(pageInfo);
         }
         for (RechargeOrder order : orders) {
             RechargeOrderVO orderVO = new RechargeOrderVO();
@@ -212,12 +163,13 @@ public class RechargeOrderApiImpl implements IRechargeOrderApi {
         orderVO.setOrderId(order.getPtbRechargeOrderId());
         orderVO.setRechargeAmount(order.getTotalAmount());
         orderVO.setStatus(order.getStatus());
+        orderVO.setInvoiceStatus(order.getInvoiceStatus());
         orderVO.setVerificationCode(order.getVerificationCode());
         orderVO.setPayMethod(order.getPayMethod());
         orderVO.setRechargeOrderNo(order.getRechargeOrderNo());
         orderVO.setPtbRechargeOrderId(order.getPtbRechargeOrderId());
         //线下充值展示收款行信息
-        if ( 2 == order.getPayMethod().intValue()) {
+        if ( PaymentMethodEnum.offline.getPaymentMethod() == order.getPayMethod().intValue()) {
             OfflinePaymentConfig config = paymentService.getOfflinePaymentConfig();
             Map<String, Object> bankInfo = new HashMap<>();
             bankInfo.put("bankName", config.getBankName());
