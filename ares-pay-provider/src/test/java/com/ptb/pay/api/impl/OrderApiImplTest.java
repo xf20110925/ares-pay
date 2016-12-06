@@ -54,6 +54,11 @@ public class OrderApiImplTest extends BaseTest {
         orderApi.getOrderListByPage(1, 10, orderQueryVO);
     }
 
+    @Test
+    public void getOrderInfo(){
+        ResponseVo orderInfo = orderApi.getOrderInfo(2, 332l);
+        System.out.println(orderInfo.getCode());
+    }
 
     @Test
     public void getOrderList(){
