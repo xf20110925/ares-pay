@@ -75,6 +75,8 @@ public class OrderApiImpl implements IOrderApi {
     @Autowired
     private IMessagePushService messagePushService;
 
+    long adminId = 2;
+
     @Transactional( rollbackFor = Exception.class, propagation = Propagation.REQUIRED)
     @Override
     public ResponseVo<Map<String,Object>> cancelApplyRefund(Long buyerId, Long orderId) throws Exception {
@@ -252,6 +254,9 @@ public class OrderApiImpl implements IOrderApi {
             if (product == null) {
                 return ReturnUtil.error("20002", "no product");
             }
+            if (product.getOwnerId() == userId){
+                return ReturnUtil.error("20003","can not buy myself product");
+            }
             //生成订单号
             String orderNo = GenerateOrderNoUtil.createOrderNo(device);
             if (orderNo == null){
@@ -349,7 +354,7 @@ public class OrderApiImpl implements IOrderApi {
     public ResponseVo getOrderInfo(long userId, Long orderId) {
         //获取订单
         Order order = orderMapper.selectByPrimaryKey(orderId);
-        if(null == order || (userId != order.getBuyerId() && userId != order.getSellerId()))
+        if(null == order || (userId != order.getBuyerId() && userId != order.getSellerId() && adminId != userId))
             return ReturnUtil.error(ErrorCode.ORDER_API_5005.getCode(), ErrorCode.ORDER_API_5005.getMessage());
         OrderVO orderVO = ConvertOrderUtil.convertOrderToOrderVO(order);
 
@@ -590,8 +595,9 @@ public class OrderApiImpl implements IOrderApi {
         List<Order> orders = orderMapper.selectDynamics(orderQueryVO);
         //订单为空返回
         if(CollectionUtils.isEmpty(orders))
-            return ReturnUtil.success(orders);
-
-        return ReturnUtil.success(new PageInfo(orders));
+            return ReturnUtil.success(new PageInfo<>(orders));
+        PageInfo pageInfo = new PageInfo<>(orders);
+        pageInfo.setList(orders.stream().map(ConvertOrderUtil::convertOrderToOrderVO).collect(Collectors.toList()));
+        return ReturnUtil.success(pageInfo);
     }
 }
