@@ -115,7 +115,7 @@ public class OrderServiceImpl implements IOrderService {
             throw new Exception("更新订单状态失败");
         }
         String remarks = "买家提交订单";
-        this.insertOrderLog(orderId, OrderActionEnum.BUYER_SUBMIT_ORDER.getOrderAction(), date, remarks, buyerId, UserType.USER_IS_BUYER.getUserType());
+        this.insertOrderLog(orderId, OrderActionEnum.BUYER_SUBMIT_ORDER.getOrderAction(), date, remarks, buyerId, UserTypeEnum.USER_IS_BUYER.getUserType());
 
        return order;
     }
@@ -139,7 +139,7 @@ public class OrderServiceImpl implements IOrderService {
             logger.error("get order by orderId error! orderId:{}", orderId);
             throw new RuntimeException("get order by orderId error!");
         }
-        this.insertOrderLog(order.getOrderNo(), OrderActionEnum.BUYER_CANCAL_ORDER.getOrderAction(), new Date(), remarks, buyerId, UserType.USER_IS_BUYER.getUserType());
+        this.insertOrderLog(order.getOrderNo(), OrderActionEnum.BUYER_CANCAL_ORDER.getOrderAction(), new Date(), remarks, buyerId, UserTypeEnum.USER_IS_BUYER.getUserType());
 
         return order;
     }
@@ -176,7 +176,7 @@ public class OrderServiceImpl implements IOrderService {
         }
         Order order = orderMapper.selectByPrimaryKey(orderId);
         String remarks = String.format("卖家修改价格 price:%d", price);
-        this.insertOrderLog(order.getOrderNo(), OrderActionEnum.SALER_MODIFY_PRICE.getOrderAction(), new Date(), remarks, userId, UserType.USER_IS_SELLER.getUserType());
+        this.insertOrderLog(order.getOrderNo(), OrderActionEnum.SALER_MODIFY_PRICE.getOrderAction(), new Date(), remarks, userId, UserTypeEnum.USER_IS_SELLER.getUserType());
         return update;
     }
 
@@ -199,7 +199,7 @@ public class OrderServiceImpl implements IOrderService {
         orderLog.setCreateTime(date);
         orderLog.setOrderNo(order.getOrderNo());
         orderLog.setRemarks(OrderActionEnum.SALER_COMPLETE.getDesc());
-        orderLog.setUserType(UserType.USER_IS_SELLER.getUserType());
+        orderLog.setUserType(UserTypeEnum.USER_IS_SELLER.getUserType());
         orderLog.setUserId(order.getSellerId());
         ia = orderLogMapper.insert(orderLog);
         if(ia < 1)
@@ -228,7 +228,7 @@ public class OrderServiceImpl implements IOrderService {
         orderLog.setCreateTime(date);
         orderLog.setOrderNo(order.getOrderNo());
         orderLog.setRemarks(OrderActionEnum.BUYER_COMPLETE.getDesc());
-        orderLog.setUserType(UserType.USER_IS_BUYER.getUserType());
+        orderLog.setUserType(UserTypeEnum.USER_IS_BUYER.getUserType());
         orderLog.setUserId(order.getBuyerId());
         ia = orderLogMapper.insert(orderLog);
         if(ia < 1)

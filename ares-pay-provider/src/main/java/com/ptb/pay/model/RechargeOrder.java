@@ -31,6 +31,10 @@ public class RechargeOrder {
 
     private String deviceType;
 
+    private Integer invoiceStatus;
+
+    private Long invoiceId;
+
     public Long getPtbRechargeOrderId() {
         return ptbRechargeOrderId;
     }
@@ -141,5 +145,21 @@ public class RechargeOrder {
 
     public void setDeviceType(String deviceType) {
         this.deviceType = deviceType == null ? null : deviceType.trim();
+    }
+
+    public Integer getInvoiceStatus() {
+        return invoiceStatus;
+    }
+
+    public void setInvoiceStatus(Integer invoiceStatus) {
+        this.invoiceStatus = invoiceStatus;
+    }
+
+    public Long getInvoiceId() {
+        return invoiceId;
+    }
+
+    public void setInvoiceId(Long invoiceId) {
+        this.invoiceId = invoiceId;
     }
 }

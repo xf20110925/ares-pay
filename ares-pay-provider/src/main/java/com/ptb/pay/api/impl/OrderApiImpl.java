@@ -5,6 +5,8 @@ import com.alibaba.dubbo.common.utils.CollectionUtils;
 import com.alibaba.dubbo.common.utils.StringUtils;
 import com.alibaba.dubbo.rpc.RpcContext;
 import com.alibaba.fastjson.JSONObject;
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import com.ptb.account.api.IAccountApi;
 import com.ptb.account.vo.PtbAccountVo;
 import com.ptb.account.vo.param.AccountPayParam;
@@ -18,12 +20,13 @@ import com.ptb.pay.api.IProductApi;
 import com.ptb.pay.enums.ErrorCode;
 import com.ptb.pay.enums.OrderActionEnum;
 import com.ptb.pay.enums.OrderStatusEnum;
-import com.ptb.pay.enums.UserType;
+import com.ptb.pay.enums.UserTypeEnum;
 import com.ptb.pay.mapper.impl.OrderMapper;
 import com.ptb.pay.mapper.impl.ProductMapper;
 import com.ptb.pay.model.Order;
 import com.ptb.pay.model.Product;
 import com.ptb.pay.model.order.OrderDetail;
+import com.ptb.pay.service.interfaces.IMessagePushService;
 import com.ptb.pay.service.interfaces.IOrderDetailService;
 import com.ptb.pay.service.interfaces.IOrderService;
 import com.ptb.pay.vo.order.*;
@@ -69,6 +72,8 @@ public class OrderApiImpl implements IOrderApi {
     private IProductApi productApi;
     @Autowired
     private IBindMediaApi bindMediaApi;
+    @Autowired
+    private IMessagePushService messagePushService;
 
     long adminId = 2;
 
@@ -168,7 +173,7 @@ public class OrderApiImpl implements IOrderApi {
             Order order = orderMapper.selectByPrimaryKey(orderId);
             //检查订单是否有误
             if (null!= order && order.getBuyerId().longValue() != userId.longValue()){
-                return ReturnUtil.error(ErrorCode.ORDER_API_5001.getCode(), ErrorCode.ORDER_API_5001.getMessage());
+                return ReturnUtil.error(ErrorCode.ORDER_API_5004.getCode(), ErrorCode.ORDER_API_5004.getMessage());
             }
             if (!orderService.checkOrderStatus(OrderActionEnum.BUYER_PAY, order.getOrderStatus(), order.getSellerStatus(), order.getBuyerStatus())) {
                 //订单状态有误
@@ -189,7 +194,9 @@ public class OrderApiImpl implements IOrderApi {
             String sign = SignUtil.getSignKey(toSign);
             RpcContext.getContext().setAttachment("key", sign);
             ResponseVo<PtbAccountVo> responseVo = accountApi.pay(param);
-            if (responseVo.getCode().equals("6002"))return responseVo;
+            if (responseVo.getCode().equals(ErrorCode.PRODUCT_API_PARAMETER_ERROR.getCode()))return responseVo;
+            if (responseVo.getCode().equals(ErrorCode.ORDER_API_5004.getCode()))
+                return ReturnUtil.error(ErrorCode.PAYPASSWORD_5006.getCode(), ErrorCode.PAYPASSWORD_5006.getMessage());
             if ( !"0".equals( responseVo.getCode())){
                 logger.error( "虚拟账户付款dubbo接口调用失败。salerId:{}", userId);
                 throw new Exception();
@@ -268,6 +275,9 @@ public class OrderApiImpl implements IOrderApi {
                 logger.error("insert order detail error! orderNo:{} product iD:{}", orderNo, product.getPtbProductId());
                 throw new RuntimeException("order detail error!");
             }
+            //消息推送
+            if(!messagePushService.pushOrderMessage(userId, order.getSellerId(), order.getPtbOrderId(), OrderActionEnum.BUYER_SUBMIT_ORDER, DeviceTypeEnum.getDeviceTypeEnum(device)))
+                logger.error("send buyer generate order message fail userId:" + userId + " orderNo:" + order.getOrderNo());
 
             Map<String, Object> map = orderService.getBuyerOrderStatus( ""+order.getOrderStatus()+order.getSellerStatus()+order.getBuyerStatus());
             if (map.get("button") != null){
@@ -311,6 +321,9 @@ public class OrderApiImpl implements IOrderApi {
             e.printStackTrace();
             return ReturnUtil.error("30010","取消订单失败");
         }
+        //消息推送
+        if(!messagePushService.pushOrderMessage(userId, order.getSellerId(), orderId, OrderActionEnum.BUYER_CANCAL_ORDER, null));
+            logger.error("send buyer cancel order message fail userId:" + userId + " orderNo:" + order.getOrderNo());
 
         BaseOrderResVO baseOrderResVO = new BaseOrderResVO();
         Map<String, Object> map = orderService.getBuyerOrderStatus( ""+order.getOrderStatus()+order.getSellerStatus()+order.getBuyerStatus());
@@ -390,7 +403,14 @@ public class OrderApiImpl implements IOrderApi {
         int update = orderService.changeOrderPrice(userId, orderId, price);
         if (update < 1){
             logger.error("卖家更新价格出错!");
+            return ReturnUtil.error("30004","[ERROR] 用户修改价格失败!");
         }
+
+        Order order = orderMapper.selectByPrimaryKey(orderId);
+        //消息推送
+        if(!messagePushService.pushOrderMessage(userId, order.getBuyerId(), orderId, OrderActionEnum.SALER_MODIFY_PRICE, null))
+            logger.error("send buyer change order price message fail userId:" + userId + " orderNo:" + order.getOrderNo());
+
         return new ResponseVo("0","更新成功",null);
     }
 
@@ -402,7 +422,7 @@ public class OrderApiImpl implements IOrderApi {
         if(null == order)
             return ReturnUtil.error(ErrorCode.ORDER_API_5005.getCode(), ErrorCode.ORDER_API_5005.getMessage());
 
-        if(confirmOrderVO.getUserType() == UserType.USER_IS_SELLER.getUserType()){ //当前用户是卖家
+        if(confirmOrderVO.getUserType() == UserTypeEnum.USER_IS_SELLER.getUserType()){ //当前用户是卖家
 
 
             //用户与订单是否匹配
@@ -410,19 +430,24 @@ public class OrderApiImpl implements IOrderApi {
                 return ReturnUtil.error(ErrorCode.ORDER_API_5001.getCode(), ErrorCode.ORDER_API_5001.getMessage());
 
             //卖家确认
-            if(orderService.checkOrderStatus(OrderActionEnum.SALER_COMPLETE, order.getOrderStatus(),order.getSellerStatus(), order.getBuyerStatus())){
-                //修改相关状态
-                boolean ret = orderService.sellerConfirmOrder(userId, order);
-                return ret?
-                        ReturnUtil.success(orderService.getSalerOrderStatus( ""+order.getOrderStatus()+order.getSellerStatus()+order.getBuyerStatus())):
-                        ReturnUtil.error(ErrorCode.PAY_API_COMMMON_1000.getCode(),ErrorCode.PAY_API_COMMMON_1000.getMessage());
-            }else{
+            if(!orderService.checkOrderStatus(OrderActionEnum.SALER_COMPLETE, order.getOrderStatus(),order.getSellerStatus(), order.getBuyerStatus())) {
                 //买家未付款, 操作失败
                 return ReturnUtil.error(ErrorCode.ORDER_API_5002.getCode(), ErrorCode.ORDER_API_5002.getMessage());
             }
+            //消息推送
+            if(!messagePushService.pushOrderMessage(userId, order.getBuyerId(), order.getPtbOrderId(), OrderActionEnum.SALER_COMPLETE, confirmOrderVO.getDeviceTypeEnum())) {
+                logger.error("send seller confirm order message fail userId:" + userId + " orderNo:" + order.getOrderNo());
+            }
 
+            //修改相关状态
+            boolean ret = orderService.sellerConfirmOrder(userId, order);
+            if(!ret) {
+                return ReturnUtil.error(ErrorCode.PAY_API_COMMMON_1000.getCode(),ErrorCode.PAY_API_COMMMON_1000.getMessage());
+            }
 
-        }else if(confirmOrderVO.getUserType() == UserType.USER_IS_BUYER.getUserType()){ //当前用户是买家
+            return ReturnUtil.success(orderService.getSalerOrderStatus( ""+order.getOrderStatus()+order.getSellerStatus()+order.getBuyerStatus()));
+
+        }else if(confirmOrderVO.getUserType() == UserTypeEnum.USER_IS_BUYER.getUserType()){ //当前用户是买家
 
             //用户与订单是否匹配
             if(userId != order.getBuyerId())
@@ -460,6 +485,10 @@ public class OrderApiImpl implements IOrderApi {
             }
 
             try {
+                //消息推送
+                if(!messagePushService.pushOrderMessage(userId, order.getSellerId(), order.getPtbOrderId(), OrderActionEnum.BUYER_COMPLETE, confirmOrderVO.getDeviceTypeEnum()))
+                    logger.error("send buyer confirm order message fail userId:" + userId + " orderNo:" + order.getOrderNo());
+
                 //上报用户中心交易成功
                 ResponseVo responseVo1 = bindMediaApi.reportDealInfo(order.getSellerId(), order.getBuyerId(), 0);
                 if(!responseVo1.getCode().equals("0")){
@@ -499,13 +528,13 @@ public class OrderApiImpl implements IOrderApi {
         if(userId != orderListReqVO.getUserId())
             return ReturnUtil.success(orderListVO);
 
-        int userType = UserType.USER_IS_BUYER.getUserType();
+        int userType = UserTypeEnum.USER_IS_BUYER.getUserType();
         //获取用户所有订单
         List<Order> orders = null;
-        if(orderListReqVO.getUserType() == UserType.USER_IS_BUYER.getUserType())
+        if(orderListReqVO.getUserType() == UserTypeEnum.USER_IS_BUYER.getUserType())
             orders = orderMapper.selectByBuyerUid(orderListReqVO.getUserId());
         else {
-            userType = UserType.USER_IS_SELLER.getUserType();
+            userType = UserTypeEnum.USER_IS_SELLER.getUserType();
             orders = orderMapper.selectBySellerUid(orderListReqVO.getUserId());
         }
 
@@ -524,7 +553,7 @@ public class OrderApiImpl implements IOrderApi {
         final int finalUserType = userType;
         List<String> orderNoList = new ArrayList<>();
         orderListVO.getOrderVOList().forEach(item->{
-            Map<String, Object> map = finalUserType ==UserType.USER_IS_SELLER.getUserType()?orderService.getSalerOrderStatus( ""+item.getOrderStatus()+item.getSellerStatus()+item.getBuyerStatus()):orderService.getBuyerOrderStatus(""+item.getOrderStatus()+item.getSellerStatus()+item.getBuyerStatus());
+            Map<String, Object> map = finalUserType == UserTypeEnum.USER_IS_SELLER.getUserType()?orderService.getSalerOrderStatus( ""+item.getOrderStatus()+item.getSellerStatus()+item.getBuyerStatus()):orderService.getBuyerOrderStatus(""+item.getOrderStatus()+item.getSellerStatus()+item.getBuyerStatus());
             item.setDesc(map.get("desc") != null?map.get("desc").toString():null);
             item.setButton(map.get("button") != null?map.get("button").toString():null);
             orderNoList.add(item.getOrderNo());
@@ -558,4 +587,17 @@ public class OrderApiImpl implements IOrderApi {
         return ReturnUtil.success(orderListVO);
     }
 
+    @Override
+    public ResponseVo getOrderListByPage(int pageNum, int pageSize, OrderQueryVO orderQueryVO) {
+
+        PageHelper.startPage(pageNum, pageSize); //开启分页查询，通过拦截器实现，紧接着执行的sql会被拦截
+        //获取用户订单
+        List<Order> orders = orderMapper.selectDynamics(orderQueryVO);
+        //订单为空返回
+        if(CollectionUtils.isEmpty(orders))
+            return ReturnUtil.success(new PageInfo<>(orders));
+        PageInfo pageInfo = new PageInfo<>(orders);
+        pageInfo.setList(orders.stream().map(ConvertOrderUtil::convertOrderToOrderVO).collect(Collectors.toList()));
+        return ReturnUtil.success(pageInfo);
+    }
 }

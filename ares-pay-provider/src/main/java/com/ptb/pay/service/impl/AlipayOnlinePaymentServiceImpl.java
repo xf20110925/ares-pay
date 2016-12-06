@@ -22,9 +22,11 @@ import com.ptb.pay.service.interfaces.IOnlinePaymentService;
 import com.ptb.pay.utils.alipayweb.util.AlipayNotify;
 import com.ptb.pay.utils.alipayweb.util.AlipaySubmit;
 import com.ptb.pay.vo.CheckPayResultVO;
+import com.ptb.service.api.IBaiduPushApi;
 import com.ptb.service.api.ISystemConfigApi;
 import com.ptb.utils.encrypt.SignUtil;
 import com.ptb.utils.tool.ChangeMoneyUtil;
+import enums.MessageTypeEnum;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.DateFormatUtils;
 import org.slf4j.Logger;
@@ -33,6 +35,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
+import vo.param.PushMessageParam;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -121,6 +124,9 @@ public class AlipayOnlinePaymentServiceImpl implements IOnlinePaymentService {
 
     @Autowired
     private BusService busService;
+
+    @Autowired
+    private IBaiduPushApi baiduPushApi;
 
     @Override
     public String getPaymentInfo(String rechargeOrderNo, Long price) throws Exception {
@@ -345,6 +351,21 @@ public class AlipayOnlinePaymentServiceImpl implements IOnlinePaymentService {
                         sendRetryMessage(rechargeParam);
                     } else {
                         LOGGER.info("充值订单号：" + rechargeOrderNo + "充值成功!");
+                        try {
+                            //推送消息
+                            PushMessageParam param = new PushMessageParam();
+                            param.setUserId(rechargeOrder.getUserId());
+                            param.setDeviceType(DeviceTypeEnum.getDeviceTypeEnum(rechargeOrder.getDeviceType()));
+                            param.setTitle("充值成功（在线充值）");
+                            param.setMessage("恭喜您，成功充值" + ChangeMoneyUtil.fromFenToYuan(rechargeOrder.getTotalAmount()) + "元，已自动转入钱包余额");
+                            param.setMessageType(MessageTypeEnum.ONLINE_RECHARGE.getMessageType());
+                            Map<String, Object> keyMap = new HashMap<>();
+                            keyMap.put("id", rechargeOrder.getPtbRechargeOrderId());
+                            param.setContentParam( keyMap);
+                            baiduPushApi.pushMessage(param);
+                        }catch (Exception e){
+                            LOGGER.error( "线上充值消息推送失败。errorMsg:{}", e.getMessage());
+                        }
                     }
                 } catch (Exception e) {
                     e.printStackTrace();

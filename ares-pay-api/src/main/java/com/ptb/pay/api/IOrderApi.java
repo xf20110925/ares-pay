@@ -1,10 +1,7 @@
 package com.ptb.pay.api;
 
 import com.ptb.common.vo.ResponseVo;
-import com.ptb.pay.vo.order.BaseOrderResVO;
-import com.ptb.pay.vo.order.ConfirmOrderReqVO;
-import com.ptb.pay.vo.order.OrderListReqVO;
-import com.ptb.pay.vo.order.OrderListVO;
+import com.ptb.pay.vo.order.*;
 
 import java.util.Map;
 
@@ -99,6 +96,15 @@ public interface IOrderApi {
      * @return
      */
     public ResponseVo<OrderListVO> getOrderList(long userId, OrderListReqVO orderListReqVO);
+
+    /**
+     * 获取订单列表 后台查询接口
+     * @param pageNum 页号
+     * @param pageSize 页大小
+     * @param orderQueryVO 复合查询条件
+     * @return
+     */
+    public ResponseVo getOrderListByPage(int pageNum, int pageSize, OrderQueryVO orderQueryVO);
 
     ResponseVo sellerChangePrice(long userId, long orderId, long price);
 }

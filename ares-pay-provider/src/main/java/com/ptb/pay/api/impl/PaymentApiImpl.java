@@ -5,11 +5,8 @@ import com.ptb.common.errorcode.CommonErrorCode;
 import com.ptb.common.vo.ResponseVo;
 import com.ptb.pay.api.IPaymentApi;
 import com.ptb.pay.mapper.impl.RechargeOrderMapper;
-import com.ptb.pay.model.RechargeOrder;
 import com.ptb.pay.service.interfaces.IOnlinePaymentService;
-import com.ptb.pay.service.interfaces.IRechargeOrderService;
 import com.ptb.pay.service.factory.OnlinePaymentServiceFactory;
-import com.ptb.pay.service.factory.RechargeOrderServiceFactory;
 import com.ptb.service.api.IBlockApi;
 import com.ptb.utils.service.ReturnUtil;
 import org.apache.commons.lang.StringUtils;
@@ -21,10 +18,9 @@ import org.springframework.transaction.annotation.Transactional;
 import com.ptb.pay.vo.CheckPayResultVO;
 import com.ptb.pay.vo.OnlinePaymentNotifyVO;
 import com.ptb.pay.vo.PaymentVO;
-import com.ptb.pay.vo.RechargeOrderParamsVO;
+import com.ptb.pay.vo.recharge.RechargeOrderParamsVO;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * Description: 支付api
@@ -67,13 +63,6 @@ public class PaymentApiImpl implements IPaymentApi {
             return ReturnUtil.error(CommonErrorCode.COMMMON_ERROR_INERERROR.getCode(),
                     CommonErrorCode.COMMMON_ERROR_INERERROR.getMessage());
         }
-    }
-
-    @Override
-    public ResponseVo<Map<String, Object>> createRechargeOrder(RechargeOrderParamsVO paramsVO) throws Exception {
-        IRechargeOrderService rechargeOrderService = RechargeOrderServiceFactory.createService(paramsVO.getPayMethod());
-        RechargeOrder rechargeOrder = rechargeOrderService.createRechargeOrder(paramsVO);
-        return ReturnUtil.success(rechargeOrderService.getReturnData(rechargeOrder));
     }
 
     @Override

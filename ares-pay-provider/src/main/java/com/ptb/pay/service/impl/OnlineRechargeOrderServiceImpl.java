@@ -1,6 +1,7 @@
 package com.ptb.pay.service.impl;
 
 import com.ptb.common.enums.DeviceTypeEnum;
+import com.ptb.common.enums.RechargeOrderInvoiceStatusEnum;
 import com.ptb.common.enums.RechargeOrderStatusEnum;
 import com.ptb.pay.mapper.impl.RechargeOrderMapper;
 import com.ptb.pay.model.RechargeOrder;
@@ -12,7 +13,7 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import com.ptb.pay.vo.RechargeOrderParamsVO;
+import com.ptb.pay.vo.recharge.RechargeOrderParamsVO;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -48,6 +49,7 @@ public class OnlineRechargeOrderServiceImpl implements IRechargeOrderService{
         rechargeOrder.setTotalAmount(paramsVO.getRechargeAmount());
         rechargeOrder.setUserId(paramsVO.getUserId());
         rechargeOrder.setPayType(paramsVO.getPayType());
+        rechargeOrder.setInvoiceStatus(RechargeOrderInvoiceStatusEnum.noopen.getRechargeOrderInvoiceStatus());
         rechargeOrder.setDeviceType(paramsVO.getDeviceType());
         rechargeOrderMapper.insert(rechargeOrder);
         return rechargeOrder;

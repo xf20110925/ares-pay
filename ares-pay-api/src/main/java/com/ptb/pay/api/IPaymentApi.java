@@ -4,10 +4,9 @@ import com.ptb.common.vo.ResponseVo;
 import com.ptb.pay.vo.CheckPayResultVO;
 import com.ptb.pay.vo.OnlinePaymentNotifyVO;
 import com.ptb.pay.vo.PaymentVO;
-import com.ptb.pay.vo.RechargeOrderParamsVO;
+import com.ptb.pay.vo.recharge.RechargeOrderParamsVO;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * 支付api Description: All Rights Reserved.
@@ -26,17 +25,6 @@ public interface IPaymentApi {
      * @Version1.0 2016年11月3日 下午7:46:53 by 王冠华（guanhua.wang@pintuibao.cn）创建
      */
     ResponseVo<List<PaymentVO>> getPaymentList(String deviceType) throws Exception;
-
-    /**
-     * 创建充值单
-     * Description:
-     * All Rights Reserved.
-     *
-     * @param
-     * @return
-     * @version 1.0  2016-11-07 19:29 by wgh（guanhua.wang@pintuibao.cn）创建
-     */
-    ResponseVo<Map<String, Object>> createRechargeOrder(RechargeOrderParamsVO paramsVO) throws Exception;
 
     /**
      * Description: 校验在线支付结果，如果成功直接充值

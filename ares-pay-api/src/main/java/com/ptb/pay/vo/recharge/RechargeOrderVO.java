@@ -1,4 +1,4 @@
-package com.ptb.pay.vo;
+package com.ptb.pay.vo.recharge;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -22,10 +22,28 @@ public class RechargeOrderVO implements Serializable{
     private String deviceType;
     private Long userId;
     private Integer status;
+    private Integer invoiceStatus;
+    private Long invoiceId;
     private Date createTime;
     private Date payTime;
     private String verificationCode;
     private Map<String, Object> bankInfo;
+
+    public Long getInvoiceId() {
+        return invoiceId;
+    }
+
+    public void setInvoiceId(Long invoiceId) {
+        this.invoiceId = invoiceId;
+    }
+
+    public Integer getInvoiceStatus() {
+        return invoiceStatus;
+    }
+
+    public void setInvoiceStatus(Integer invoiceStatus) {
+        this.invoiceStatus = invoiceStatus;
+    }
 
     public Long getPtbRechargeOrderId() {
         return ptbRechargeOrderId;
