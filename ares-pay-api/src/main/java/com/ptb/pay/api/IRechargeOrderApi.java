@@ -36,6 +36,14 @@ public interface IRechargeOrderApi {
     ResponseVo<Object> getRechargeOrderListByPage(int pageNum, int pageSize, RechargeOrderQueryVO rechargeOrderQueryVO) throws Exception;
 
     /**
+     * Description: 分页查询充值订单列表，用于后台查询，可以控制是否查总数
+     * All Rights Reserved.
+     * @param
+     * @return 
+     * @version 1.0  2016-12-06 14:53 by wgh（guanhua.wang@pintuibao.cn）创建
+     */ 
+    ResponseVo<Object> getRechargeOrderListByPage(int pageNum, int pageSize, RechargeOrderQueryVO rechargeOrderQueryVO, boolean count) throws Exception;
+    /**
      * 获取线下充值详情
      *
      * @param rechargeOrderId 充值ID

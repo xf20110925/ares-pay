@@ -82,6 +82,11 @@ public class RechargeOrderApiImpl implements IRechargeOrderApi {
 
     @Override
     public ResponseVo<Object> getRechargeOrderListByPage(int pageNum, int pageSize, RechargeOrderQueryVO rechargeOrderQueryVO) throws Exception {
+        return getRechargeOrderListByPage(pageNum, pageSize, rechargeOrderQueryVO, true);
+    }
+
+    @Override
+    public ResponseVo<Object> getRechargeOrderListByPage(int pageNum, int pageSize, RechargeOrderQueryVO rechargeOrderQueryVO, boolean count) throws Exception {
         RechargeOrderExample example = new RechargeOrderExample();
 
         RechargeOrderExample.Criteria c = example.createCriteria();
@@ -120,7 +125,7 @@ public class RechargeOrderApiImpl implements IRechargeOrderApi {
 
         example.setOrderByClause("create_time desc");
 
-        PageHelper.startPage(pageNum, pageSize); //开启分页查询，通过拦截器实现，紧接着执行的sql会被拦截
+        PageHelper.startPage(pageNum, pageSize, count); //开启分页查询，通过拦截器实现，紧接着执行的sql会被拦截
         List<RechargeOrder> orders = rechargeOrderMapper.selectByExample(example);
         List<RechargeOrderVO> returnData = new ArrayList<RechargeOrderVO>();
         PageInfo pageInfo = new PageInfo(orders);
