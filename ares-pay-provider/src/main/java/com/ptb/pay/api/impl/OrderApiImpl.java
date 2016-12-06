@@ -5,6 +5,8 @@ import com.alibaba.dubbo.common.utils.CollectionUtils;
 import com.alibaba.dubbo.common.utils.StringUtils;
 import com.alibaba.dubbo.rpc.RpcContext;
 import com.alibaba.fastjson.JSONObject;
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import com.ptb.account.api.IAccountApi;
 import com.ptb.account.vo.PtbAccountVo;
 import com.ptb.account.vo.param.AccountPayParam;
@@ -580,4 +582,16 @@ public class OrderApiImpl implements IOrderApi {
         return ReturnUtil.success(orderListVO);
     }
 
+    @Override
+    public ResponseVo getOrderListByPage(int pageNum, int pageSize, OrderQueryVO orderQueryVO) {
+
+        PageHelper.startPage(pageNum, pageSize); //开启分页查询，通过拦截器实现，紧接着执行的sql会被拦截
+        //获取用户订单
+        List<Order> orders = orderMapper.selectDynamics(orderQueryVO);
+        //订单为空返回
+        if(CollectionUtils.isEmpty(orders))
+            return ReturnUtil.success(orders);
+
+        return ReturnUtil.success(new PageInfo(orders));
+    }
 }

@@ -9,8 +9,11 @@ import com.ptb.pay.enums.OrderStatusEnum;
 import com.ptb.pay.enums.UserTypeEnum;
 import com.ptb.pay.vo.order.ConfirmOrderReqVO;
 import com.ptb.pay.vo.order.OrderListReqVO;
+import com.ptb.pay.vo.order.OrderQueryVO;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.Date;
 
 /**
  * Created by zuokui.fu on 2016/11/18.
@@ -42,6 +45,15 @@ public class OrderApiImplTest extends BaseTest {
     public void confirmOrder(){
 
     }
+    @Test
+    public void getOrderListDynamics() {
+        OrderQueryVO orderQueryVO = new OrderQueryVO();
+        //orderQueryVO.setStartTime(new Date(new Date().getTime() - 5 * 24 * 60 * 60 * 1000));
+        //orderQueryVO.setEndTime(new Date(new Date().getTime() - 3 * 24 * 60 * 60 * 1000));
+        orderQueryVO.setOrderStatus(OrderStatusEnum.ORDER_STATUS_DEALING.getStatus());
+        orderApi.getOrderListByPage(1, 10, orderQueryVO);
+    }
+
 
     @Test
     public void getOrderList(){

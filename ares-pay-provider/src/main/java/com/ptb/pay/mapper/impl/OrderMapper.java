@@ -2,6 +2,8 @@ package com.ptb.pay.mapper.impl;
 
 import com.ptb.pay.mapper.MyMapper;
 import com.ptb.pay.model.Order;
+import com.ptb.pay.vo.order.OrderListVO;
+import com.ptb.pay.vo.order.OrderQueryVO;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.ResultMap;
 import org.apache.ibatis.annotations.Select;
@@ -34,4 +36,6 @@ public interface OrderMapper extends MyMapper<Order> {
     @ResultMap("BaseResultMap")
     int updateOrderPriceByOrderId(@Param("orderId") long orderId, @Param("price") long price);
 
+    @ResultMap("BaseResultMap")
+    List<Order> selectDynamics(OrderQueryVO orderQueryVO);
 }

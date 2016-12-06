@@ -1,226 +1,263 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="com.ptb.pay.mapper.impl.OrderMapper" >
-  <resultMap id="BaseResultMap" type="com.ptb.pay.model.Order" >
-    <id column="ptb_order_id" property="ptbOrderId" jdbcType="BIGINT" />
-    <result column="order_no" property="orderNo" jdbcType="VARCHAR" />
-    <result column="order_status" property="orderStatus" jdbcType="INTEGER" />
-    <result column="seller_status" property="sellerStatus" jdbcType="INTEGER" />
-    <result column="buyer_status" property="buyerStatus" jdbcType="INTEGER" />
-    <result column="original_price" property="originalPrice" jdbcType="BIGINT" />
-    <result column="payable_price" property="payablePrice" jdbcType="BIGINT" />
-    <result column="seller_id" property="sellerId" jdbcType="BIGINT" />
-    <result column="buyer_id" property="buyerId" jdbcType="BIGINT" />
-    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
-    <result column="last_modify_time" property="lastModifyTime" jdbcType="TIMESTAMP" />
-    <result column="remarks" property="remarks" jdbcType="VARCHAR" />
-    <result column="pay_time" property="payTime" jdbcType="TIMESTAMP" />
-    <result column="last_modifier_id" property="lastModifierId" jdbcType="BIGINT" />
-  </resultMap>
-  <sql id="Base_Column_List" >
-    ptb_order_id, order_no, order_status, seller_status, buyer_status, original_price, 
-    payable_price, seller_id, buyer_id, create_time, last_modify_time, 
-remarks, pay_time, 
-    last_modifier_id
-  </sql>
-  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
-    select 
-    <include refid="Base_Column_List" />
-    from ptb_order
-    where ptb_order_id = #{ptbOrderId,jdbcType=BIGINT}
-  </select>
-  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
-    delete from ptb_order
-    where ptb_order_id = #{ptbOrderId,jdbcType=BIGINT}
-  </delete>
-  <insert id="insert" parameterType="com.ptb.pay.model.Order" >
-    insert into ptb_order (ptb_order_id, order_no, order_status, 
-      seller_status, buyer_status, original_price, 
-      payable_price, seller_id, buyer_id, 
-      create_time, last_modify_time, 
-remarks, 
-      pay_time, last_modifier_id)
-    values (#{ptbOrderId,jdbcType=BIGINT}, #{orderNo,jdbcType=VARCHAR}, #{orderStatus,jdbcType=VARCHAR}, 
-      #{sellerStatus,jdbcType=INTEGER}, #{buyerStatus,jdbcType=INTEGER}, #{originalPrice,jdbcType=BIGINT}, 
-      #{payablePrice,jdbcType=BIGINT}, #{sellerId,jdbcType=BIGINT}, #{buyerId,jdbcType=BIGINT}, 
-      #{createTime,jdbcType=TIMESTAMP}, #{lastModifyTime,jdbcType=TIMESTAMP}, #{
-remarks,jdbcType=VARCHAR}, 
-      #{payTime,jdbcType=TIMESTAMP}, #{lastModifierId,jdbcType=BIGINT})
-  </insert>
-  <insert id="insertReturnId" parameterType="com.ptb.pay.model.Order"  useGeneratedKeys="true" keyProperty="ptbOrderId">
-    insert into ptb_order (ptb_order_id, order_no, order_status,
-    seller_status, buyer_status, original_price,
-    payable_price, seller_id, buyer_id,
-    create_time, last_modify_time,
-    remarks,
-    pay_time, last_modifier_id)
-    values (#{ptbOrderId,jdbcType=BIGINT}, #{orderNo,jdbcType=VARCHAR}, #{orderStatus,jdbcType=VARCHAR},
-    #{sellerStatus,jdbcType=INTEGER}, #{buyerStatus,jdbcType=INTEGER}, #{originalPrice,jdbcType=BIGINT},
-    #{payablePrice,jdbcType=BIGINT}, #{sellerId,jdbcType=BIGINT}, #{buyerId,jdbcType=BIGINT},
-    #{createTime,jdbcType=TIMESTAMP}, #{lastModifyTime,jdbcType=TIMESTAMP}, #{
+<mapper namespace="com.ptb.pay.mapper.impl.OrderMapper">
+    <resultMap id="BaseResultMap" type="com.ptb.pay.model.Order">
+        <id column="ptb_order_id" property="ptbOrderId" jdbcType="BIGINT"/>
+        <result column="order_no" property="orderNo" jdbcType="VARCHAR"/>
+        <result column="order_status" property="orderStatus" jdbcType="INTEGER"/>
+        <result column="seller_status" property="sellerStatus" jdbcType="INTEGER"/>
+        <result column="buyer_status" property="buyerStatus" jdbcType="INTEGER"/>
+        <result column="original_price" property="originalPrice" jdbcType="BIGINT"/>
+        <result column="payable_price" property="payablePrice" jdbcType="BIGINT"/>
+        <result column="seller_id" property="sellerId" jdbcType="BIGINT"/>
+        <result column="buyer_id" property="buyerId" jdbcType="BIGINT"/>
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP"/>
+        <result column="last_modify_time" property="lastModifyTime" jdbcType="TIMESTAMP"/>
+        <result column="remarks" property="remarks" jdbcType="VARCHAR"/>
+        <result column="pay_time" property="payTime" jdbcType="TIMESTAMP"/>
+        <result column="last_modifier_id" property="lastModifierId" jdbcType="BIGINT"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+        ptb_order_id, order_no, order_status, seller_status, buyer_status, original_price,
+        payable_price, seller_id, buyer_id, create_time, last_modify_time,
+        remarks, pay_time,
+        last_modifier_id
+    </sql>
+    <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long">
+        select
+        <include refid="Base_Column_List"/>
+        from ptb_order
+        where ptb_order_id = #{ptbOrderId,jdbcType=BIGINT}
+    </select>
+    <select id="selectDynamics" resultMap="BaseResultMap" parameterType="com.ptb.pay.vo.order.OrderQueryVO">
+        select
+        <include refid="Base_Column_List"/>
+        from ptb_order
+        <where>
+            <if test="orderNo != null">
+                order_no = #{orderNo}
+            </if>
+            <if test="orderStatus != null">
+                order_status = #{orderStatus}
+            </if>
+            <if test="buyerStatus != null">
+                buyer_status = #{buyerStatus}
+            </if>
+            <if test="sellerStatus != null">
+                seller_status = #{sellerStatus}
+            </if>
+            <if test="startTime != null">
+                <![CDATA[
+                     and create_time >= #{startTime}
+                ]]>
+            </if>
+            <if test="endTime != null">
+                <![CDATA[
+                    and create_time <= #{endTime}
+                ]]>
+            </if>
+        </where>
+        ORDER BY create_time desc
+    </select>
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+        DELETE FROM ptb_order
+        WHERE ptb_order_id = #{ptbOrderId,jdbcType=BIGINT}
+    </delete>
+    <insert id="insert" parameterType="com.ptb.pay.model.Order">
+        INSERT INTO ptb_order (ptb_order_id, order_no, order_status,
+                               seller_status, buyer_status, original_price,
+                               payable_price, seller_id, buyer_id,
+                               create_time, last_modify_time,
+                               remarks,
+                               pay_time, last_modifier_id)
+        VALUES (#{ptbOrderId,jdbcType=BIGINT}, #{orderNo,jdbcType=VARCHAR}, #{orderStatus,jdbcType=VARCHAR},
+                                               #{sellerStatus,jdbcType=INTEGER}, #{buyerStatus,jdbcType=INTEGER},
+                                               #{originalPrice,jdbcType=BIGINT},
+                                               #{payablePrice,jdbcType=BIGINT}, #{sellerId,jdbcType=BIGINT},
+                                               #{buyerId,jdbcType=BIGINT},
+                                               #{createTime,jdbcType=TIMESTAMP}, #{lastModifyTime,jdbcType=TIMESTAMP},
+                #{
 remarks,jdbcType=VARCHAR},
-    #{payTime,jdbcType=TIMESTAMP}, #{lastModifierId,jdbcType=BIGINT})
-  </insert>
-  <insert id="insertSelective" parameterType="com.ptb.pay.model.Order" >
-    insert into ptb_order
-    <trim prefix="(" suffix=")" suffixOverrides="," >
-      <if test="ptbOrderId != null" >
-        ptb_order_id,
-      </if>
-      <if test="orderNo != null" >
-        order_no,
-      </if>
-      <if test="orderStatus != null" >
-        order_status,
-      </if>
-      <if test="sellerStatus != null" >
-        seller_status,
-      </if>
-      <if test="buyerStatus != null" >
-        buyer_status,
-      </if>
-      <if test="originalPrice != null" >
-        original_price,
-      </if>
-      <if test="payablePrice != null" >
-        payable_price,
-      </if>
-      <if test="sellerId != null" >
-        seller_id,
-      </if>
-      <if test="buyerId != null" >
-        buyer_id,
-      </if>
-      <if test="createTime != null" >
-        create_time,
-      </if>
-      <if test="lastModifyTime != null" >
-        last_modify_time,
-      </if>
-      <if test="
-remarks != null" >
-        
-remarks,
-      </if>
-      <if test="payTime != null" >
-        pay_time,
-      </if>
-      <if test="lastModifierId != null" >
-        last_modifier_id,
-      </if>
-    </trim>
-    <trim prefix="values (" suffix=")" suffixOverrides="," >
-      <if test="ptbOrderId != null" >
-        #{ptbOrderId,jdbcType=BIGINT},
-      </if>
-      <if test="orderNo != null" >
-        #{orderNo,jdbcType=VARCHAR},
-      </if>
-      <if test="orderStatus != null" >
-        #{orderStatus,jdbcType=VARCHAR},
-      </if>
-      <if test="sellerStatus != null" >
-        #{sellerStatus,jdbcType=INTEGER},
-      </if>
-      <if test="buyerStatus != null" >
-        #{buyerStatus,jdbcType=INTEGER},
-      </if>
-      <if test="originalPrice != null" >
-        #{originalPrice,jdbcType=BIGINT},
-      </if>
-      <if test="payablePrice != null" >
-        #{payablePrice,jdbcType=BIGINT},
-      </if>
-      <if test="sellerId != null" >
-        #{sellerId,jdbcType=BIGINT},
-      </if>
-      <if test="buyerId != null" >
-        #{buyerId,jdbcType=BIGINT},
-      </if>
-      <if test="createTime != null" >
-        #{createTime,jdbcType=TIMESTAMP},
-      </if>
-      <if test="lastModifyTime != null" >
-        #{lastModifyTime,jdbcType=TIMESTAMP},
-      </if>
-      <if test="
-remarks != null" >
-        #{
+                #{payTime,jdbcType=TIMESTAMP}, #{lastModifierId,jdbcType=BIGINT})
+    </insert>
+    <insert id="insertReturnId" parameterType="com.ptb.pay.model.Order" useGeneratedKeys="true"
+            keyProperty="ptbOrderId">
+        INSERT INTO ptb_order (ptb_order_id, order_no, order_status,
+                               seller_status, buyer_status, original_price,
+                               payable_price, seller_id, buyer_id,
+                               create_time, last_modify_time,
+                               remarks,
+                               pay_time, last_modifier_id)
+        VALUES (#{ptbOrderId,jdbcType=BIGINT}, #{orderNo,jdbcType=VARCHAR}, #{orderStatus,jdbcType=VARCHAR},
+                                               #{sellerStatus,jdbcType=INTEGER}, #{buyerStatus,jdbcType=INTEGER},
+                                               #{originalPrice,jdbcType=BIGINT},
+                                               #{payablePrice,jdbcType=BIGINT}, #{sellerId,jdbcType=BIGINT},
+                                               #{buyerId,jdbcType=BIGINT},
+                                               #{createTime,jdbcType=TIMESTAMP}, #{lastModifyTime,jdbcType=TIMESTAMP},
+                #{
 remarks,jdbcType=VARCHAR},
-      </if>
-      <if test="payTime != null" >
-        #{payTime,jdbcType=TIMESTAMP},
-      </if>
-      <if test="lastModifierId != null" >
-        #{lastModifierId,jdbcType=BIGINT},
-      </if>
-    </trim>
-  </insert>
-  <update id="updateByPrimaryKeySelective" parameterType="com.ptb.pay.model.Order" >
-    update ptb_order
-    <set >
-      <if test="orderNo != null" >
-        order_no = #{orderNo,jdbcType=VARCHAR},
-      </if>
-      <if test="orderStatus != null" >
-        order_status = #{orderStatus,jdbcType=VARCHAR},
-      </if>
-      <if test="sellerStatus != null" >
-        seller_status = #{sellerStatus,jdbcType=INTEGER},
-      </if>
-      <if test="buyerStatus != null" >
-        buyer_status = #{buyerStatus,jdbcType=INTEGER},
-      </if>
-      <if test="originalPrice != null" >
-        original_price = #{originalPrice,jdbcType=BIGINT},
-      </if>
-      <if test="payablePrice != null" >
-        payable_price = #{payablePrice,jdbcType=BIGINT},
-      </if>
-      <if test="sellerId != null" >
-        seller_id = #{sellerId,jdbcType=BIGINT},
-      </if>
-      <if test="buyerId != null" >
-        buyer_id = #{buyerId,jdbcType=BIGINT},
-      </if>
-      <if test="createTime != null" >
-        create_time = #{createTime,jdbcType=TIMESTAMP},
-      </if>
-      <if test="lastModifyTime != null" >
-        last_modify_time = #{lastModifyTime,jdbcType=TIMESTAMP},
-      </if>
-      <if test="
-remarks != null" >
-        
-remarks = #{
+                #{payTime,jdbcType=TIMESTAMP}, #{lastModifierId,jdbcType=BIGINT})
+    </insert>
+    <insert id="insertSelective" parameterType="com.ptb.pay.model.Order">
+        insert into ptb_order
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="ptbOrderId != null">
+                ptb_order_id,
+            </if>
+            <if test="orderNo != null">
+                order_no,
+            </if>
+            <if test="orderStatus != null">
+                order_status,
+            </if>
+            <if test="sellerStatus != null">
+                seller_status,
+            </if>
+            <if test="buyerStatus != null">
+                buyer_status,
+            </if>
+            <if test="originalPrice != null">
+                original_price,
+            </if>
+            <if test="payablePrice != null">
+                payable_price,
+            </if>
+            <if test="sellerId != null">
+                seller_id,
+            </if>
+            <if test="buyerId != null">
+                buyer_id,
+            </if>
+            <if test="createTime != null">
+                create_time,
+            </if>
+            <if test="lastModifyTime != null">
+                last_modify_time,
+            </if>
+            <if test="
+remarks != null">
+
+                remarks,
+            </if>
+            <if test="payTime != null">
+                pay_time,
+            </if>
+            <if test="lastModifierId != null">
+                last_modifier_id,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="ptbOrderId != null">
+                #{ptbOrderId,jdbcType=BIGINT},
+            </if>
+            <if test="orderNo != null">
+                #{orderNo,jdbcType=VARCHAR},
+            </if>
+            <if test="orderStatus != null">
+                #{orderStatus,jdbcType=VARCHAR},
+            </if>
+            <if test="sellerStatus != null">
+                #{sellerStatus,jdbcType=INTEGER},
+            </if>
+            <if test="buyerStatus != null">
+                #{buyerStatus,jdbcType=INTEGER},
+            </if>
+            <if test="originalPrice != null">
+                #{originalPrice,jdbcType=BIGINT},
+            </if>
+            <if test="payablePrice != null">
+                #{payablePrice,jdbcType=BIGINT},
+            </if>
+            <if test="sellerId != null">
+                #{sellerId,jdbcType=BIGINT},
+            </if>
+            <if test="buyerId != null">
+                #{buyerId,jdbcType=BIGINT},
+            </if>
+            <if test="createTime != null">
+                #{createTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="lastModifyTime != null">
+                #{lastModifyTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="
+remarks != null">
+                #{
+        remarks,jdbcType=VARCHAR},
+            </if>
+            <if test="payTime != null">
+                #{payTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="lastModifierId != null">
+                #{lastModifierId,jdbcType=BIGINT},
+            </if>
+        </trim>
+    </insert>
+    <update id="updateByPrimaryKeySelective" parameterType="com.ptb.pay.model.Order">
+        update ptb_order
+        <set>
+            <if test="orderNo != null">
+                order_no = #{orderNo,jdbcType=VARCHAR},
+            </if>
+            <if test="orderStatus != null">
+                order_status = #{orderStatus,jdbcType=VARCHAR},
+            </if>
+            <if test="sellerStatus != null">
+                seller_status = #{sellerStatus,jdbcType=INTEGER},
+            </if>
+            <if test="buyerStatus != null">
+                buyer_status = #{buyerStatus,jdbcType=INTEGER},
+            </if>
+            <if test="originalPrice != null">
+                original_price = #{originalPrice,jdbcType=BIGINT},
+            </if>
+            <if test="payablePrice != null">
+                payable_price = #{payablePrice,jdbcType=BIGINT},
+            </if>
+            <if test="sellerId != null">
+                seller_id = #{sellerId,jdbcType=BIGINT},
+            </if>
+            <if test="buyerId != null">
+                buyer_id = #{buyerId,jdbcType=BIGINT},
+            </if>
+            <if test="createTime != null">
+                create_time = #{createTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="lastModifyTime != null">
+                last_modify_time = #{lastModifyTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="
+remarks != null">
+
+                remarks = #{
 remarks,jdbcType=VARCHAR},
-      </if>
-      <if test="payTime != null" >
-        pay_time = #{payTime,jdbcType=TIMESTAMP},
-      </if>
-      <if test="lastModifierId != null" >
-        last_modifier_id = #{lastModifierId,jdbcType=BIGINT},
-      </if>
-    </set>
-    where ptb_order_id = #{ptbOrderId,jdbcType=BIGINT}
-  </update>
-  <update id="updateByPrimaryKey" parameterType="com.ptb.pay.model.Order" >
-    update ptb_order
-    set order_no = #{orderNo,jdbcType=VARCHAR},
-      order_status = #{orderStatus,jdbcType=VARCHAR},
-      seller_status = #{sellerStatus,jdbcType=INTEGER},
-      buyer_status = #{buyerStatus,jdbcType=INTEGER},
-      original_price = #{originalPrice,jdbcType=BIGINT},
-      payable_price = #{payablePrice,jdbcType=BIGINT},
-      seller_id = #{sellerId,jdbcType=BIGINT},
-      buyer_id = #{buyerId,jdbcType=BIGINT},
-      create_time = #{createTime,jdbcType=TIMESTAMP},
-      last_modify_time = #{lastModifyTime,jdbcType=TIMESTAMP},
-      
-remarks = #{
+            </if>
+            <if test="payTime != null">
+                pay_time = #{payTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="lastModifierId != null">
+                last_modifier_id = #{lastModifierId,jdbcType=BIGINT},
+            </if>
+        </set>
+        where ptb_order_id = #{ptbOrderId,jdbcType=BIGINT}
+    </update>
+    <update id="updateByPrimaryKey" parameterType="com.ptb.pay.model.Order">
+        UPDATE ptb_order
+        SET order_no         = #{orderNo,jdbcType=VARCHAR},
+            order_status     = #{orderStatus,jdbcType=VARCHAR},
+            seller_status    = #{sellerStatus,jdbcType=INTEGER},
+            buyer_status     = #{buyerStatus,jdbcType=INTEGER},
+            original_price   = #{originalPrice,jdbcType=BIGINT},
+            payable_price    = #{payablePrice,jdbcType=BIGINT},
+            seller_id        = #{sellerId,jdbcType=BIGINT},
+            buyer_id         = #{buyerId,jdbcType=BIGINT},
+            create_time      = #{createTime,jdbcType=TIMESTAMP},
+            last_modify_time = #{lastModifyTime,jdbcType=TIMESTAMP},
+
+            remarks          = #{
 remarks,jdbcType=VARCHAR},
-      pay_time = #{payTime,jdbcType=TIMESTAMP},
-      last_modifier_id = #{lastModifierId,jdbcType=BIGINT}
-    where ptb_order_id = #{ptbOrderId,jdbcType=BIGINT}
-  </update>
+            pay_time         = #{payTime,jdbcType=TIMESTAMP},
+            last_modifier_id = #{lastModifierId,jdbcType=BIGINT}
+        WHERE ptb_order_id = #{ptbOrderId,jdbcType=BIGINT}
+    </update>
 </mapper>
