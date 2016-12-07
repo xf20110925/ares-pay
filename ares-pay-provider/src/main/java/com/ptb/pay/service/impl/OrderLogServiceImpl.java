@@ -38,18 +38,18 @@ public class OrderLogServiceImpl implements IOrderLogService{
         }
 
         List<OrderLogVO> orderLogVOs = new ArrayList<>();
-        orderLogs.forEach(log -> {
+        for (OrderLog orderLog : orderLogs) {
             OrderLogVO orderLogVO = new OrderLogVO();
-            orderLogVO.setPtbOrderLogId(log.getPtbOrderLogId());
-            orderLogVO.setActionType(log.getActionType());
-            orderLogVO.setActionName(iOrderService.getOrderStatusName(log.getActionType()));
-            orderLogVO.setCreateTime(log.getCreateTime().getTime());
-            orderLogVO.setOrderNo(log.getOrderNo());
-            orderLogVO.setRemarks(log.getRemarks());
-            orderLogVO.setUserId(log.getUserId());
-            orderLogVO.setUserType(log.getUserType());
+            orderLogVO.setPtbOrderLogId(orderLog.getPtbOrderLogId());
+            orderLogVO.setActionType(orderLog.getActionType());
+            orderLogVO.setActionName(iOrderService.getOrderStatusName(orderLog.getActionType()));
+            orderLogVO.setCreateTime(orderLog.getCreateTime().getTime());
+            orderLogVO.setOrderNo(orderLog.getOrderNo());
+            orderLogVO.setRemarks(orderLog.getRemarks());
+            orderLogVO.setUserId(orderLog.getUserId());
+            orderLogVO.setUserType(orderLog.getUserType());
             orderLogVOs.add(orderLogVO);
-        });
+        }
         return orderLogVOs;
     }
 }
