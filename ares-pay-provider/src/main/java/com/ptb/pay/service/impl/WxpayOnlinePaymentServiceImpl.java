@@ -8,7 +8,6 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.ptb.account.api.IAccountApi;
 import com.ptb.account.vo.PtbAccountVo;
-import com.ptb.account.vo.RecipientVo;
 import com.ptb.account.vo.param.AccountRechargeParam;
 import com.ptb.common.enums.DeviceTypeEnum;
 import com.ptb.common.enums.PlatformEnum;
@@ -19,7 +18,6 @@ import com.ptb.pay.model.RechargeOrder;
 import com.ptb.pay.model.RechargeOrderExample;
 import com.ptb.pay.model.vo.AccountRechargeParamMessageVO;
 import com.ptb.pay.service.BusService;
-import com.ptb.pay.service.ThirdPaymentNotifyLogService;
 import com.ptb.pay.service.interfaces.IOnlinePaymentService;
 import com.ptb.pay.utils.wxpay.GetWxOrderno;
 import com.ptb.pay.utils.wxpay.RequestHandler;
@@ -31,7 +29,6 @@ import com.ptb.utils.encrypt.SignUtil;
 import com.ptb.utils.tool.ChangeMoneyUtil;
 import com.ptb.utils.tool.RandomUtil;
 import enums.MessageTypeEnum;
-import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -144,26 +141,27 @@ public class WxpayOnlinePaymentServiceImpl implements IOnlinePaymentService{
 
     @Override
     public CheckPayResultVO checkPayResult(String payResult) throws Exception {
-        LOGGER.info( payResult);
-        CheckPayResultVO resultVO = new CheckPayResultVO();
-        if (StringUtils.isBlank(payResult)) {
-            resultVO.setPayResult(false);
-            return resultVO;
-        }
-        //TODO 解析得到订单号
-        String rechargeOrderNo = "";
-        RechargeOrderExample example = new RechargeOrderExample();
-        example.createCriteria().andRechargeOrderNoEqualTo(rechargeOrderNo);
-        List<RechargeOrder> rechargeOrders = rechargeOrderMapper.selectByExample(example);
-        if ( CollectionUtils.isEmpty( rechargeOrders)){
-            resultVO.setPayResult(false);
-            return resultVO;
-        }
-        RechargeOrder order = rechargeOrders.get( 0);
-        resultVO.setPayResult( true);
-        resultVO.setRechargeAmount( order.getTotalAmount());
-        resultVO.setRechargeOderNo( order.getRechargeOrderNo());
-        return resultVO;
+//        LOGGER.info( payResult);
+//        CheckPayResultVO resultVO = new CheckPayResultVO();
+//        if (StringUtils.isBlank(payResult)) {
+//            resultVO.setPayResult(false);
+//            return resultVO;
+//        }
+//        //TODO 解析得到订单号
+//        String rechargeOrderNo = "test";
+//        RechargeOrderExample example = new RechargeOrderExample();
+//        example.createCriteria().andRechargeOrderNoEqualTo(rechargeOrderNo);
+//        List<RechargeOrder> rechargeOrders = rechargeOrderMapper.selectByExample(example);
+//        if ( CollectionUtils.isEmpty( rechargeOrders)){
+//            resultVO.setPayResult(false);
+//            return resultVO;
+//        }
+//        RechargeOrder order = rechargeOrders.get( 0);
+//        resultVO.setPayResult( true);
+//        resultVO.setRechargeAmount( order.getTotalAmount());
+//        resultVO.setRechargeOderNo( order.getRechargeOrderNo());
+//        return resultVO;
+        return null;
     }
 
     @Override
