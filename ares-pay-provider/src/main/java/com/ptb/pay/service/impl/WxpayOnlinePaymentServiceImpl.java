@@ -154,7 +154,7 @@ public class WxpayOnlinePaymentServiceImpl implements IOnlinePaymentService{
         if(result_code.equals("SUCCESS") && !CollectionUtils.isEmpty( rechargeOrders)){
             RechargeOrder rechargeOrder = rechargeOrders.get( 0);
             //总金额以分为单位，不带小数点
-            String order_total_fee = String.valueOf(rechargeOrder.getReceiptAmount());
+            String order_total_fee = String.valueOf(rechargeOrder.getTotalAmount());
             String fee_type  = (String) map.get("fee_type");
             String bank_type  = (String) map.get("bank_type");
             String cash_fee  = (String) map.get("cash_fee");
