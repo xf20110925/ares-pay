@@ -131,4 +131,6 @@ public interface IOrderService {
      * @return
      */
     List<OrderTimeAxis> getOrderTimeAxises(String orderNo);
+
+    String getOrderStatusName(int orderAction);
 }

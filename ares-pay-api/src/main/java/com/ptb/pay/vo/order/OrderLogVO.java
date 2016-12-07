@@ -9,6 +9,7 @@ public class OrderLogVO implements Serializable{
     long ptbOrderLogId;
     String orderNo;
     int actionType;
+    String actionName;
     long createTime;
     String remarks;
     long userId;
@@ -36,6 +37,14 @@ public class OrderLogVO implements Serializable{
 
     public void setActionType(int actionType) {
         this.actionType = actionType;
+    }
+
+    public String getActionName() {
+        return actionName;
+    }
+
+    public void setActionName(String actionName) {
+        this.actionName = actionName;
     }
 
     public long getCreateTime() {
@@ -69,4 +78,5 @@ public class OrderLogVO implements Serializable{
     public void setUserType(int userType) {
         this.userType = userType;
     }
+
 }

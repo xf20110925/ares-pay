@@ -37,6 +37,7 @@ public class OrderServiceImpl implements IOrderService {
     private static Map<String, Object> salerOrderStatusMap = new HashMap<>();
     private static Map<String, Object> buyerOrderStatusMap = new HashMap<>();
     private static Map<Integer, String> orderActionTimeAxis = new HashMap<>();
+    private static Map<Integer, String> orderActionToAllStatus = new HashMap<>();
 
     static {
         Map<String, Object> map =  new HashMap();map.put( "button", "6");   map.put( "desc", "等待买家付款");salerOrderStatusMap.put( "000", map);
@@ -88,6 +89,11 @@ public class OrderServiceImpl implements IOrderService {
      */
     public Map<String, Object> getBuyerOrderStatus( String multiOrderStatus){
         return (Map<String, Object>)buyerOrderStatusMap.get( multiOrderStatus);
+    }
+
+    @Override
+    public String getOrderStatusName(int orderAction){
+        return orderActionTimeAxis.get(orderAction);
     }
 
     @Override
