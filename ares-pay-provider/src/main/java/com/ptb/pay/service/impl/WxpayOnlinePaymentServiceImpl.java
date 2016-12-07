@@ -31,6 +31,7 @@ import com.ptb.utils.encrypt.SignUtil;
 import com.ptb.utils.tool.ChangeMoneyUtil;
 import com.ptb.utils.tool.RandomUtil;
 import enums.MessageTypeEnum;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -143,7 +144,26 @@ public class WxpayOnlinePaymentServiceImpl implements IOnlinePaymentService{
 
     @Override
     public CheckPayResultVO checkPayResult(String payResult) throws Exception {
-        return null;
+        LOGGER.info( payResult);
+        CheckPayResultVO resultVO = new CheckPayResultVO();
+        if (StringUtils.isBlank(payResult)) {
+            resultVO.setPayResult(false);
+            return resultVO;
+        }
+        //TODO 解析得到订单号
+        String rechargeOrderNo = "";
+        RechargeOrderExample example = new RechargeOrderExample();
+        example.createCriteria().andRechargeOrderNoEqualTo(rechargeOrderNo);
+        List<RechargeOrder> rechargeOrders = rechargeOrderMapper.selectByExample(example);
+        if ( CollectionUtils.isEmpty( rechargeOrders)){
+            resultVO.setPayResult(false);
+            return resultVO;
+        }
+        RechargeOrder order = rechargeOrders.get( 0);
+        resultVO.setPayResult( true);
+        resultVO.setRechargeAmount( order.getTotalAmount());
+        resultVO.setRechargeOderNo( order.getRechargeOrderNo());
+        return resultVO;
     }
 
     @Override
