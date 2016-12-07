@@ -107,4 +107,11 @@ public interface IOrderApi {
     public ResponseVo getOrderListByPage(int pageNum, int pageSize, OrderQueryVO orderQueryVO);
 
     ResponseVo sellerChangePrice(long userId, long orderId, long price);
+
+    /**
+     * 获取订单历史记录
+     * @param orderNo 订单编号
+     * @return
+     */
+    ResponseVo getOrderLogByOrderNo(String orderNo);
 }

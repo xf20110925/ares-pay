@@ -130,4 +130,12 @@ public class OrderApiImplTest extends BaseTest {
         orderApi.confirmOrder(1111, confirmOrderReqVO);
     }
 
+    @Test
+    public void getOrderLogByOrderNo(){
+        ResponseVo orderLogByOrderNo = orderApi.getOrderLogByOrderNo("JYAP161124155041000000");
+
+        System.out.println(orderLogByOrderNo.getData());
+
+    }
+
 }
