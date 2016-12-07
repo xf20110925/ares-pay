@@ -38,13 +38,13 @@
                 order_no = #{orderNo}
             </if>
             <if test="orderStatus != null">
-                order_status = #{orderStatus}
+                and order_status = #{orderStatus}
             </if>
             <if test="buyerStatus != null">
-                buyer_status = #{buyerStatus}
+                and buyer_status = #{buyerStatus}
             </if>
             <if test="sellerStatus != null">
-                seller_status = #{sellerStatus}
+                and seller_status = #{sellerStatus}
             </if>
             <if test="startTime != null">
                 <![CDATA[

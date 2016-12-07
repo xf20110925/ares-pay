@@ -3,8 +3,12 @@ package com.ptb.pay.service.impl;
 import com.alibaba.dubbo.rpc.RpcContext;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import com.ptb.account.api.IAccountApi;
 import com.ptb.account.vo.PtbAccountVo;
+import com.ptb.account.vo.RecipientVo;
 import com.ptb.account.vo.param.AccountRechargeParam;
 import com.ptb.common.enums.DeviceTypeEnum;
 import com.ptb.common.enums.PlatformEnum;
@@ -35,6 +39,8 @@ import org.springframework.util.CollectionUtils;
 import vo.param.PushMessageParam;
 
 import java.util.*;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Description: 微信支付相关接口
@@ -154,7 +160,7 @@ public class WxpayOnlinePaymentServiceImpl implements IOnlinePaymentService{
         if(result_code.equals("SUCCESS") && !CollectionUtils.isEmpty( rechargeOrders)){
             RechargeOrder rechargeOrder = rechargeOrders.get( 0);
             //总金额以分为单位，不带小数点
-            String order_total_fee = String.valueOf(rechargeOrder.getReceiptAmount());
+            String order_total_fee = String.valueOf(rechargeOrder.getTotalAmount());
             String fee_type  = (String) map.get("fee_type");
             String bank_type  = (String) map.get("bank_type");
             String cash_fee  = (String) map.get("cash_fee");
@@ -249,18 +255,27 @@ public class WxpayOnlinePaymentServiceImpl implements IOnlinePaymentService{
         busService.sendAccountRechargeRetryMessage(messageVO);
     }
 
-    public Map<String, String> getWXPayConfig() {
-        List<String> params = new ArrayList<String>();
-        params.add(SYSTEM_CONFIG_WXPAY_APPID);
-        params.add(SYSTEM_CONFIG_WXPAY_MCH_ID);
-        params.add(SYSTEM_CONFIG_WXPAY_NOTIFY_URL);
-        params.add(SYSTEM_CONFIG_WXPAY_API_KEY);
-        params.add(SYSTEM_CONFIG_WXPAY_CREATE_ORDER_URL);
+    private LoadingCache<String, Map<String, String>> wxPayConfigCache = CacheBuilder.newBuilder()
+            .expireAfterWrite(10, TimeUnit.MINUTES) //缓存10分钟
+            .build(new CacheLoader<String, Map<String, String>>() {
+                @Override
+                public Map<String, String> load(String s) {
+                    List<String> params = new ArrayList<String>();
+                    params.add(SYSTEM_CONFIG_WXPAY_APPID);
+                    params.add(SYSTEM_CONFIG_WXPAY_MCH_ID);
+                    params.add(SYSTEM_CONFIG_WXPAY_NOTIFY_URL);
+                    params.add(SYSTEM_CONFIG_WXPAY_API_KEY);
+                    params.add(SYSTEM_CONFIG_WXPAY_CREATE_ORDER_URL);
+                    ResponseVo<Map<String, String>> result = systemConfigApi.getConfigs(params);
+                    if ( !"0".equals( result.getCode())) {
+                        return new HashMap<>();
+                    }
+                    return result.getData();
+                }
+            });
 
-        ResponseVo<Map<String, String>> result = systemConfigApi.getConfigs(params);
-        if ( !"0".equals( result.getCode())) {
-            return new HashMap<>();
-        }
-        return result.getData();
+    public Map<String, String> getWXPayConfig() throws ExecutionException {
+        return wxPayConfigCache.get("ptb.pay.wxpay.config");
+
     }
 }
