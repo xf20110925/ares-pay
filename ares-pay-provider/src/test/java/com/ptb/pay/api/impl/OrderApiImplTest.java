@@ -48,6 +48,8 @@ public class OrderApiImplTest extends BaseTest {
     @Test
     public void getOrderListDynamics() {
         OrderQueryVO orderQueryVO = new OrderQueryVO();
+        orderQueryVO.setOrderNo("JYPP161206190055000021");
+        orderQueryVO.setOrderStatus(OrderStatusEnum.ORDER_STATUS_NEW_DEAL.getStatus());
         //orderQueryVO.setStartTime(new Date(new Date().getTime() - 5 * 24 * 60 * 60 * 1000));
         //orderQueryVO.setEndTime(new Date(new Date().getTime() - 3 * 24 * 60 * 60 * 1000));
         //orderQueryVO.setOrderStatus(OrderStatusEnum.ORDER_STATUS_DEALING.getStatus());
