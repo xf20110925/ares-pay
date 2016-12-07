@@ -5,6 +5,7 @@ import com.ptb.pay.vo.recharge.RechargeOrderParamsVO;
 import com.ptb.pay.vo.recharge.RechargeOrderQueryVO;
 import com.ptb.pay.vo.recharge.RechargeOrderVO;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -52,5 +53,14 @@ public interface IRechargeOrderApi {
      * @return
      */
     public ResponseVo<RechargeOrderVO> getRechargeOrderDetail(Long rechargeOrderId, String rechargeOrderNo, Long userId);
+
+    /**
+     * Description: 更新发票状态
+     * All Rights Reserved.
+     * @param
+     * @return 
+     * @version 1.0  2016-12-06 19:23 by wgh（guanhua.wang@pintuibao.cn）创建
+     */ 
+    public ResponseVo<Object> updateInvoiceStatus(RechargeOrderVO rechargeOrderVO, List<Long> rechargeOrderIds) throws Exception;
 }
 

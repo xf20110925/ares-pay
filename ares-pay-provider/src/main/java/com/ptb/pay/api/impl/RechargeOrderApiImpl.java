@@ -121,6 +121,10 @@ public class RechargeOrderApiImpl implements IRechargeOrderApi {
         if(rechargeOrderQueryVO.getEndTime() != null){
             c.andCreateTimeLessThanOrEqualTo(rechargeOrderQueryVO.getEndTime());
         }
+        //充值订单ID
+        if(!CollectionUtils.isEmpty(rechargeOrderQueryVO.getRechargeOrderIds())){
+            c.andPtbRechargeOrderIdIn(rechargeOrderQueryVO.getRechargeOrderIds());
+        }
 
         example.setOrderByClause("create_time desc");
 
@@ -146,6 +150,7 @@ public class RechargeOrderApiImpl implements IRechargeOrderApi {
             orderVO.setRechargeOrderNo(order.getRechargeOrderNo());
             orderVO.setPtbRechargeOrderId(order.getPtbRechargeOrderId());
             orderVO.setInvoiceId(order.getInvoiceId());
+            orderVO.setInvoiceStatus(order.getInvoiceStatus());
             returnData.add(orderVO);
         }
         pageInfo.setList(returnData);
@@ -172,7 +177,7 @@ public class RechargeOrderApiImpl implements IRechargeOrderApi {
         orderVO.setPayMethod(order.getPayMethod());
         orderVO.setRechargeOrderNo(order.getRechargeOrderNo());
         orderVO.setPtbRechargeOrderId(order.getPtbRechargeOrderId());
-        orderVO.setInvoiceStatus( order.getInvoiceStatus());
+        orderVO.setInvoiceStatus(order.getInvoiceStatus());
         //线下充值展示收款行信息
         if ( PaymentMethodEnum.offline.getPaymentMethod() == order.getPayMethod().intValue()) {
             OfflinePaymentConfig config = paymentService.getOfflinePaymentConfig();
@@ -184,5 +189,17 @@ public class RechargeOrderApiImpl implements IRechargeOrderApi {
             orderVO.setBankInfo(bankInfo);
         }
         return ReturnUtil.success( orderVO);
+    }
+
+    @Override
+    public ResponseVo<Object> updateInvoiceStatus(RechargeOrderVO rechargeOrderVO, List<Long> rechargeOrderIds) throws Exception {
+        RechargeOrder rechargeOrder = new RechargeOrder();
+        rechargeOrder.setInvoiceStatus(rechargeOrderVO.getInvoiceStatus());
+        rechargeOrder.setInvoiceId(rechargeOrderVO.getInvoiceId());
+
+        RechargeOrderExample example = new RechargeOrderExample();
+        example.createCriteria().andPtbRechargeOrderIdIn(rechargeOrderIds);
+        rechargeOrderMapper.updateByExampleSelective(rechargeOrder, example);
+        return ReturnUtil.success();
     }
 }
