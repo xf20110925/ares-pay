@@ -488,6 +488,7 @@ public class OrderApiImpl implements IOrderApi {
                 accountThawParam.setPayPassword(confirmOrderVO.getPassword());
                 accountThawParam.setPlatform(confirmOrderVO.getPlatformEnum());
                 accountThawParam.setDeviceType(confirmOrderVO.getDeviceTypeEnum());
+                accountThawParam.setNeedValidatePassword(true);
                 TreeMap toSign = JSONObject.parseObject(JSONObject.toJSONString(accountThawParam), TreeMap.class);
                 String sign = SignUtil.getSignKey(toSign);
                 RpcContext.getContext().setAttachment("key", sign);
