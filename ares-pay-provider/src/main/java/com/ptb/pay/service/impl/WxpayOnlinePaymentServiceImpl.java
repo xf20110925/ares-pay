@@ -93,8 +93,6 @@ public class WxpayOnlinePaymentServiceImpl implements IOnlinePaymentService{
         packageParams.put("nonce_str", nonceStr);
         packageParams.put("notify_url", notifyUrl);
         packageParams.put("out_trade_no", rechargeOrderNo);
-        //TODO 客户端IP非必填参数
-//        packageParams.put("spbill_create_ip", spbill_create_ip);
         packageParams.put("total_fee", String.valueOf(price));
         packageParams.put("trade_type", tradeType);
         RequestHandler reqHandler = new RequestHandler(apiKey);
@@ -106,7 +104,6 @@ public class WxpayOnlinePaymentServiceImpl implements IOnlinePaymentService{
                 "<nonce_str>"+nonceStr+"</nonce_str>"+
                 "<notify_url>"+notifyUrl+"</notify_url>"+
                 "<out_trade_no>"+rechargeOrderNo+"</out_trade_no>"+
-//                "<spbill_create_ip>"+spbill_create_ip+"</spbill_create_ip>"+
                 "<total_fee>"+String.valueOf(price)+"</total_fee>"+
                 "<trade_type>"+tradeType+"</trade_type>"+
                 "<sign>"+sign+"</sign>"+
@@ -136,7 +133,54 @@ public class WxpayOnlinePaymentServiceImpl implements IOnlinePaymentService{
 
     @Override
     public String getPcPaymentInfo(String rechargeOrderNo, Long price) throws Exception {
-        return null;
+        Map<String, String> config = getWXPayConfig();
+        String appid = config.get(SYSTEM_CONFIG_WXPAY_APPID);
+        String mchId = config.get(SYSTEM_CONFIG_WXPAY_MCH_ID);
+        String notifyUrl = config.get(SYSTEM_CONFIG_WXPAY_NOTIFY_URL);
+        String apiKey = config.get(SYSTEM_CONFIG_WXPAY_API_KEY);
+        String createOrderURL = config.get(SYSTEM_CONFIG_WXPAY_CREATE_ORDER_URL);
+        String partnerid = mchId;
+        String currTime = DateUtil.getCurrTime();
+        //8位日期
+        String strTime = currTime.substring(8, currTime.length());
+        //四位随机数
+        String strRandom = RandomUtil.buildRandom(4) + "";
+        //10位序列号,可以自行调整。
+        String nonceStr = strTime + strRandom;
+        String body = "品推宝小蜜-充值";
+        String tradeType = "NATIVE";
+        SortedMap<String, String> packageParams = new TreeMap<String, String>();
+        packageParams.put("appid", appid);
+        packageParams.put("body", body);
+        packageParams.put("mch_id", mchId);
+        packageParams.put("nonce_str", nonceStr);
+        packageParams.put("notify_url", notifyUrl);
+        packageParams.put("out_trade_no", rechargeOrderNo);
+        packageParams.put("total_fee", String.valueOf(price));
+        packageParams.put("trade_type", tradeType);
+        RequestHandler reqHandler = new RequestHandler(apiKey);
+        String sign = reqHandler.createSign(packageParams);//获取签名
+        String xml="<xml>"+
+                "<appid>"+appid+"</appid>"+
+                "<body><![CDATA["+body+"]]></body>"+
+                "<mch_id>"+mchId+"</mch_id>"+
+                "<nonce_str>"+nonceStr+"</nonce_str>"+
+                "<notify_url>"+notifyUrl+"</notify_url>"+
+                "<out_trade_no>"+rechargeOrderNo+"</out_trade_no>"+
+                "<total_fee>"+String.valueOf(price)+"</total_fee>"+
+                "<trade_type>"+tradeType+"</trade_type>"+
+                "<sign>"+sign+"</sign>"+
+                "</xml>";
+        String code_url="";
+        try {
+            code_url = new GetWxOrderno().getCodeUrl(createOrderURL, xml);
+            if(code_url.equals("")){
+                return null;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return code_url;
     }
 
     @Override
@@ -147,7 +191,6 @@ public class WxpayOnlinePaymentServiceImpl implements IOnlinePaymentService{
 //            resultVO.setPayResult(false);
 //            return resultVO;
 //        }
-//        //TODO 解析得到订单号
 //        String rechargeOrderNo = "test";
 //        RechargeOrderExample example = new RechargeOrderExample();
 //        example.createCriteria().andRechargeOrderNoEqualTo(rechargeOrderNo);
