@@ -17,6 +17,8 @@ public class OnlinePaymentServiceFactory {
             return SpringContextHolder.getBean("alipayOnlinePaymentServiceImpl");
         else if (OnlinePaymentTypeEnum.WXPAY.getPaymentTypeId() == payType)
             return SpringContextHolder.getBean("wxpayOnlinePaymentServiceImpl");
+        else if (OnlinePaymentTypeEnum.YLPAY.getPaymentTypeId() == payType)
+            return SpringContextHolder.getBean("unionpayOnlinePaymentServiceImpl");
         else
             return null;
     }
