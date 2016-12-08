@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.ptb.common.enums.DeviceTypeEnum;
 import com.ptb.common.vo.ResponseVo;
 import com.ptb.pay.enums.OrderActionEnum;
+import com.ptb.pay.enums.UserTypeEnum;
 import com.ptb.pay.model.Order;
 import com.ptb.pay.service.interfaces.IMessagePushService;
 import com.ptb.service.api.IBaiduPushApi;
@@ -35,16 +36,22 @@ public class MessagePushServiceImpl implements IMessagePushService {
         Map<String, Object> keyMap = new HashMap<>();
         keyMap.put("id", orderId);
 
+
         if(orderActionEnum.getOrderAction() == OrderActionEnum.BUYER_SUBMIT_ORDER.getOrderAction()){
             message = "买家已拍下媒体，等待付款中";
+            keyMap.put("userType", UserTypeEnum.USER_IS_SELLER.getUserType());
         }else if(orderActionEnum.getOrderAction() == OrderActionEnum.BUYER_CANCAL_ORDER.getOrderAction()){
             message = "买家取消了订单，交易已关闭";
+            keyMap.put("userType", UserTypeEnum.USER_IS_SELLER.getUserType());
         }else if(orderActionEnum.getOrderAction() == OrderActionEnum.SALER_MODIFY_PRICE.getOrderAction()){
             message = "卖家已修改订单价格，请及时查看";
+            keyMap.put("userType", UserTypeEnum.USER_IS_BUYER.getUserType());
         }else if(orderActionEnum.getOrderAction() == OrderActionEnum.BUYER_COMPLETE.getOrderAction()){
             message = "买家已确认完成，收入已转入钱包余额";
+            keyMap.put("userType", UserTypeEnum.USER_IS_SELLER.getUserType());
         }else if(orderActionEnum.getOrderAction() == OrderActionEnum.SALER_COMPLETE.getOrderAction()){
             message = "卖家已确认投放完成，请及时确认";
+            keyMap.put("userType", UserTypeEnum.USER_IS_BUYER.getUserType());
         }else {
             logger.error("Unknown message OrderActionEnum");
             return false;

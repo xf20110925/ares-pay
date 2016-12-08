@@ -19,61 +19,73 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-
-
-
-
-
-
-
-
-
 public class GetWxOrderno
 {
-  public static DefaultHttpClient httpclient;
+	public static DefaultHttpClient httpclient;
 
-  static
-  {
-    httpclient = new DefaultHttpClient();
-    httpclient = (DefaultHttpClient) HttpClientConnectionManager.getSSLInstance(httpclient);
-  }
-  public static String getPayNo(String url,String xmlParam){
-	//  System.out.println("xml是:"+xmlParam);
-	  DefaultHttpClient client = new DefaultHttpClient();
-	  client.getParams().setParameter(ClientPNames.ALLOW_CIRCULAR_REDIRECTS, true);
-	  HttpPost httpost= HttpClientConnectionManager.getPostMethod(url);
-	  String prepay_id = "";
-     try {
-		 httpost.setEntity(new StringEntity(xmlParam, "UTF-8"));
-		 HttpResponse response = httpclient.execute(httpost);
-	     String jsonStr = EntityUtils.toString(response.getEntity(), "UTF-8");
-	     Map<String, Object> dataMap = new HashMap<String, Object>();
-	//     System.out.println("json是:"+jsonStr);
-	     
-	    if(jsonStr.indexOf("FAIL")!=-1){
-	    	return prepay_id;
-	    }
-	    Map map = doXMLParse(jsonStr);
-	    String return_code  = (String) map.get("return_code");
-	    prepay_id  = (String) map.get("prepay_id");
-	} catch (Exception e) {
-		// TODO Auto-generated catch block
-		e.printStackTrace();
+	static
+	{
+	httpclient = new DefaultHttpClient();
+	httpclient = (DefaultHttpClient) HttpClientConnectionManager.getSSLInstance(httpclient);
 	}
-	return prepay_id;
-  }
-  /**
+
+	public static String getResponseStr(String url,String xmlParam){
+		DefaultHttpClient client = new DefaultHttpClient();
+		client.getParams().setParameter(ClientPNames.ALLOW_CIRCULAR_REDIRECTS, true);
+		HttpPost httpost= HttpClientConnectionManager.getPostMethod(url);
+
+		String jsonStr = "";
+		try {
+			httpost.setEntity(new StringEntity(xmlParam, "UTF-8"));
+			HttpResponse response = httpclient.execute(httpost);
+			jsonStr = EntityUtils.toString(response.getEntity(), "UTF-8");
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return jsonStr;
+	}
+
+	public static String getPayNo(String url,String xmlParam){
+		String jsonStr = getResponseStr( url, xmlParam);
+		String prepay_id = "";
+		if(jsonStr.indexOf("FAIL")!=-1){
+			return prepay_id;
+		}
+		Map map = null;
+		try {
+			map = doXMLParse(jsonStr);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		prepay_id  = (String) map.get("prepay_id");
+		return prepay_id;
+	}
+
+	public static String getCodeUrl(String url,String xmlParam){
+		String jsonStr = getResponseStr( url, xmlParam);
+		String code_url = "";
+		if(jsonStr.indexOf("FAIL")!=-1){
+			return code_url;
+		}
+		Map map = null;
+		try {
+			map = doXMLParse(jsonStr);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		code_url  = (String) map.get("code_url");
+		return code_url;
+	}
+	/**
 	 * 解析xml,返回第一级元素键值对。如果第一级元素有子节点，则此节点的值是子节点的xml数据。
 	 * @param strxml
 	 * @return
-	 * @throws JDOMException
-	 * @throws IOException
 	 */
 	public static Map doXMLParse(String strxml) throws Exception {
 		if(null == strxml || "".equals(strxml)) {
 			return null;
 		}
-		
+
 		Map m = new HashMap();
 		InputStream in = String2Inputstream(strxml);
 		SAXBuilder builder = new SAXBuilder();
@@ -91,13 +103,13 @@ public class GetWxOrderno
 			} else {
 				v = getChildrenText(children);
 			}
-			
+
 			m.put(k, v);
 		}
-		
+
 		//关闭流
 		in.close();
-		
+
 		return m;
 	}
 	/**
@@ -122,10 +134,10 @@ public class GetWxOrderno
 				sb.append("</" + name + ">");
 			}
 		}
-		
+
 		return sb.toString();
 	}
-  public static InputStream String2Inputstream(String str) {
+	public static InputStream String2Inputstream(String str) {
 		return new ByteArrayInputStream(str.getBytes());
 	}
   

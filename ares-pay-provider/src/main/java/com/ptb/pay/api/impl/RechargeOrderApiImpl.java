@@ -39,12 +39,13 @@ import java.util.Map;
 /**
  * Description: 充值订单API实现
  * All Rights Reserved.
+ *
  * @version 1.0  2016-11-15 10:35 by wgh（guanhua.wang@pintuibao.cn）创建
  */
 @Component("rechargeOrderApi")
 public class RechargeOrderApiImpl implements IRechargeOrderApi {
 
-    private static Logger logger = LoggerFactory.getLogger( RechargeOrderApiImpl.class);
+    private static Logger logger = LoggerFactory.getLogger(RechargeOrderApiImpl.class);
 
     @Autowired
     private RechargeOrderMapper rechargeOrderMapper;
@@ -52,18 +53,18 @@ public class RechargeOrderApiImpl implements IRechargeOrderApi {
     private IPaymentService paymentService;
     @Autowired
     private IBaiduPushApi baiduPushApi;
-    @Resource(name="offlinePaymentService")
+    @Resource(name = "offlinePaymentService")
     private IOfflinePaymentService offlinePaymentService;
 
     @Override
     public ResponseVo<Map<String, Object>> createRechargeOrder(RechargeOrderParamsVO paramsVO) throws Exception {
         IRechargeOrderService rechargeOrderService = RechargeOrderServiceFactory.createService(paramsVO.getPayMethod());
         RechargeOrder rechargeOrder = rechargeOrderService.createRechargeOrder(paramsVO);
-        if(rechargeOrder == null){
+        if (rechargeOrder == null) {
             return ReturnUtil.error(CommonErrorCode.COMMMON_ERROR_ARGSERROR.getCode(),
                     CommonErrorCode.COMMMON_ERROR_ARGSERROR.getMessage());
         }
-        if ( PaymentMethodEnum.offline.getPaymentMethod() == paramsVO.getPayMethod()){
+        if (PaymentMethodEnum.offline.getPaymentMethod() == paramsVO.getPayMethod()) {
             //推送消息
             try {
                 PushMessageParam param = new PushMessageParam();
@@ -74,10 +75,10 @@ public class RechargeOrderApiImpl implements IRechargeOrderApi {
                 param.setMessageType(MessageTypeEnum.XXDKSQ.getMessageType());
                 Map<String, Object> keyMap = new HashMap<>();
                 keyMap.put("id", rechargeOrder.getPtbRechargeOrderId());
-                param.setContentParam( keyMap);
+                param.setContentParam(keyMap);
                 baiduPushApi.pushMessage(param);
-            }catch (Exception e){
-                logger.error( "线下打款消息推送失败。errorMsg:{}", e.getMessage());
+            } catch (Exception e) {
+                logger.error("线下打款消息推送失败。errorMsg:{}", e.getMessage());
             }
         }
         return ReturnUtil.success(rechargeOrderService.getReturnData(rechargeOrder));
@@ -94,39 +95,39 @@ public class RechargeOrderApiImpl implements IRechargeOrderApi {
 
         RechargeOrderExample.Criteria c = example.createCriteria();
         //充值订单号
-        if(StringUtils.isNotBlank(rechargeOrderQueryVO.getRechargeOrderNo())){
+        if (StringUtils.isNotBlank(rechargeOrderQueryVO.getRechargeOrderNo())) {
             c.andRechargeOrderNoEqualTo(rechargeOrderQueryVO.getRechargeOrderNo());
         }
         //验证码
-        if(StringUtils.isNotBlank(rechargeOrderQueryVO.getVerificationCode())){
+        if (StringUtils.isNotBlank(rechargeOrderQueryVO.getVerificationCode())) {
             c.andVerificationCodeEqualTo(rechargeOrderQueryVO.getVerificationCode());
         }
         //充值类型
-        if(rechargeOrderQueryVO.getPayMethod() != null){
+        if (rechargeOrderQueryVO.getPayMethod() != null) {
             c.andPayMethodEqualTo(rechargeOrderQueryVO.getPayMethod());
         }
         //充值状态
-        if(rechargeOrderQueryVO.getStatus() != null){
+        if (rechargeOrderQueryVO.getStatus() != null) {
             c.andStatusEqualTo(rechargeOrderQueryVO.getStatus());
         }
         //发票状态
-        if(rechargeOrderQueryVO.getInvoiceStatus() != null){
+        if (rechargeOrderQueryVO.getInvoiceStatus() != null) {
             c.andInvoiceStatusEqualTo(rechargeOrderQueryVO.getInvoiceStatus());
         }
         //发票ID
-        if(rechargeOrderQueryVO.getInvoiceId() != null){
+        if (rechargeOrderQueryVO.getInvoiceId() != null) {
             c.andInvoiceIdEqualTo(rechargeOrderQueryVO.getInvoiceId());
         }
         //创建时间
-        if(rechargeOrderQueryVO.getStartTime() != null){
+        if (rechargeOrderQueryVO.getStartTime() != null) {
             c.andCreateTimeGreaterThanOrEqualTo(rechargeOrderQueryVO.getStartTime());
         }
         //创建时间
-        if(rechargeOrderQueryVO.getEndTime() != null){
+        if (rechargeOrderQueryVO.getEndTime() != null) {
             c.andCreateTimeLessThanOrEqualTo(rechargeOrderQueryVO.getEndTime());
         }
         //充值订单ID
-        if(!CollectionUtils.isEmpty(rechargeOrderQueryVO.getRechargeOrderIds())){
+        if (!CollectionUtils.isEmpty(rechargeOrderQueryVO.getRechargeOrderIds())) {
             c.andPtbRechargeOrderIdIn(rechargeOrderQueryVO.getRechargeOrderIds());
         }
 
@@ -136,7 +137,7 @@ public class RechargeOrderApiImpl implements IRechargeOrderApi {
         List<RechargeOrder> orders = rechargeOrderMapper.selectByExample(example);
         List<RechargeOrderVO> returnData = new ArrayList<RechargeOrderVO>();
         PageInfo pageInfo = new PageInfo(orders);
-        if(CollectionUtils.isEmpty(orders)){
+        if (CollectionUtils.isEmpty(orders)) {
             return ReturnUtil.success(pageInfo);
         }
         for (RechargeOrder order : orders) {
@@ -164,9 +165,9 @@ public class RechargeOrderApiImpl implements IRechargeOrderApi {
     @Override
     public ResponseVo<RechargeOrderVO> getRechargeOrderDetail(Long rechargeOrderId, String rechargeOrderNo, Long userId) {
         RechargeOrderVO orderVO = new RechargeOrderVO();
-        RechargeOrder order = rechargeOrderMapper.selectOne( rechargeOrderId, rechargeOrderNo, userId);
-        if ( null == order) {
-            return ReturnUtil.success( null);
+        RechargeOrder order = rechargeOrderMapper.selectOne(rechargeOrderId, rechargeOrderNo, userId);
+        if (null == order) {
+            return ReturnUtil.success(null);
         }
         orderVO.setPayTime(order.getPayTime());
         orderVO.setPayType(order.getPayType());
@@ -181,9 +182,9 @@ public class RechargeOrderApiImpl implements IRechargeOrderApi {
         orderVO.setPayMethod(order.getPayMethod());
         orderVO.setRechargeOrderNo(order.getRechargeOrderNo());
         orderVO.setPtbRechargeOrderId(order.getPtbRechargeOrderId());
-        orderVO.setInvoiceStatus(order.getInvoiceStatus());
+        orderVO.setInvoiceId(order.getInvoiceId());
         //线下充值展示收款行信息
-        if ( PaymentMethodEnum.offline.getPaymentMethod() == order.getPayMethod().intValue()) {
+        if (PaymentMethodEnum.offline.getPaymentMethod() == order.getPayMethod().intValue()) {
             OfflinePaymentConfig config = paymentService.getOfflinePaymentConfig();
             Map<String, Object> bankInfo = new HashMap<>();
             bankInfo.put("bankName", config.getBankName());
@@ -192,34 +193,44 @@ public class RechargeOrderApiImpl implements IRechargeOrderApi {
             bankInfo.put("openAccountUserNum", config.getOpenAccountUserNum());
             orderVO.setBankInfo(bankInfo);
         }
-        return ReturnUtil.success( orderVO);
+        return ReturnUtil.success(orderVO);
     }
 
     @Override
-    public ResponseVo<Object> updateInvoiceStatus(RechargeOrderVO rechargeOrderVO, List<Long> rechargeOrderIds) throws Exception {
+    public ResponseVo<Object> updateInvoiceStatus(RechargeOrderVO rechargeOrderVO, List<Long> rechargeOrderIds, Long invoiceId) throws Exception {
         RechargeOrder rechargeOrder = new RechargeOrder();
         rechargeOrder.setInvoiceStatus(rechargeOrderVO.getInvoiceStatus());
         rechargeOrder.setInvoiceId(rechargeOrderVO.getInvoiceId());
 
         RechargeOrderExample example = new RechargeOrderExample();
-        example.createCriteria().andPtbRechargeOrderIdIn(rechargeOrderIds);
-        rechargeOrderMapper.updateByExampleSelective(rechargeOrder, example);
-        return ReturnUtil.success();
+        RechargeOrderExample.Criteria c = example.createCriteria();
+        if (!CollectionUtils.isEmpty(rechargeOrderIds)) {
+            c.andPtbRechargeOrderIdIn(rechargeOrderIds);
+        }
+        if (invoiceId != null) {
+            c.andInvoiceIdEqualTo(invoiceId);
+        }
+        int result = rechargeOrderMapper.updateByExampleSelective(rechargeOrder, example);
+        if (result > 0) {
+            return ReturnUtil.success();
+        }
+        return ReturnUtil.error(CommonErrorCode.COMMMON_ERROR_OPTERROR.getCode(),
+                CommonErrorCode.COMMMON_ERROR_OPTERROR.getMessage());
     }
 
     @Override
     public ResponseVo offlineRecharge(Long rechargeOrderId, Long rechargeAmount) throws Exception {
         RechargeOrder rechargeOrder = rechargeOrderMapper.selectByPrimaryKey(rechargeOrderId);
-        if(rechargeOrder == null){
+        if (rechargeOrder == null) {
             return ReturnUtil.error(CommonErrorCode.COMMMON_ERROR_ARGSERROR.getCode(),
                     CommonErrorCode.COMMMON_ERROR_ARGSERROR.getMessage());
         }
-        if(!rechargeOrder.getTotalAmount().equals(rechargeAmount)){
+        if (!rechargeOrder.getTotalAmount().equals(rechargeAmount)) {
             rechargeOrder.setTotalAmount(rechargeAmount);
         }
 
         boolean result = offlinePaymentService.recharge(rechargeOrder);
-        if(result){
+        if (result) {
             return ReturnUtil.success();
         }
         return ReturnUtil.error(CommonErrorCode.COMMMON_ERROR_INERERROR.getCode(),

@@ -117,6 +117,6 @@ public class OfflinePaymentServiceImpl implements IOfflinePaymentService {
             rechargeOrderMapper.updateByPrimaryKey(rechargeOrder);
         }
 
-        return false;
+        return true;
     }
 }
