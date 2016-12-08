@@ -117,6 +117,14 @@ public interface IOrderApi {
     ResponseVo getOrderLogByOrderNo(String orderNo);
 
     /**
+     * 获取订单历史,并分页
+     * @param pageNum
+     * @param pageSize
+     * @param orderNo
+     * @return
+     */
+    ResponseVo getOrderLogForPageByOrderNo(int pageNum, int pageSize, String orderNo);
+    /**
      * 管理员强制退款,钱给买家
      * @param adminId   管理员ID
      * @param orderId   订单ID
