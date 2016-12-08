@@ -40,7 +40,6 @@ public class GetWxOrderno
 			HttpResponse response = httpclient.execute(httpost);
 			jsonStr = EntityUtils.toString(response.getEntity(), "UTF-8");
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return jsonStr;
