@@ -59,6 +59,8 @@ public class MessagePushServiceImpl implements IMessagePushService {
         PushMessageParam param = null;
         try {
             param = generateMessageParam(toUserId, deviceTypeEnum, title, message, MessageTypeEnum.ORDER_TIP, keyMap);
+            param.setNeedSaveMessage( true);
+            param.setNeedPushMessage( true);
             responseVo = baiduPushApi.pushMessage(param);
         }catch (Exception ee){
             logger.error("push order message error args:" + JSON.toJSONString(param) + " error:" + ee.getMessage());
