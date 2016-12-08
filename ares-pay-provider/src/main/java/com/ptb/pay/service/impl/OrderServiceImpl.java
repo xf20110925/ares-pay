@@ -37,7 +37,6 @@ public class OrderServiceImpl implements IOrderService {
     private static Map<String, Object> salerOrderStatusMap = new HashMap<>();
     private static Map<String, Object> buyerOrderStatusMap = new HashMap<>();
     private static Map<Integer, String> orderActionTimeAxis = new HashMap<>();
-    private static Map<Integer, String> orderActionToAllStatus = new HashMap<>();
 
     static {
         Map<String, Object> map =  new HashMap();map.put( "button", "6");   map.put( "desc", "等待买家付款");salerOrderStatusMap.put( "000", map);
@@ -70,7 +69,8 @@ public class OrderServiceImpl implements IOrderService {
         orderActionTimeAxis.put(OrderActionEnum.BUYER_COMPLETE.getOrderAction(), "订单完成");
         orderActionTimeAxis.put(OrderActionEnum.SALER_AGREE_REFUND.getOrderAction(), "订单完成");
         orderActionTimeAxis.put(OrderActionEnum.BUYER_CANCAL_ORDER.getOrderAction(), "订单完成");
-        orderActionTimeAxis.put(OrderActionEnum.SALER_MODIFY_PRICE.getOrderAction(), "待付款");
+        orderActionTimeAxis.put(OrderActionEnum.ADMIN_COMPLETE_ORDER.getOrderAction(), "订单完成");
+        orderActionTimeAxis.put(OrderActionEnum.ADMIN_CANCEL_ORDER.getOrderAction(), "订单完成");
 
     }
 
@@ -394,6 +394,62 @@ public class OrderServiceImpl implements IOrderService {
         if ( updateCnt < 1){
             throw new Exception("卖家同意退款插入日志失败");
         }
+    }
+
+    @Override
+    public void updateStatusForAdminRefund(Long ptbOrderId, Long adminId, String orderNo, String reason) throws Exception {
+         int salerStatus = 2;//同意退款
+        int orderStatus = 3;//关闭
+        Date date = new Date();
+        Order order = new Order();
+        order.setPtbOrderId( ptbOrderId);
+        order.setSellerStatus( salerStatus);
+        order.setOrderStatus( orderStatus);
+        order.setLastModifyTime( date);
+        order.setLastModifierId( adminId);
+        int updateCnt = orderMapper.updateByPrimaryKeySelective( order);
+        if ( updateCnt < 1){
+            throw new Exception("更新订单状态失败");
+        }
+        OrderLog orderLog = new OrderLog();
+        orderLog.setOrderNo( orderNo);
+        orderLog.setActionType( OrderActionEnum.ADMIN_CANCEL_ORDER.getOrderAction());
+        orderLog.setCreateTime( date);
+        orderLog.setUserId( adminId);
+        orderLog.setUserType( UserTypeEnum.USER_IS_ADMIN.getUserType());//卖家
+        orderLog.setRemarks(reason);
+        updateCnt = orderLogMapper.insertSelective( orderLog);
+        if ( updateCnt < 1){
+            throw new Exception("卖家同意退款插入日志失败");
+        }
+
+    }
+
+    @Override
+    public boolean updateStatusForAdminComplete(long adminId, Order order, String reason){
+        //修改订单状态
+        Date date = new Date();
+        order.setOrderStatus(OrderStatusEnum.ORDER_STATUS_DEAL_OVER.getStatus());
+        order.setBuyerStatus(BuyerStatusEnum.BUYER_STATUS_CONFIRM.getStatus());
+        order.setLastModifierId(adminId);
+        order.setLastModifyTime(date);
+        order.setPayTime(date);
+        int ia = orderMapper.updateByPrimaryKeySelective(order);
+        if(ia < 1)
+            throw new RuntimeException("买家确认完成更新订单状态失败");
+
+        //增加操作日志
+        OrderLog orderLog = new OrderLog();
+        orderLog.setActionType(OrderActionEnum.ADMIN_COMPLETE_ORDER.getOrderAction());
+        orderLog.setCreateTime(date);
+        orderLog.setOrderNo(order.getOrderNo());
+        orderLog.setRemarks(reason);
+        orderLog.setUserType(UserTypeEnum.USER_IS_ADMIN.getUserType());
+        orderLog.setUserId(adminId);
+        ia = orderLogMapper.insert(orderLog);
+        if(ia < 1)
+            throw new RuntimeException("买家确认完成更新订单操作日志失败");
+        return true;
     }
 
     @Override

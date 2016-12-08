@@ -616,4 +616,125 @@ public class OrderApiImpl implements IOrderApi {
         pageInfo.setList(orders.stream().map(ConvertOrderUtil::convertOrderToOrderVO).collect(Collectors.toList()));
         return ReturnUtil.success(pageInfo);
     }
+
+
+    @Override
+    public ResponseVo forceRefundByAdmin(long adminId, long orderId, String reason){
+        //参数校验
+        if (!ParamUtil.checkParams(adminId, orderId, reason)) {
+            return ReturnUtil.error(ErrorCode.PAY_API_COMMMON_1001.getCode(), ErrorCode.PAY_API_COMMMON_1001.getMessage());
+        }
+        //检查订单状态
+        Order order = orderMapper.selectByPrimaryKey(orderId);
+        if (null == order) {
+            //获取订单失败
+            return ReturnUtil.error(ErrorCode.ORDER_API_5005.getCode(), ErrorCode.ORDER_API_5005.getMessage());
+        }
+        if (order.getOrderStatus() != OrderStatusEnum.ORDER_STATUS_DEALING.getStatus()){
+            //订单状态不是进行中,不能强制修改订单。
+            return ReturnUtil.error(ErrorCode.ORDER_API_5002.getCode(), ErrorCode.ORDER_API_5002.getMessage());
+        }
+
+        //更新订单状态、新增订单日志记录
+        try {
+            orderService.updateStatusForAdminRefund(order.getPtbOrderId(), adminId, order.getOrderNo(), reason);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        //调用虚拟账户退款接口
+        AccountRefundParam param = new AccountRefundParam();
+        param.setBuyerId(order.getBuyerId());
+        param.setSalerId(order.getSellerId());
+        param.setMoney(order.getPayablePrice());
+        param.setOrderNo( order.getOrderNo());
+        param.setDeviceType(DeviceTypeEnum.getDeviceTypeEnum("PC"));
+        param.setPlatform(PlatformEnum.xiaomi);
+        //隐式加密
+        TreeMap toSign = JSONObject.parseObject(JSONObject.toJSONString(param), TreeMap.class);
+        String sign = SignUtil.getSignKey(toSign);
+        RpcContext.getContext().setAttachment("key", sign);
+        ResponseVo<PtbAccountVo> accountResponse = null;
+        try {
+            accountResponse = accountApi.refund(param);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        if ( !"0".equals( accountResponse.getCode())){
+            logger.error( "虚拟账户退款dubbo接口调用失败。salerId:{}", orderId);
+        }
+        Order resultOrder = orderMapper.selectByPrimaryKey( orderId);
+        return ReturnUtil.success( orderService.getSalerOrderStatus( resultOrder.getOrderStatus().toString()+resultOrder.getSellerStatus()+resultOrder.getBuyerStatus()));
+    }
+
+    @Override
+    public ResponseVo forceCompleteByAdmin(long adminId, long orderId, String reason){
+        //参数校验
+        Order order = orderMapper.selectByPrimaryKey(orderId);
+        if(null == order)
+            return ReturnUtil.error(ErrorCode.ORDER_API_5005.getCode(), ErrorCode.ORDER_API_5005.getMessage());
+
+        if (order.getOrderStatus() != OrderStatusEnum.ORDER_STATUS_DEALING.getStatus()){
+            //订单状态不是进行中,不能强制修改订单。
+            logger.error("{}" ,ErrorCode.ORDER_API_5002.getMessage());
+            return ReturnUtil.error(ErrorCode.ORDER_API_5002.getCode(), ErrorCode.ORDER_API_5002.getMessage());
+        }
+
+        ResponseVo responseVo = null;
+        //取消款项冻结
+        try {
+            AccountThawParam accountThawParam = new AccountThawParam();
+            accountThawParam.setOrderNo(order.getOrderNo());
+            accountThawParam.setBuyerId(order.getBuyerId());
+            accountThawParam.setSalerId(order.getSellerId());
+            accountThawParam.setMoney(order.getPayablePrice());
+            accountThawParam.setPayPassword("1");
+            accountThawParam.setPlatform(PlatformEnum.xiaomi);
+            accountThawParam.setDeviceType(DeviceTypeEnum.PC);
+            accountThawParam.setNeedValidatePassword(false);
+            TreeMap toSign = JSONObject.parseObject(JSONObject.toJSONString(accountThawParam), TreeMap.class);
+            String sign = SignUtil.getSignKey(toSign);
+            RpcContext.getContext().setAttachment("key", sign);
+            responseVo = accountApi.thaw(accountThawParam);
+            if(!responseVo.getCode().equals("0")) {
+                return ReturnUtil.error(responseVo.getCode(), responseVo.getMessage());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ReturnUtil.error(ErrorCode.PAY_API_COMMMON_1000.getCode(), ErrorCode.PAY_API_COMMMON_1000.getMessage());
+        }
+
+        try {
+            //消息推送
+            if(!messagePushService.pushOrderMessage(adminId, order.getSellerId(), order.getPtbOrderId(), OrderActionEnum.BUYER_COMPLETE, DeviceTypeEnum.PC))
+                logger.error("send buyer confirm order message fail userId:" + adminId + " orderNo:" + order.getOrderNo());
+
+            //上报用户中心交易成功
+            ResponseVo responseVo1 = bindMediaApi.reportDealInfo(order.getSellerId(), order.getBuyerId(), 0);
+            if(!responseVo1.getCode().equals("0")){
+                //更新失败 add message to bus
+                logger.error("buyerConfirm, report dealSuccess to bindMediaApi orderNo:" + order.getOrderNo() + " sellerId:" + order.getSellerId() + " buyerId:" + order.getBuyerId());
+            }
+            //更新商品计数
+            Long productId = orderDetailService.getProductIdByOrderNo(order.getOrderNo());
+            if(productId != null) {
+                responseVo1 = productApi.updateProductDealNum(order.getBuyerId(), productId);
+                if (!responseVo1.getCode().equals("0")) {
+                    //更新失败 add message to bus
+                    logger.error("buyerConfirm, update productDealNum error, orderNo:" + order.getOrderNo() + " productId:" + productId);
+                }
+            }else{
+                logger.error("buyerConfirm, product not exists of orderNo:" + order.getOrderNo());
+            }
+            //更新订单状态 与 订单操作日志
+            boolean ret = orderService.updateStatusForAdminComplete(adminId, order, reason);
+            if(!ret){
+                //更新失败 add message to bus
+                logger.error("buyerConfirm, order info and order_log info update error, orderNo:" + order.getOrderNo());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return ReturnUtil.success(orderService.getBuyerOrderStatus(""+order.getOrderStatus()+order.getSellerStatus()+order.getBuyerStatus()));
+    }
+
 }

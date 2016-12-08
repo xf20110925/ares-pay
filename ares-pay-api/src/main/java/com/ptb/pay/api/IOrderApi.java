@@ -1,6 +1,7 @@
 package com.ptb.pay.api;
 
 import com.ptb.common.vo.ResponseVo;
+import com.ptb.pay.enums.OrderActionEnum;
 import com.ptb.pay.vo.order.*;
 
 import java.util.Map;
@@ -114,4 +115,22 @@ public interface IOrderApi {
      * @return
      */
     ResponseVo getOrderLogByOrderNo(String orderNo);
+
+    /**
+     * 管理员强制退款,钱给买家
+     * @param adminId   管理员ID
+     * @param orderId   订单ID
+     * @param reason    操作原因
+     * @return
+     */
+    ResponseVo forceRefundByAdmin(long adminId, long orderId, String reason);
+
+    /**
+     * 管理员强制完成订单,钱给卖家
+     * @param adminId
+     * @param orderId
+     * @param reason
+     * @return
+     */
+    ResponseVo forceCompleteByAdmin(long adminId, long orderId, String reason);
 }

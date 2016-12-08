@@ -140,4 +140,17 @@ public class OrderApiImplTest extends BaseTest {
 
     }
 
+    @Test
+    public void forceCompleteByAdmin(){
+        ResponseVo responseVo = orderApi.forceCompleteByAdmin(2, 20, "test aaaaaaaaaaaaaa");
+        System.out.println(responseVo.getCode());
+    }
+
+    @Test
+    public void forceRefundByAdmin(){
+        ResponseVo responseVo = orderApi.forceRefundByAdmin(2, 68, "test abbgagag");
+
+        System.out.println(responseVo.getCode());
+    }
+
 }

@@ -5,7 +5,8 @@ package com.ptb.pay.enums;
  */
 public enum UserTypeEnum {
     USER_IS_BUYER(1),
-    USER_IS_SELLER(2);
+    USER_IS_SELLER(2),
+    USER_IS_ADMIN(3);
 
     int userType;
 

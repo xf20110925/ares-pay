@@ -123,6 +123,24 @@ public interface IOrderService {
      */
     boolean buyerConfirmOrder(long buyer, Order order);
 
+    /**
+     * 管理员强制退款给买家
+     * @param ptbOrderId
+     * @param adminId
+     * @param orderNo
+     * @param reason
+     * @throws Exception
+     */
+    void updateStatusForAdminRefund(Long ptbOrderId, Long adminId, String orderNo, String reason) throws Exception;
+
+    /**
+     * 管理员强制确认完成订单
+     * @param adminId
+     * @param order
+     * @param reason
+     */
+    boolean updateStatusForAdminComplete(long adminId, Order order, String reason);
+
     int getOrderStatus(long orderId);
 
     /**

@@ -13,7 +13,9 @@ public enum OrderActionEnum {
     SALER_AGREE_REFUND( 6, "卖家同意退款"),
     BUYER_CANCAL_ORDER( 7, "买家取消订单"),
     BUYER_SUBMIT_ORDER( 8, "买家提交订单"),
-    SALER_MODIFY_PRICE( 9, "卖家修改价格")
+    SALER_MODIFY_PRICE( 9, "卖家修改价格"),
+    ADMIN_COMPLETE_ORDER(10, "管理员强制完成交易"),
+    ADMIN_CANCEL_ORDER(11, "管理员强制退款"),
     ;
 
     private OrderActionEnum( int orderAction, String desc){
