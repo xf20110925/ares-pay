@@ -26,8 +26,10 @@ import com.ptb.pay.mapper.impl.ProductMapper;
 import com.ptb.pay.model.Order;
 import com.ptb.pay.model.Product;
 import com.ptb.pay.model.order.OrderDetail;
+import com.ptb.pay.service.impl.OrderLogServiceImpl;
 import com.ptb.pay.service.interfaces.IMessagePushService;
 import com.ptb.pay.service.interfaces.IOrderDetailService;
+import com.ptb.pay.service.interfaces.IOrderLogService;
 import com.ptb.pay.service.interfaces.IOrderService;
 import com.ptb.pay.vo.order.*;
 import com.ptb.pay.vo.product.ProductVO;
@@ -74,6 +76,8 @@ public class OrderApiImpl implements IOrderApi {
     private IBindMediaApi bindMediaApi;
     @Autowired
     private IMessagePushService messagePushService;
+    @Autowired
+    private IOrderLogService orderLogService;
 
     long adminId = 2;
 
@@ -412,6 +416,18 @@ public class OrderApiImpl implements IOrderApi {
             logger.error("send buyer change order price message fail userId:" + userId + " orderNo:" + order.getOrderNo());
 
         return new ResponseVo("0","更新成功",null);
+    }
+
+    @Override
+    public ResponseVo getOrderLogByOrderNo(String orderNo) {
+        logger.info("获取订单日志");
+        List<OrderLogVO> orderLogByOrderId = orderLogService.getOrderLogByOrderId(orderNo);
+        if (orderLogByOrderId == null){
+            logger.error("获取订单日志出错 orderNo:{}", orderNo);
+            return ReturnUtil.error("50001", "获取订单日志出错");
+        }
+
+        return ReturnUtil.success(orderLogByOrderId);
     }
 
     @Override

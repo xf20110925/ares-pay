@@ -12,6 +12,7 @@ import com.ptb.pay.mapper.impl.RechargeOrderMapper;
 import com.ptb.pay.model.RechargeOrder;
 import com.ptb.pay.model.RechargeOrderExample;
 import com.ptb.pay.service.factory.RechargeOrderServiceFactory;
+import com.ptb.pay.service.interfaces.IOfflinePaymentService;
 import com.ptb.pay.service.interfaces.IPaymentService;
 import com.ptb.pay.service.interfaces.IRechargeOrderService;
 import com.ptb.pay.vo.recharge.RechargeOrderParamsVO;
@@ -29,6 +30,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 import vo.param.PushMessageParam;
 
+import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -50,6 +52,8 @@ public class RechargeOrderApiImpl implements IRechargeOrderApi {
     private IPaymentService paymentService;
     @Autowired
     private IBaiduPushApi baiduPushApi;
+    @Resource(name="offlinePaymentService")
+    private IOfflinePaymentService offlinePaymentService;
 
     @Override
     public ResponseVo<Map<String, Object>> createRechargeOrder(RechargeOrderParamsVO paramsVO) throws Exception {
@@ -177,7 +181,7 @@ public class RechargeOrderApiImpl implements IRechargeOrderApi {
         orderVO.setPayMethod(order.getPayMethod());
         orderVO.setRechargeOrderNo(order.getRechargeOrderNo());
         orderVO.setPtbRechargeOrderId(order.getPtbRechargeOrderId());
-        orderVO.setInvoiceStatus(order.getInvoiceStatus());
+        orderVO.setInvoiceId(order.getInvoiceId());
         //线下充值展示收款行信息
         if ( PaymentMethodEnum.offline.getPaymentMethod() == order.getPayMethod().intValue()) {
             OfflinePaymentConfig config = paymentService.getOfflinePaymentConfig();
@@ -201,5 +205,24 @@ public class RechargeOrderApiImpl implements IRechargeOrderApi {
         example.createCriteria().andPtbRechargeOrderIdIn(rechargeOrderIds);
         rechargeOrderMapper.updateByExampleSelective(rechargeOrder, example);
         return ReturnUtil.success();
+    }
+
+    @Override
+    public ResponseVo offlineRecharge(Long rechargeOrderId, Long rechargeAmount) throws Exception {
+        RechargeOrder rechargeOrder = rechargeOrderMapper.selectByPrimaryKey(rechargeOrderId);
+        if(rechargeOrder == null){
+            return ReturnUtil.error(CommonErrorCode.COMMMON_ERROR_ARGSERROR.getCode(),
+                    CommonErrorCode.COMMMON_ERROR_ARGSERROR.getMessage());
+        }
+        if(!rechargeOrder.getTotalAmount().equals(rechargeAmount)){
+            rechargeOrder.setTotalAmount(rechargeAmount);
+        }
+
+        boolean result = offlinePaymentService.recharge(rechargeOrder);
+        if(result){
+            return ReturnUtil.success();
+        }
+        return ReturnUtil.error(CommonErrorCode.COMMMON_ERROR_INERERROR.getCode(),
+                CommonErrorCode.COMMMON_ERROR_INERERROR.getMessage());
     }
 }

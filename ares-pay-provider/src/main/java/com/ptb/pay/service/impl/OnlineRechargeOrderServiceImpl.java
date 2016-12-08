@@ -66,6 +66,7 @@ public class OnlineRechargeOrderServiceImpl implements IRechargeOrderService{
         }
         Map<String, Object> returnData = new HashMap<String, Object>();
         returnData.put("rechargeOrderNo", rechargeOrder.getRechargeOrderNo());
+        returnData.put("rechargeOrderId", rechargeOrder.getPtbRechargeOrderId());
         returnData.put("orderInfo", orderInfo);
         returnData.put("rechargeAmount", rechargeOrder.getTotalAmount());
         returnData.put("payType", rechargeOrder.getPayType());

@@ -3,6 +3,9 @@ package com.ptb.pay.service.impl;
 import com.alibaba.dubbo.rpc.RpcContext;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import com.ptb.account.api.IAccountApi;
 import com.ptb.account.vo.PtbAccountVo;
 import com.ptb.account.vo.param.AccountRechargeParam;
@@ -15,7 +18,6 @@ import com.ptb.pay.model.RechargeOrder;
 import com.ptb.pay.model.RechargeOrderExample;
 import com.ptb.pay.model.vo.AccountRechargeParamMessageVO;
 import com.ptb.pay.service.BusService;
-import com.ptb.pay.service.ThirdPaymentNotifyLogService;
 import com.ptb.pay.service.interfaces.IOnlinePaymentService;
 import com.ptb.pay.utils.wxpay.GetWxOrderno;
 import com.ptb.pay.utils.wxpay.RequestHandler;
@@ -35,6 +37,8 @@ import org.springframework.util.CollectionUtils;
 import vo.param.PushMessageParam;
 
 import java.util.*;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Description: 微信支付相关接口
@@ -82,6 +86,7 @@ public class WxpayOnlinePaymentServiceImpl implements IOnlinePaymentService{
         String nonceStr = strTime + strRandom;
         String body = "品推宝小蜜-充值";
         String tradeType = "APP";
+        String limitPay = "no_credit";
         SortedMap<String, String> packageParams = new TreeMap<String, String>();
         packageParams.put("appid", appid);
         packageParams.put("body", body);
@@ -89,10 +94,9 @@ public class WxpayOnlinePaymentServiceImpl implements IOnlinePaymentService{
         packageParams.put("nonce_str", nonceStr);
         packageParams.put("notify_url", notifyUrl);
         packageParams.put("out_trade_no", rechargeOrderNo);
-        //TODO 客户端IP非必填参数
-//        packageParams.put("spbill_create_ip", spbill_create_ip);
         packageParams.put("total_fee", String.valueOf(price));
         packageParams.put("trade_type", tradeType);
+        packageParams.put("limit_pay", limitPay);
         RequestHandler reqHandler = new RequestHandler(apiKey);
         String sign = reqHandler.createSign(packageParams);//获取签名
         String xml="<xml>"+
@@ -102,9 +106,9 @@ public class WxpayOnlinePaymentServiceImpl implements IOnlinePaymentService{
                 "<nonce_str>"+nonceStr+"</nonce_str>"+
                 "<notify_url>"+notifyUrl+"</notify_url>"+
                 "<out_trade_no>"+rechargeOrderNo+"</out_trade_no>"+
-//                "<spbill_create_ip>"+spbill_create_ip+"</spbill_create_ip>"+
                 "<total_fee>"+String.valueOf(price)+"</total_fee>"+
                 "<trade_type>"+tradeType+"</trade_type>"+
+                "<limit_pay>"+limitPay+"</limit_pay>"+
                 "<sign>"+sign+"</sign>"+
                 "</xml>";
         String prepay_id="";
@@ -132,11 +136,80 @@ public class WxpayOnlinePaymentServiceImpl implements IOnlinePaymentService{
 
     @Override
     public String getPcPaymentInfo(String rechargeOrderNo, Long price) throws Exception {
-        return null;
+        Map<String, String> config = getWXPayConfig();
+        String appid = config.get(SYSTEM_CONFIG_WXPAY_APPID);
+        String mchId = config.get(SYSTEM_CONFIG_WXPAY_MCH_ID);
+        String notifyUrl = config.get(SYSTEM_CONFIG_WXPAY_NOTIFY_URL);
+        String apiKey = config.get(SYSTEM_CONFIG_WXPAY_API_KEY);
+        String createOrderURL = config.get(SYSTEM_CONFIG_WXPAY_CREATE_ORDER_URL);
+        String partnerid = mchId;
+        String currTime = DateUtil.getCurrTime();
+        //8位日期
+        String strTime = currTime.substring(8, currTime.length());
+        //四位随机数
+        String strRandom = RandomUtil.buildRandom(4) + "";
+        //10位序列号,可以自行调整。
+        String nonceStr = strTime + strRandom;
+        String body = "品推宝小蜜-充值";
+        String tradeType = "NATIVE";
+        String limitPay = "no_credit";
+        SortedMap<String, String> packageParams = new TreeMap<String, String>();
+        packageParams.put("appid", appid);
+        packageParams.put("body", body);
+        packageParams.put("mch_id", mchId);
+        packageParams.put("nonce_str", nonceStr);
+        packageParams.put("notify_url", notifyUrl);
+        packageParams.put("out_trade_no", rechargeOrderNo);
+        packageParams.put("total_fee", String.valueOf(price));
+        packageParams.put("trade_type", tradeType);
+        packageParams.put("limit_pay", limitPay);
+        RequestHandler reqHandler = new RequestHandler(apiKey);
+        String sign = reqHandler.createSign(packageParams);//获取签名
+        String xml="<xml>"+
+                "<appid>"+appid+"</appid>"+
+                "<body><![CDATA["+body+"]]></body>"+
+                "<mch_id>"+mchId+"</mch_id>"+
+                "<nonce_str>"+nonceStr+"</nonce_str>"+
+                "<notify_url>"+notifyUrl+"</notify_url>"+
+                "<out_trade_no>"+rechargeOrderNo+"</out_trade_no>"+
+                "<total_fee>"+String.valueOf(price)+"</total_fee>"+
+                "<trade_type>"+tradeType+"</trade_type>"+
+                "<limit_pay>"+limitPay+"</limit_pay>"+
+                "<sign>"+sign+"</sign>"+
+                "</xml>";
+        String code_url="";
+        try {
+            code_url = new GetWxOrderno().getCodeUrl(createOrderURL, xml);
+            if(code_url.equals("")){
+                return null;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return code_url;
     }
 
     @Override
     public CheckPayResultVO checkPayResult(String payResult) throws Exception {
+//        LOGGER.info( payResult);
+//        CheckPayResultVO resultVO = new CheckPayResultVO();
+//        if (StringUtils.isBlank(payResult)) {
+//            resultVO.setPayResult(false);
+//            return resultVO;
+//        }
+//        String rechargeOrderNo = "test";
+//        RechargeOrderExample example = new RechargeOrderExample();
+//        example.createCriteria().andRechargeOrderNoEqualTo(rechargeOrderNo);
+//        List<RechargeOrder> rechargeOrders = rechargeOrderMapper.selectByExample(example);
+//        if ( CollectionUtils.isEmpty( rechargeOrders)){
+//            resultVO.setPayResult(false);
+//            return resultVO;
+//        }
+//        RechargeOrder order = rechargeOrders.get( 0);
+//        resultVO.setPayResult( true);
+//        resultVO.setRechargeAmount( order.getTotalAmount());
+//        resultVO.setRechargeOderNo( order.getRechargeOrderNo());
+//        return resultVO;
         return null;
     }
 
@@ -154,7 +227,7 @@ public class WxpayOnlinePaymentServiceImpl implements IOnlinePaymentService{
         if(result_code.equals("SUCCESS") && !CollectionUtils.isEmpty( rechargeOrders)){
             RechargeOrder rechargeOrder = rechargeOrders.get( 0);
             //总金额以分为单位，不带小数点
-            String order_total_fee = String.valueOf(rechargeOrder.getReceiptAmount());
+            String order_total_fee = String.valueOf(rechargeOrder.getTotalAmount());
             String fee_type  = (String) map.get("fee_type");
             String bank_type  = (String) map.get("bank_type");
             String cash_fee  = (String) map.get("cash_fee");
@@ -249,18 +322,27 @@ public class WxpayOnlinePaymentServiceImpl implements IOnlinePaymentService{
         busService.sendAccountRechargeRetryMessage(messageVO);
     }
 
-    public Map<String, String> getWXPayConfig() {
-        List<String> params = new ArrayList<String>();
-        params.add(SYSTEM_CONFIG_WXPAY_APPID);
-        params.add(SYSTEM_CONFIG_WXPAY_MCH_ID);
-        params.add(SYSTEM_CONFIG_WXPAY_NOTIFY_URL);
-        params.add(SYSTEM_CONFIG_WXPAY_API_KEY);
-        params.add(SYSTEM_CONFIG_WXPAY_CREATE_ORDER_URL);
+    private LoadingCache<String, Map<String, String>> wxPayConfigCache = CacheBuilder.newBuilder()
+            .expireAfterWrite(10, TimeUnit.MINUTES) //缓存10分钟
+            .build(new CacheLoader<String, Map<String, String>>() {
+                @Override
+                public Map<String, String> load(String s) {
+                    List<String> params = new ArrayList<String>();
+                    params.add(SYSTEM_CONFIG_WXPAY_APPID);
+                    params.add(SYSTEM_CONFIG_WXPAY_MCH_ID);
+                    params.add(SYSTEM_CONFIG_WXPAY_NOTIFY_URL);
+                    params.add(SYSTEM_CONFIG_WXPAY_API_KEY);
+                    params.add(SYSTEM_CONFIG_WXPAY_CREATE_ORDER_URL);
+                    ResponseVo<Map<String, String>> result = systemConfigApi.getConfigs(params);
+                    if ( !"0".equals( result.getCode())) {
+                        return new HashMap<>();
+                    }
+                    return result.getData();
+                }
+            });
 
-        ResponseVo<Map<String, String>> result = systemConfigApi.getConfigs(params);
-        if ( !"0".equals( result.getCode())) {
-            return new HashMap<>();
-        }
-        return result.getData();
+    public Map<String, String> getWXPayConfig() throws ExecutionException {
+        return wxPayConfigCache.get("ptb.pay.wxpay.config");
+
     }
 }

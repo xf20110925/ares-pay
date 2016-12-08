@@ -62,5 +62,14 @@ public interface IRechargeOrderApi {
      * @version 1.0  2016-12-06 19:23 by wgh（guanhua.wang@pintuibao.cn）创建
      */ 
     public ResponseVo<Object> updateInvoiceStatus(RechargeOrderVO rechargeOrderVO, List<Long> rechargeOrderIds) throws Exception;
+
+    /**
+     * Description: 管理员后台进行线下充值
+     * All Rights Reserved.
+     * @param
+     * @return 
+     * @version 1.0  2016-12-07 18:34 by wgh（guanhua.wang@pintuibao.cn）创建
+     */ 
+    ResponseVo offlineRecharge(Long rechargeOrderId, Long rechargeAmount) throws Exception;
 }
 

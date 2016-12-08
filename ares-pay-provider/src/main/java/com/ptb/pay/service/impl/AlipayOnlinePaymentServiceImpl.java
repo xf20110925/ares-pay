@@ -4,6 +4,9 @@ import com.alibaba.dubbo.rpc.RpcContext;
 import com.alibaba.fastjson.JSONObject;
 import com.alipay.api.AlipayApiException;
 import com.alipay.api.internal.util.AlipaySignature;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import com.ptb.account.api.IAccountApi;
 import com.ptb.account.vo.PtbAccountVo;
 import com.ptb.account.vo.param.AccountRechargeParam;
@@ -40,6 +43,8 @@ import vo.param.PushMessageParam;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.*;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Description:支付宝相关接口
@@ -106,7 +111,7 @@ public class AlipayOnlinePaymentServiceImpl implements IOnlinePaymentService {
      */
     private static final String SYSTEM_CONFIG_ALIPAY_PC_NOTIFYURL = "alipay.pc.notifyUrl";
 
-    private static AlipayConfig alipayConfig;
+//    private static AlipayConfig alipayConfig;
 
     private static Logger LOGGER = LoggerFactory.getLogger(AlipayOnlinePaymentServiceImpl.class);
 
@@ -398,6 +403,47 @@ public class AlipayOnlinePaymentServiceImpl implements IOnlinePaymentService {
         busService.sendAccountRechargeRetryMessage(messageVO);
     }
 
+    private LoadingCache<String, AlipayConfig> aliPayConfigCache = CacheBuilder.newBuilder()
+            .expireAfterWrite(10, TimeUnit.MINUTES) //缓存10分钟
+            .build(new CacheLoader<String, AlipayConfig>() {
+                @Override
+                public AlipayConfig load(String s) {
+                    AlipayConfig alipayConfig = new AlipayConfig();
+                    List<String> params = new ArrayList<String>();
+                    params.add(SYSTEM_CONFIG_ALIPAY_APPID);
+                    params.add(SYSTEM_CONFIG_ALIPAY_PARTNER);
+                    params.add(SYSTEM_CONFIG_ALIPAY_SUBJECT);
+                    params.add(SYSTEM_CONFIG_ALIPAY_BODY);
+                    params.add(SYSTEM_CONFIG_ALIPAY_NOTIFYURL);
+                    params.add(SYSTEM_CONFIG_ALIPAY_RETURNURL);
+                    params.add(SYSTEM_CONFIG_ALIPAY_PRIVATEKEY);
+                    params.add(SYSTEM_CONFIG_ALIPAY_PUBLICKEY);
+                    params.add(SYSTEM_CONFIG_ALIPAY_PC_PUBLICKEY);
+                    params.add(SYSTEM_CONFIG_ALIPAY_PC_RETURNURL);
+                    params.add(SYSTEM_CONFIG_ALIPAY_PC_NOTIFYURL);
+
+                    ResponseVo<Map<String, String>> result = systemConfigApi.getConfigs(params);
+                    if (result == null || CollectionUtils.isEmpty(result.getData())) {
+                        return null;
+                    }
+                    Map<String, String> alipayInfo = result.getData();
+                    alipayConfig.setAppId(alipayInfo.get(SYSTEM_CONFIG_ALIPAY_APPID));
+                    alipayConfig.setPartner(alipayInfo.get(SYSTEM_CONFIG_ALIPAY_PARTNER));
+                    alipayConfig.setSellerId(alipayInfo.get(SYSTEM_CONFIG_ALIPAY_PARTNER));
+                    alipayConfig.setSubject(alipayInfo.get(SYSTEM_CONFIG_ALIPAY_SUBJECT));
+                    alipayConfig.setBody(alipayInfo.get(SYSTEM_CONFIG_ALIPAY_BODY));
+                    alipayConfig.setNotifyUrl(alipayInfo.get(SYSTEM_CONFIG_ALIPAY_NOTIFYURL));
+                    alipayConfig.setReturnUrl(alipayInfo.get(SYSTEM_CONFIG_ALIPAY_RETURNURL));
+                    alipayConfig.setPrivateKey(alipayInfo.get(SYSTEM_CONFIG_ALIPAY_PRIVATEKEY));
+                    alipayConfig.setPublicKey(alipayInfo.get(SYSTEM_CONFIG_ALIPAY_PUBLICKEY));
+
+                    alipayConfig.setPcPublickKey(alipayInfo.get(SYSTEM_CONFIG_ALIPAY_PC_PUBLICKEY));
+                    alipayConfig.setPcReturnUrl(alipayInfo.get(SYSTEM_CONFIG_ALIPAY_PC_RETURNURL));
+                    alipayConfig.setPcNotifyUrl(alipayInfo.get(SYSTEM_CONFIG_ALIPAY_PC_NOTIFYURL));
+                    return alipayConfig;
+                }
+            });
+
     /**
      * Description: 获取支付宝配置信息
      * All Rights Reserved.
@@ -406,42 +452,8 @@ public class AlipayOnlinePaymentServiceImpl implements IOnlinePaymentService {
      * @return
      * @version 1.0  2016-11-09 23:10 by wgh（guanhua.wang@pintuibao.cn）创建
      */
-    public AlipayConfig getAlipayConfig() {
-        if (alipayConfig == null) {
-            alipayConfig = new AlipayConfig();
-            List<String> params = new ArrayList<String>();
-            params.add(SYSTEM_CONFIG_ALIPAY_APPID);
-            params.add(SYSTEM_CONFIG_ALIPAY_PARTNER);
-            params.add(SYSTEM_CONFIG_ALIPAY_SUBJECT);
-            params.add(SYSTEM_CONFIG_ALIPAY_BODY);
-            params.add(SYSTEM_CONFIG_ALIPAY_NOTIFYURL);
-            params.add(SYSTEM_CONFIG_ALIPAY_RETURNURL);
-            params.add(SYSTEM_CONFIG_ALIPAY_PRIVATEKEY);
-            params.add(SYSTEM_CONFIG_ALIPAY_PUBLICKEY);
-            params.add(SYSTEM_CONFIG_ALIPAY_PC_PUBLICKEY);
-            params.add(SYSTEM_CONFIG_ALIPAY_PC_RETURNURL);
-            params.add(SYSTEM_CONFIG_ALIPAY_PC_NOTIFYURL);
-
-            ResponseVo<Map<String, String>> result = systemConfigApi.getConfigs(params);
-            if (result == null || CollectionUtils.isEmpty(result.getData())) {
-                return null;
-            }
-            Map<String, String> alipayInfo = result.getData();
-            alipayConfig.setAppId(alipayInfo.get(SYSTEM_CONFIG_ALIPAY_APPID));
-            alipayConfig.setPartner(alipayInfo.get(SYSTEM_CONFIG_ALIPAY_PARTNER));
-            alipayConfig.setSellerId(alipayInfo.get(SYSTEM_CONFIG_ALIPAY_PARTNER));
-            alipayConfig.setSubject(alipayInfo.get(SYSTEM_CONFIG_ALIPAY_SUBJECT));
-            alipayConfig.setBody(alipayInfo.get(SYSTEM_CONFIG_ALIPAY_BODY));
-            alipayConfig.setNotifyUrl(alipayInfo.get(SYSTEM_CONFIG_ALIPAY_NOTIFYURL));
-            alipayConfig.setReturnUrl(alipayInfo.get(SYSTEM_CONFIG_ALIPAY_RETURNURL));
-            alipayConfig.setPrivateKey(alipayInfo.get(SYSTEM_CONFIG_ALIPAY_PRIVATEKEY));
-            alipayConfig.setPublicKey(alipayInfo.get(SYSTEM_CONFIG_ALIPAY_PUBLICKEY));
-
-            alipayConfig.setPcPublickKey(alipayInfo.get(SYSTEM_CONFIG_ALIPAY_PC_PUBLICKEY));
-            alipayConfig.setPcReturnUrl(alipayInfo.get(SYSTEM_CONFIG_ALIPAY_PC_RETURNURL));
-            alipayConfig.setPcNotifyUrl(alipayInfo.get(SYSTEM_CONFIG_ALIPAY_PC_NOTIFYURL));
-        }
-        return alipayConfig;
+    public AlipayConfig getAlipayConfig() throws ExecutionException {
+        return aliPayConfigCache.get( "ptb.pay.alipay.config");
     }
 
     public static void main(String[] args) {
