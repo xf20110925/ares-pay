@@ -86,6 +86,7 @@ public class WxpayOnlinePaymentServiceImpl implements IOnlinePaymentService{
         String nonceStr = strTime + strRandom;
         String body = "品推宝小蜜-充值";
         String tradeType = "APP";
+        String limitPay = "no_credit";
         SortedMap<String, String> packageParams = new TreeMap<String, String>();
         packageParams.put("appid", appid);
         packageParams.put("body", body);
@@ -95,6 +96,7 @@ public class WxpayOnlinePaymentServiceImpl implements IOnlinePaymentService{
         packageParams.put("out_trade_no", rechargeOrderNo);
         packageParams.put("total_fee", String.valueOf(price));
         packageParams.put("trade_type", tradeType);
+        packageParams.put("limit_pay", limitPay);
         RequestHandler reqHandler = new RequestHandler(apiKey);
         String sign = reqHandler.createSign(packageParams);//获取签名
         String xml="<xml>"+
@@ -106,6 +108,7 @@ public class WxpayOnlinePaymentServiceImpl implements IOnlinePaymentService{
                 "<out_trade_no>"+rechargeOrderNo+"</out_trade_no>"+
                 "<total_fee>"+String.valueOf(price)+"</total_fee>"+
                 "<trade_type>"+tradeType+"</trade_type>"+
+                "<limit_pay>"+limitPay+"</limit_pay>"+
                 "<sign>"+sign+"</sign>"+
                 "</xml>";
         String prepay_id="";
@@ -149,6 +152,7 @@ public class WxpayOnlinePaymentServiceImpl implements IOnlinePaymentService{
         String nonceStr = strTime + strRandom;
         String body = "品推宝小蜜-充值";
         String tradeType = "NATIVE";
+        String limitPay = "no_credit";
         SortedMap<String, String> packageParams = new TreeMap<String, String>();
         packageParams.put("appid", appid);
         packageParams.put("body", body);
@@ -158,6 +162,7 @@ public class WxpayOnlinePaymentServiceImpl implements IOnlinePaymentService{
         packageParams.put("out_trade_no", rechargeOrderNo);
         packageParams.put("total_fee", String.valueOf(price));
         packageParams.put("trade_type", tradeType);
+        packageParams.put("limit_pay", limitPay);
         RequestHandler reqHandler = new RequestHandler(apiKey);
         String sign = reqHandler.createSign(packageParams);//获取签名
         String xml="<xml>"+
@@ -169,6 +174,7 @@ public class WxpayOnlinePaymentServiceImpl implements IOnlinePaymentService{
                 "<out_trade_no>"+rechargeOrderNo+"</out_trade_no>"+
                 "<total_fee>"+String.valueOf(price)+"</total_fee>"+
                 "<trade_type>"+tradeType+"</trade_type>"+
+                "<limit_pay>"+limitPay+"</limit_pay>"+
                 "<sign>"+sign+"</sign>"+
                 "</xml>";
         String code_url="";
