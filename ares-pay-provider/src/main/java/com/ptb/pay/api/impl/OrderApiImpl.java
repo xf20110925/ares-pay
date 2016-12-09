@@ -17,10 +17,7 @@ import com.ptb.common.enums.PlatformEnum;
 import com.ptb.common.vo.ResponseVo;
 import com.ptb.pay.api.IOrderApi;
 import com.ptb.pay.api.IProductApi;
-import com.ptb.pay.enums.ErrorCode;
-import com.ptb.pay.enums.OrderActionEnum;
-import com.ptb.pay.enums.OrderStatusEnum;
-import com.ptb.pay.enums.UserTypeEnum;
+import com.ptb.pay.enums.*;
 import com.ptb.pay.mapper.impl.OrderLogMapper;
 import com.ptb.pay.mapper.impl.OrderMapper;
 import com.ptb.pay.mapper.impl.ProductMapper;
@@ -653,8 +650,10 @@ public class OrderApiImpl implements IOrderApi {
             //获取订单失败
             return ReturnUtil.error(ErrorCode.ORDER_API_5005.getCode(), ErrorCode.ORDER_API_5005.getMessage());
         }
-        if (order.getOrderStatus() != OrderStatusEnum.ORDER_STATUS_DEALING.getStatus()){
-            //订单状态不是进行中,不能强制修改订单。
+        if (order.getOrderStatus() != OrderStatusEnum.ORDER_STATUS_DEALING.getStatus() ||
+                order.getBuyerStatus() != BuyerStatusEnum.BUYER_STATUS_APPLY_REFUND.getStatus()){
+            //订单状态不是进行中或者卖家状态不是申请退款状态,不能强制修改订单。
+            logger.error("订单状态不是进行中或者卖家状态不是申请退款状态,不能强制修改订单。:{}", ErrorCode.ORDER_API_5002.getMessage());
             return ReturnUtil.error(ErrorCode.ORDER_API_5002.getCode(), ErrorCode.ORDER_API_5002.getMessage());
         }
 
@@ -696,9 +695,10 @@ public class OrderApiImpl implements IOrderApi {
         if(null == order)
             return ReturnUtil.error(ErrorCode.ORDER_API_5005.getCode(), ErrorCode.ORDER_API_5005.getMessage());
 
-        if (order.getOrderStatus() != OrderStatusEnum.ORDER_STATUS_DEALING.getStatus()){
-            //订单状态不是进行中,不能强制修改订单。
-            logger.error("{}" ,ErrorCode.ORDER_API_5002.getMessage());
+        if (order.getOrderStatus() != OrderStatusEnum.ORDER_STATUS_DEALING.getStatus() ||
+                order.getSellerStatus() != SellerStatusEnum.SELLER_STATUS_CONFIRM.getStatus()){
+            //订单状态不是进行中或者卖家不是确认完成状态,不能强制修改订单。
+            logger.error("订单状态不是进行中或者卖家不是确认完成状态,不能强制修改订单.:{}" ,ErrorCode.ORDER_API_5002.getMessage());
             return ReturnUtil.error(ErrorCode.ORDER_API_5002.getCode(), ErrorCode.ORDER_API_5002.getMessage());
         }
 
