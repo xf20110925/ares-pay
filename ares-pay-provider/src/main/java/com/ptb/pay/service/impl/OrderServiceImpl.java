@@ -69,6 +69,7 @@ public class OrderServiceImpl implements IOrderService {
         orderActionTimeAxis.put(OrderActionEnum.BUYER_COMPLETE.getOrderAction(), "订单完成");
         orderActionTimeAxis.put(OrderActionEnum.SALER_AGREE_REFUND.getOrderAction(), "订单完成");
         orderActionTimeAxis.put(OrderActionEnum.BUYER_CANCAL_ORDER.getOrderAction(), "订单完成");
+        orderActionTimeAxis.put(OrderActionEnum.SALER_MODIFY_PRICE.getOrderAction(), "卖家修改价格");
         orderActionTimeAxis.put(OrderActionEnum.ADMIN_COMPLETE_ORDER.getOrderAction(), "订单完成");
         orderActionTimeAxis.put(OrderActionEnum.ADMIN_CANCEL_ORDER.getOrderAction(), "订单完成");
 

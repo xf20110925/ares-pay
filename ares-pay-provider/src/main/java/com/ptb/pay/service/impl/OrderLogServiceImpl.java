@@ -1,5 +1,6 @@
 package com.ptb.pay.service.impl;
 
+import com.ptb.pay.enums.OrderActionEnum;
 import com.ptb.pay.mapper.impl.OrderLogMapper;
 import com.ptb.pay.model.OrderLog;
 import com.ptb.pay.service.interfaces.IOrderLogService;
@@ -42,7 +43,7 @@ public class OrderLogServiceImpl implements IOrderLogService{
             OrderLogVO orderLogVO = new OrderLogVO();
             orderLogVO.setPtbOrderLogId(orderLog.getPtbOrderLogId());
             orderLogVO.setActionType(orderLog.getActionType());
-            orderLogVO.setActionName(iOrderService.getOrderStatusName(orderLog.getActionType()));
+            orderLogVO.setActionName(OrderActionEnum.getOrderActionInfo(orderLog.getActionType()).getDesc());
             orderLogVO.setCreateTime(orderLog.getCreateTime().getTime());
             orderLogVO.setOrderNo(orderLog.getOrderNo());
             orderLogVO.setRemarks(orderLog.getRemarks());

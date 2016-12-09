@@ -41,4 +41,47 @@ public enum OrderActionEnum {
     public void setDesc(String desc) {
         this.desc = desc;
     }
+
+    public static OrderActionEnum getOrderActionInfo(int orderAction){
+
+        OrderActionEnum orderActionEnum = null;
+        switch (orderAction){
+            case 1:
+                orderActionEnum = OrderActionEnum.BUYER_PAY;
+                break;
+            case 2:
+                orderActionEnum = OrderActionEnum.BUYER_APPLY_REFUND;
+                break;
+            case 3:
+                orderActionEnum = OrderActionEnum.BUYER_CANCEL_REFUND;
+                break;
+            case 4:
+                orderActionEnum = OrderActionEnum.BUYER_COMPLETE;
+                break;
+            case 5:
+                orderActionEnum = OrderActionEnum.SALER_COMPLETE;
+                break;
+            case 6:
+                orderActionEnum = OrderActionEnum.SALER_AGREE_REFUND;
+                break;
+            case 7:
+                orderActionEnum = OrderActionEnum.BUYER_CANCAL_ORDER;
+                break;
+            case 8:
+                orderActionEnum = OrderActionEnum.BUYER_SUBMIT_ORDER;
+                break;
+            case 9:
+                orderActionEnum = OrderActionEnum.SALER_MODIFY_PRICE;
+                break;
+            case 10:
+                orderActionEnum = OrderActionEnum.ADMIN_COMPLETE_ORDER;
+                break;
+            case 11:
+                orderActionEnum = OrderActionEnum.ADMIN_CANCEL_ORDER;
+                break;
+            default:
+                break;
+        }
+        return orderActionEnum;
+    }
 }
