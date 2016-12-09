@@ -421,6 +421,7 @@ public class OrderApiImpl implements IOrderApi {
     @Override
     public ResponseVo getOrderLogByOrderNo(String orderNo) {
         logger.info("获取订单日志");
+
         List<OrderLogVO> orderLogByOrderId = orderLogService.getOrderLogByOrderId(orderNo);
         if (orderLogByOrderId == null){
             logger.error("获取订单日志出错 orderNo:{}", orderNo);
@@ -428,6 +429,22 @@ public class OrderApiImpl implements IOrderApi {
         }
 
         return ReturnUtil.success(orderLogByOrderId);
+    }
+
+    @Override
+    public ResponseVo getOrderLogForPageByOrderNo(int pageNum, int pageSize, String orderNo){
+        PageHelper.startPage(pageNum, pageSize); //开启分页查询，通过拦截器实现，紧接着执行的sql会被拦截
+        List<OrderLogVO> orderLogByOrderId = orderLogService.getOrderLogByOrderId(orderNo);
+        if (orderLogByOrderId == null){
+            logger.error("获取订单日志出错 orderNo:{}", orderNo);
+            return ReturnUtil.error("50001", "获取订单日志出错");
+        }
+
+        if(CollectionUtils.isEmpty(orderLogByOrderId))
+            return ReturnUtil.success(new PageInfo<>(orderLogByOrderId));
+        PageInfo pageInfo = new PageInfo<>(orderLogByOrderId);
+        pageInfo.setList(orderLogByOrderId);
+        return ReturnUtil.success(pageInfo);
     }
 
     @Override
