@@ -28,8 +28,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static com.unionpay.acp.sdk.SDKUtil.isEmpty;
-
+import static com.ptb.pay.utils.unionpay.SDKUtil.isEmpty;
 public class CertUtil {
 	/** 证书容器. */
 	private static KeyStore keyStore = null;
