@@ -1,22 +1,38 @@
 package com.ptb.pay.service.impl;
 
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
+import com.ptb.common.vo.ResponseVo;
 import com.ptb.pay.service.interfaces.IOnlinePaymentService;
 import com.ptb.pay.utils.unionpay.AcpService;
 import com.ptb.pay.utils.unionpay.LogUtil;
 import com.ptb.pay.utils.unionpay.SDKConfig;
 import com.ptb.pay.vo.CheckPayResultVO;
+import com.ptb.service.api.ISystemConfigApi;
 import com.ptb.utils.date.DateUtil;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by zuokui.fu on 2016/12/8.
  */
 @Service
 public class UnionpayOnlinePaymentServiceImpl implements IOnlinePaymentService {
+
+    private static final String SYSTEM_CONFIG_UNIONPAY_MER_ID = "unionpay.mer.id";
+    private static final String SYSTEM_CONFIG_UNIONPAY_NOTIFY_URL = "unionpay.notify.url";
+
+    @Autowired
+    private ISystemConfigApi systemConfigApi;
 
     @PostConstruct
     private void init(){
@@ -25,7 +41,8 @@ public class UnionpayOnlinePaymentServiceImpl implements IOnlinePaymentService {
 
     @Override
     public String getPaymentInfo(String rechargeOrderNo, Long price) throws Exception {
-        String merId = "777290058141520";
+        Map<String, String> payConfig = getUnionPayConfig();
+        String merId = payConfig.get(SYSTEM_CONFIG_UNIONPAY_MER_ID);
         String txnAmt = String.valueOf( price);
         String orderId = rechargeOrderNo;
         String txnTime = DateUtil.getCurrTime();
@@ -56,7 +73,7 @@ public class UnionpayOnlinePaymentServiceImpl implements IOnlinePaymentService {
         //注意:1.需设置为外网能访问，否则收不到通知    2.http https均可  3.收单后台通知后需要10秒内返回http200或302状态码
         //    4.如果银联通知服务器发送通知后10秒内未收到返回状态码或者应答码非http200或302，那么银联会间隔一段时间再次发送。总共发送5次，银联后续间隔1、2、4、5 分钟后会再次通知。
         //    5.后台通知地址如果上送了带有？的参数，例如：http://abc/web?a=b&c=d 在后台通知处理程序验证签名之前需要编写逻辑将这些字段去掉再验签，否则将会验签失败
-        contentData.put("backUrl", "https://test.pintuibao.cn/payment/alipayNotify");
+        contentData.put("backUrl", payConfig.get(SYSTEM_CONFIG_UNIONPAY_NOTIFY_URL));
 
         /**对请求参数进行签名并发送http post请求，接收同步应答报文**/
         Map<String, String> reqData = AcpService.sign(contentData,"UTF-8");			 //报文中certId,signature的值是在signData方法中获取并自动赋值的，只要证书配置正确即可。
@@ -97,5 +114,31 @@ public class UnionpayOnlinePaymentServiceImpl implements IOnlinePaymentService {
     @Override
     public boolean notifyPayResult(Map<String, String> params) throws Exception {
         return false;
+    }
+
+    private LoadingCache<String, Map<String, String>> unionPayConfigCache = CacheBuilder.newBuilder()
+            .expireAfterWrite(5, TimeUnit.MINUTES) //缓存10分钟
+            .build(new CacheLoader<String, Map<String, String>>() {
+                @Override
+                public Map<String, String> load(String s) {
+                    List<String> params = new ArrayList<String>();
+                    params.add(SYSTEM_CONFIG_UNIONPAY_MER_ID);
+                    params.add(SYSTEM_CONFIG_UNIONPAY_NOTIFY_URL);
+                    ResponseVo<Map<String, String>> result = systemConfigApi.getConfigs(params);
+                    if ( !"0".equals( result.getCode())) {
+                        return new HashMap<>();
+                    }
+                    return result.getData();
+                }
+            });
+
+    public Map<String, String> getUnionPayConfig() {
+        Map<String, String> map = new HashMap<>();
+        try {
+            map = unionPayConfigCache.get("ptb.pay.unionpay.config");
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
+        return map;
     }
 }

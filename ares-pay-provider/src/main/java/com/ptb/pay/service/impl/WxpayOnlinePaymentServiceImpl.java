@@ -52,7 +52,7 @@ public class WxpayOnlinePaymentServiceImpl implements IOnlinePaymentService{
     private static Logger LOGGER = LoggerFactory.getLogger(WxpayOnlinePaymentServiceImpl.class);
 
     private static final String SYSTEM_CONFIG_WXPAY_APPID = "wxpay.appid";
-    private static final String SYSTEM_CONFIG_WXPAY_MCH_ID = "wxpay.mch_id";
+    private static final String SYSTEM_CONFIG_WXPAY_MCH_ID = "wxpay.mch.id";
     private static final String SYSTEM_CONFIG_WXPAY_NOTIFY_URL = "wxpay.notify.url";
     private static final String SYSTEM_CONFIG_WXPAY_API_KEY = "wxpay.api.key";
     private static final String SYSTEM_CONFIG_WXPAY_CREATE_ORDER_URL = "wxpay.create.order.url";
