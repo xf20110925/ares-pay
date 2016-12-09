@@ -108,6 +108,10 @@ public class RechargeOrderApiImpl implements IRechargeOrderApi {
         if (rechargeOrderQueryVO.getPayMethod() != null) {
             c.andPayMethodEqualTo(rechargeOrderQueryVO.getPayMethod());
         }
+        //用户ID
+        if (rechargeOrderQueryVO.getUserId() != null) {
+            c.andUserIdEqualTo(rechargeOrderQueryVO.getUserId());
+        }
         //充值状态
         if (rechargeOrderQueryVO.getStatus() != null) {
             c.andStatusEqualTo(rechargeOrderQueryVO.getStatus());
