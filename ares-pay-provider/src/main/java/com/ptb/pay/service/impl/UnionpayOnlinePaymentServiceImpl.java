@@ -1,24 +1,43 @@
 package com.ptb.pay.service.impl;
 
+import com.alibaba.dubbo.rpc.RpcContext;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import com.ptb.account.api.IAccountApi;
+import com.ptb.account.vo.PtbAccountVo;
+import com.ptb.account.vo.param.AccountRechargeParam;
+import com.ptb.common.enums.DeviceTypeEnum;
+import com.ptb.common.enums.PlatformEnum;
+import com.ptb.common.enums.RechargeOrderStatusEnum;
 import com.ptb.common.vo.ResponseVo;
+import com.ptb.pay.mapper.impl.RechargeOrderMapper;
+import com.ptb.pay.model.RechargeOrder;
+import com.ptb.pay.model.RechargeOrderExample;
+import com.ptb.pay.model.vo.AccountRechargeParamMessageVO;
+import com.ptb.pay.service.BusService;
 import com.ptb.pay.service.interfaces.IOnlinePaymentService;
 import com.ptb.pay.utils.unionpay.AcpService;
 import com.ptb.pay.utils.unionpay.LogUtil;
 import com.ptb.pay.utils.unionpay.SDKConfig;
 import com.ptb.pay.vo.CheckPayResultVO;
+import com.ptb.service.api.IBaiduPushApi;
 import com.ptb.service.api.ISystemConfigApi;
 import com.ptb.utils.date.DateUtil;
+import com.ptb.utils.encrypt.SignUtil;
+import com.ptb.utils.tool.ChangeMoneyUtil;
+import enums.MessageTypeEnum;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
+import vo.param.PushMessageParam;
 
 import javax.annotation.PostConstruct;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
@@ -28,11 +47,21 @@ import java.util.concurrent.TimeUnit;
 @Service
 public class UnionpayOnlinePaymentServiceImpl implements IOnlinePaymentService {
 
+    private static Logger LOGGER = LoggerFactory.getLogger(UnionpayOnlinePaymentServiceImpl.class);
+
     private static final String SYSTEM_CONFIG_UNIONPAY_MER_ID = "unionpay.mer.id";
     private static final String SYSTEM_CONFIG_UNIONPAY_NOTIFY_URL = "unionpay.notify.url";
 
     @Autowired
     private ISystemConfigApi systemConfigApi;
+    @Autowired
+    private RechargeOrderMapper rechargeOrderMapper;
+    @Autowired
+    private IAccountApi accountApi;
+    @Autowired
+    private IBaiduPushApi baiduPushApi;
+    @Autowired
+    private BusService busService;
 
     @PostConstruct
     private void init(){
@@ -113,7 +142,79 @@ public class UnionpayOnlinePaymentServiceImpl implements IOnlinePaymentService {
 
     @Override
     public boolean notifyPayResult(Map<String, String> params) throws Exception {
-        return false;
+        String encoding = params.get("encoding");
+        String rechargeOrderNo = params.get("orderId"); //订单号
+        String respCode = params.get("respCode");
+        RechargeOrderExample example = new RechargeOrderExample();
+        example.createCriteria().andRechargeOrderNoEqualTo(rechargeOrderNo);
+        List<RechargeOrder> rechargeOrders = rechargeOrderMapper.selectByExample(example);
+        if ( !"00".equals( respCode) || CollectionUtils.isEmpty( rechargeOrders)){
+            return false;
+        }
+        RechargeOrder rechargeOrder = rechargeOrders.get( 0);
+        String txnAmt = String.valueOf(rechargeOrder.getTotalAmount());//系统的充值金额
+        Map<String, String> config = getUnionPayConfig();
+        String merId = config.get(SYSTEM_CONFIG_UNIONPAY_MER_ID); //系统的商户号
+        params.put( "txnAmt", new String(txnAmt.getBytes(encoding), encoding));
+        params.put( "merId", new String(merId.getBytes(encoding), encoding));
+        if (!AcpService.validate(params, encoding)) {
+            LOGGER.error( "银联充值，验签失败。params:{}", JSON.toJSONString( params));
+            return false;
+        }
+        AccountRechargeParam rechargeParam = new AccountRechargeParam();
+        try {
+            rechargeParam.setDeviceType(DeviceTypeEnum.getDeviceTypeEnum(rechargeOrder.getDeviceType()));
+            rechargeParam.setMoney(rechargeOrder.getTotalAmount());
+            rechargeParam.setUserId(rechargeOrder.getUserId());
+            rechargeParam.setPayType(rechargeOrder.getPayType());
+            rechargeParam.setPayMethod(rechargeOrder.getPayMethod());
+            rechargeParam.setPlatformNo(PlatformEnum.xiaomi);
+            rechargeParam.setOrderNo(rechargeOrderNo);
+            //隐式加密
+            TreeMap toSign = JSONObject.parseObject(JSONObject.toJSONString(rechargeParam), TreeMap.class);
+            String signKey = SignUtil.getSignKey(toSign);
+            RpcContext.getContext().setAttachment("key", signKey);
+
+            ResponseVo<PtbAccountVo> repsonseVO = accountApi.recharge(rechargeParam);
+            if (repsonseVO == null || !"0".equals(repsonseVO.getCode())) {
+                sendRetryMessage(rechargeParam);
+            } else {
+                LOGGER.info("充值订单号：{} 充值成功!", rechargeOrderNo);
+                try {
+                    //推送消息
+                    PushMessageParam param = new PushMessageParam();
+                    param.setUserId(rechargeOrder.getUserId());
+                    param.setDeviceType(DeviceTypeEnum.getDeviceTypeEnum(rechargeOrder.getDeviceType()));
+                    param.setTitle("充值成功（在线充值）");
+                    param.setMessage("恭喜您，成功充值" + ChangeMoneyUtil.fromFenToYuan(rechargeOrder.getTotalAmount()) + "元，已自动转入钱包余额");
+                    param.setMessageType(MessageTypeEnum.ONLINE_RECHARGE.getMessageType());
+                    Map<String, Object> keyMap = new HashMap<>();
+                    keyMap.put("id", rechargeOrder.getPtbRechargeOrderId());
+                    param.setContentParam( keyMap);
+                    param.setNeedSaveMessage( true);
+                    param.setNeedPushMessage( true);
+                    baiduPushApi.pushMessage(param);
+                }catch (Exception e){
+                    LOGGER.error( "线上充值消息推送失败。errorMsg:{}", e.getMessage());
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            sendRetryMessage(rechargeParam);
+            LOGGER.error("银联充值失败，放入消息队列重试,params:" + JSONObject.toJSONString(params));
+        } finally {
+            rechargeOrder.setStatus(RechargeOrderStatusEnum.paid.getRechargeOrderStatus());
+            rechargeOrder.setPayTime(new Date());
+            rechargeOrderMapper.updateByPrimaryKey(rechargeOrder);
+        }
+        return true;
+    }
+
+    private void sendRetryMessage(AccountRechargeParam rechargeParam) {
+        AccountRechargeParamMessageVO messageVO = new AccountRechargeParamMessageVO();
+        messageVO.setAccountRechargeParam(rechargeParam);
+        LOGGER.info("发送重试充值消息：" + JSONObject.toJSONString(messageVO));
+        busService.sendAccountRechargeRetryMessage(messageVO);
     }
 
     private LoadingCache<String, Map<String, String>> unionPayConfigCache = CacheBuilder.newBuilder()
