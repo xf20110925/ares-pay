@@ -134,8 +134,8 @@ public class OrderServiceImpl implements IOrderService {
             logger.error("cancel order error! buyerId:{} orderId:{}", buyerId, orderId);
             return null;
         }
-
-        int update = orderMapper.updateOrderStateByOrderNo(orderId, OrderStatusEnum.ORDER_STATUS_DEAL_CLOSE.getStatus(), BuyerStatusEnum.BUYER_STATUS_CANCLE_ORDER.getStatus());
+        Date date = new Date();
+        int update = orderMapper.updateOrderStateByOrderNo(orderId, OrderStatusEnum.ORDER_STATUS_DEAL_CLOSE.getStatus(), BuyerStatusEnum.BUYER_STATUS_CANCLE_ORDER.getStatus(), date);
         if (update < 1){
             logger.error("buyer cacle order error! buyer:{}  orderId:{}", buyerId, orderId);
             throw new RuntimeException("buyer cacle order error!");
@@ -146,7 +146,7 @@ public class OrderServiceImpl implements IOrderService {
             logger.error("get order by orderId error! orderId:{}", orderId);
             throw new RuntimeException("get order by orderId error!");
         }
-        this.insertOrderLog(order.getOrderNo(), OrderActionEnum.BUYER_CANCAL_ORDER.getOrderAction(), new Date(), remarks, buyerId, UserTypeEnum.USER_IS_BUYER.getUserType());
+        this.insertOrderLog(order.getOrderNo(), OrderActionEnum.BUYER_CANCAL_ORDER.getOrderAction(), date, remarks, buyerId, UserTypeEnum.USER_IS_BUYER.getUserType());
 
         return order;
     }
