@@ -15,7 +15,6 @@
  */
 package com.ptb.pay.utils.unionpay;
 
-import com.unionpay.acp.sdk.BaseHttpSSLSocketFactory.TrustAnyHostnameVerifier;
 
 import javax.net.ssl.HttpsURLConnection;
 import java.io.*;
@@ -223,7 +222,7 @@ public class HttpClient {
 		if ("https".equalsIgnoreCase(url.getProtocol())) {
 			HttpsURLConnection husn = (HttpsURLConnection) httpURLConnection;
 			husn.setSSLSocketFactory(new BaseHttpSSLSocketFactory());
-			husn.setHostnameVerifier(new TrustAnyHostnameVerifier());//解决由于服务器证书问题导致HTTPS无法访问的情况
+			husn.setHostnameVerifier(new BaseHttpSSLSocketFactory.TrustAnyHostnameVerifier());//解决由于服务器证书问题导致HTTPS无法访问的情况
 			return husn;
 		}
 		return httpURLConnection;
@@ -252,7 +251,7 @@ public class HttpClient {
 		if ("https".equalsIgnoreCase(url.getProtocol())) {
 			HttpsURLConnection husn = (HttpsURLConnection) httpURLConnection;
 			husn.setSSLSocketFactory(new BaseHttpSSLSocketFactory());
-			husn.setHostnameVerifier(new TrustAnyHostnameVerifier());//解决由于服务器证书问题导致HTTPS无法访问的情况
+			husn.setHostnameVerifier(new BaseHttpSSLSocketFactory.TrustAnyHostnameVerifier());//解决由于服务器证书问题导致HTTPS无法访问的情况
 			return husn;
 		}
 		return httpURLConnection;

@@ -21,9 +21,9 @@ public class RechargeOrderApiTest extends BaseTest {
     public void createRechargeOrder(){
         RechargeOrderParamsVO p = new RechargeOrderParamsVO();
         p.setUserId( 1156L);
-        p.setDeviceType(DeviceTypeEnum.PC.getDeviceType());
+        p.setDeviceType(DeviceTypeEnum.android.getDeviceType());
         p.setPayMethod(PaymentMethodEnum.online.getPaymentMethod());
-        p.setPayType(OnlinePaymentTypeEnum.WXPAY.getPaymentTypeId());
+        p.setPayType(OnlinePaymentTypeEnum.YLPAY.getPaymentTypeId());
         p.setRechargeAmount( 1L);
         try {
             rechargeOrderApi.createRechargeOrder( p);

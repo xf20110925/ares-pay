@@ -9,6 +9,7 @@ import org.apache.ibatis.annotations.ResultMap;
 import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -21,8 +22,8 @@ public interface OrderMapper extends MyMapper<Order> {
     @ResultMap("BaseResultMap")
     Order getOrderByOrderNo( @Param("orderNo") String orderNo);
 
-    @Update(" update ptb_order set order_status = #{orderStatus}, buyer_status = #{buyerStatus} where ptb_order_id = #{orderId}")
-    int updateOrderStateByOrderNo(@Param("orderId") long orderId, @Param("orderStatus") int orderStatus, @Param("buyerStatus") int buyerStatus);
+    @Update(" update ptb_order set order_status = #{orderStatus}, buyer_status = #{buyerStatus}, last_modify_time=#{updateTime} where ptb_order_id = #{orderId}")
+    int updateOrderStateByOrderNo(@Param("orderId") long orderId, @Param("orderStatus") int orderStatus, @Param("buyerStatus") int buyerStatus, @Param("updateTime")Date updateTime);
 
     @Select("select * from ptb_order where seller_id=#{uid} order by create_time desc")
     @ResultMap("BaseResultMap")
