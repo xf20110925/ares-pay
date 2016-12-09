@@ -138,6 +138,11 @@
       #{createTime,jdbcType=TIMESTAMP}, #{payTime,jdbcType=TIMESTAMP}, #{status,jdbcType=INTEGER}, 
       #{orderNo,jdbcType=VARCHAR}, #{verificationCode,jdbcType=VARCHAR}, #{deviceType,jdbcType=VARCHAR}, 
       #{invoiceStatus,jdbcType=INTEGER}, #{invoiceId,jdbcType=BIGINT})
+    <selectKey resultType="java.lang.Long" keyProperty="ptbRechargeOrderId" keyColumn="ptb_recharge_order_id">
+      <![CDATA[
+          SELECT LAST_INSERT_ID() AS id
+      ]]>
+    </selectKey>
   </insert>
   <insert id="insertSelective" parameterType="com.ptb.pay.model.RechargeOrder" >
     insert into ptb_recharge_order
