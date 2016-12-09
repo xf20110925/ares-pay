@@ -21,9 +21,11 @@ import com.ptb.pay.enums.ErrorCode;
 import com.ptb.pay.enums.OrderActionEnum;
 import com.ptb.pay.enums.OrderStatusEnum;
 import com.ptb.pay.enums.UserTypeEnum;
+import com.ptb.pay.mapper.impl.OrderLogMapper;
 import com.ptb.pay.mapper.impl.OrderMapper;
 import com.ptb.pay.mapper.impl.ProductMapper;
 import com.ptb.pay.model.Order;
+import com.ptb.pay.model.OrderLog;
 import com.ptb.pay.model.Product;
 import com.ptb.pay.model.order.OrderDetail;
 import com.ptb.pay.service.impl.OrderLogServiceImpl;
@@ -68,6 +70,8 @@ public class OrderApiImpl implements IOrderApi {
     private IOrderService orderService;
     @Autowired
     private ProductMapper productMapper;
+    @Autowired
+    private OrderLogMapper orderLogMapper;
     @Autowired
     private IOrderDetailService orderDetailService;
     @Autowired
@@ -433,17 +437,18 @@ public class OrderApiImpl implements IOrderApi {
 
     @Override
     public ResponseVo getOrderLogForPageByOrderNo(int pageNum, int pageSize, String orderNo){
-        PageHelper.startPage(pageNum, pageSize); //开启分页查询，通过拦截器实现，紧接着执行的sql会被拦截
-        List<OrderLogVO> orderLogByOrderId = orderLogService.getOrderLogByOrderId(orderNo);
-        if (orderLogByOrderId == null){
-            logger.error("获取订单日志出错 orderNo:{}", orderNo);
-            return ReturnUtil.error("50001", "获取订单日志出错");
+        if (orderNo == null){
+            logger.error("order no is null!");
+            return null;
         }
-
-        if(CollectionUtils.isEmpty(orderLogByOrderId))
-            return ReturnUtil.success(new PageInfo<>(orderLogByOrderId));
-        PageInfo pageInfo = new PageInfo<>(orderLogByOrderId);
-        pageInfo.setList(orderLogByOrderId);
+        PageHelper.startPage(pageNum, pageSize); //开启分页查询，通过拦截器实现，紧接着执行的sql会被拦截
+        List<OrderLog> orderLogs = orderLogMapper.selectByOrderNo(orderNo);
+        if (orderLogs == null){
+            logger.error("can not get order logs by order: {}!", orderNo);
+            return null;
+        }
+        PageInfo pageInfo = new PageInfo<>(orderLogs);
+        pageInfo.setList(orderLogs.stream().map(ConvertOrderUtil::convertOrderLogToVO).collect(Collectors.toList()));
         return ReturnUtil.success(pageInfo);
     }
 

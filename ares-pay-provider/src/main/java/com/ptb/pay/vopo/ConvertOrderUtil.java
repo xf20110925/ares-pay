@@ -1,6 +1,9 @@
 package com.ptb.pay.vopo;
 
+import com.ptb.pay.enums.OrderActionEnum;
 import com.ptb.pay.model.Order;
+import com.ptb.pay.model.OrderLog;
+import com.ptb.pay.vo.order.OrderLogVO;
 import com.ptb.pay.vo.order.OrderVO;
 
 import java.util.List;
@@ -30,4 +33,18 @@ public class ConvertOrderUtil {
             orderVO.setPtbOrderId(item.getPtbOrderId());
             return orderVO;
     }
+
+        public static OrderLogVO convertOrderLogToVO(OrderLog orderLog){
+            OrderLogVO orderLogVO = new OrderLogVO();
+            orderLogVO.setPtbOrderLogId(orderLog.getPtbOrderLogId());
+            orderLogVO.setActionType(orderLog.getActionType());
+            orderLogVO.setActionName(OrderActionEnum.getOrderActionInfo(orderLog.getActionType()).getDesc());
+            orderLogVO.setCreateTime(orderLog.getCreateTime().getTime());
+            orderLogVO.setOrderNo(orderLog.getOrderNo());
+            orderLogVO.setRemarks(orderLog.getRemarks());
+            orderLogVO.setUserId(orderLog.getUserId());
+            orderLogVO.setUserType(orderLog.getUserType());
+            return orderLogVO;
+        }
+
 }

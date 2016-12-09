@@ -134,8 +134,8 @@ public class OrderApiImplTest extends BaseTest {
 
     @Test
     public void getOrderLogByOrderNo(){
-        //ResponseVo orderLogByOrderNo = orderApi.getOrderLogForPageByOrderNo(2, 5,"JYAP161124155041000000");
-        ResponseVo orderLogByOrderNo = orderApi.getOrderLogByOrderNo("JYAP161124155041000000");
+        ResponseVo orderLogByOrderNo = orderApi.getOrderLogForPageByOrderNo(2, 5,"JYAP161124155041000000");
+        //ResponseVo orderLogByOrderNo = orderApi.getOrderLogByOrderNo("JYAP161124155041000000");
 
         System.out.println(orderLogByOrderNo.getData());
 
