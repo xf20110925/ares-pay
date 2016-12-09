@@ -241,6 +241,11 @@
         #{invoiceId,jdbcType=BIGINT},
       </if>
     </trim>
+    <selectKey resultType="java.lang.Long" keyProperty="ptbRechargeOrderId" keyColumn="ptb_recharge_order_id">
+      <![CDATA[
+          SELECT LAST_INSERT_ID() AS id
+      ]]>
+    </selectKey>
   </insert>
   <update id="updateByExampleSelective" parameterType="map" >
     update ptb_recharge_order
