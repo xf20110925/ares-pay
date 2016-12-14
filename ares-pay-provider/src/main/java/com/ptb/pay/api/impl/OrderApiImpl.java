@@ -696,7 +696,8 @@ public class OrderApiImpl implements IOrderApi {
             return ReturnUtil.error(ErrorCode.ORDER_API_5005.getCode(), ErrorCode.ORDER_API_5005.getMessage());
 
         if (order.getOrderStatus() != OrderStatusEnum.ORDER_STATUS_DEALING.getStatus() ||
-                order.getSellerStatus() != SellerStatusEnum.SELLER_STATUS_CONFIRM.getStatus()){
+                order.getSellerStatus() != SellerStatusEnum.SELLER_STATUS_CONFIRM.getStatus() ||
+                order.getBuyerStatus() != BuyerStatusEnum.BUYER_STATUS_APPLY_REFUND.getStatus()){
             //订单状态不是进行中或者卖家不是确认完成状态,不能强制修改订单。
             logger.error("订单状态不是进行中或者卖家不是确认完成状态,不能强制修改订单.:{}" ,ErrorCode.ORDER_API_5002.getMessage());
             return ReturnUtil.error(ErrorCode.ORDER_API_5002.getCode(), ErrorCode.ORDER_API_5002.getMessage());

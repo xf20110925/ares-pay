@@ -431,6 +431,7 @@ public class OrderServiceImpl implements IOrderService {
         //修改订单状态
         Date date = new Date();
         order.setOrderStatus(OrderStatusEnum.ORDER_STATUS_DEAL_OVER.getStatus());
+        order.setSellerStatus(SellerStatusEnum.SELLER_STATUS_CONFIRM.getStatus());
         order.setBuyerStatus(BuyerStatusEnum.BUYER_STATUS_CONFIRM.getStatus());
         order.setLastModifierId(adminId);
         order.setLastModifyTime(date);
