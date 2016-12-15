@@ -26,6 +26,15 @@ public class RechargeOrderQueryVO  implements Serializable {
     private Date endTime;
     private String verificationCode;
     private List<Long> rechargeOrderIds;
+    private List<Integer> statuss;
+
+    public List<Integer> getStatuss() {
+        return statuss;
+    }
+
+    public void setStatuss(List<Integer> statuss) {
+        this.statuss = statuss;
+    }
 
     public List<Long> getRechargeOrderIds() {
         return rechargeOrderIds;
