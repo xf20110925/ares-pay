@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import vo.param.PushMessageParam;
 
+import javax.annotation.Resource;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -25,7 +26,7 @@ import java.util.Map;
 public class MessagePushServiceImpl implements IMessagePushService {
     private Logger logger = Logger.getLogger(MessagePushServiceImpl.class);
 
-    @Autowired
+    @Resource
     private IBaiduPushApi baiduPushApi;
 
     @Override

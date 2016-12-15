@@ -38,6 +38,7 @@ import org.springframework.util.CollectionUtils;
 import vo.param.PushMessageParam;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.Resource;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -54,13 +55,13 @@ public class UnionpayOnlinePaymentServiceImpl implements IOnlinePaymentService {
     private static final String SYSTEM_CONFIG_UNIONPAY_NOTIFY_URL = "unionpay.notify.url";
     private static final String SYSTEM_CONFIG_UNIONPAY_FRONT_URL = "unionpay.front.url";
 
-    @Autowired
+    @Resource
     private ISystemConfigApi systemConfigApi;
     @Autowired
     private RechargeOrderMapper rechargeOrderMapper;
-    @Autowired
+    @Resource
     private IAccountApi accountApi;
-    @Autowired
+    @Resource
     private IBaiduPushApi baiduPushApi;
     @Autowired
     private BusService busService;

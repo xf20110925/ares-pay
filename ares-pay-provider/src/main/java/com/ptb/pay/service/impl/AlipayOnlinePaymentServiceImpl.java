@@ -40,6 +40,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import vo.param.PushMessageParam;
 
+import javax.annotation.Resource;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.*;
@@ -115,13 +116,13 @@ public class AlipayOnlinePaymentServiceImpl implements IOnlinePaymentService {
 
     private static Logger LOGGER = LoggerFactory.getLogger(AlipayOnlinePaymentServiceImpl.class);
 
-    @Autowired
+    @Resource
     private ISystemConfigApi systemConfigApi;
 
     @Autowired
     private RechargeOrderMapper rechargeOrderMapper;
 
-    @Autowired
+    @Resource
     private IAccountApi accountApi;
 
     @Autowired
@@ -130,7 +131,7 @@ public class AlipayOnlinePaymentServiceImpl implements IOnlinePaymentService {
     @Autowired
     private BusService busService;
 
-    @Autowired
+    @Resource
     private IBaiduPushApi baiduPushApi;
 
     @Override

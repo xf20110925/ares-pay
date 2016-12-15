@@ -6,9 +6,10 @@ import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.ResultMap;
 import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
-
+@Component
 public interface OrderDetailMapper extends MyMapper<OrderDetail>{
 
     @Select("select * from ptb_order_detail where order_no = #{orderNo}")

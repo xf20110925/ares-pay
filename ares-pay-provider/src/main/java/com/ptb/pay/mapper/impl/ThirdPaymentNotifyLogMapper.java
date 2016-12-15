@@ -6,7 +6,10 @@ import com.ptb.pay.model.ThirdPaymentNotifyLog;
 import com.ptb.pay.model.ThirdPaymentNotifyLogExample;
 import java.util.List;
 import org.apache.ibatis.annotations.Param;
+import org.springframework.stereotype.Component;
 
+
+@Component
 public interface ThirdPaymentNotifyLogMapper extends MyMapper<ThirdPaymentNotifyLog> {
     int deleteByExample(ThirdPaymentNotifyLogExample example);
 

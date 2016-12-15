@@ -8,6 +8,7 @@ import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.ResultMap;
 import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
+import org.springframework.stereotype.Component;
 
 import java.util.Date;
 import java.util.List;
@@ -15,6 +16,7 @@ import java.util.List;
 /**
  * Created by zuokui.fu on 2016/11/16.
  */
+@Component
 public interface OrderMapper extends MyMapper<Order> {
     int insertReturnId(Order order);
 

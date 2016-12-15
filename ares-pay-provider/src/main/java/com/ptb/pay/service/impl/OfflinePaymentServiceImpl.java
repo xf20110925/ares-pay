@@ -25,6 +25,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import vo.param.PushMessageParam;
 
+import javax.annotation.Resource;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -42,13 +43,13 @@ public class OfflinePaymentServiceImpl implements IOfflinePaymentService {
 
     private static Logger LOGGER = LoggerFactory.getLogger(OfflinePaymentServiceImpl.class);
 
-    @Autowired
+    @Resource
     private IAccountApi accountApi;
 
     @Autowired
     private BusService busService;
 
-    @Autowired
+    @Resource
     private IBaiduPushApi baiduPushApi;
 
     @Autowired

@@ -20,6 +20,7 @@ import com.ptb.pay.vo.OnlinePaymentNotifyVO;
 import com.ptb.pay.vo.PaymentVO;
 import com.ptb.pay.vo.recharge.RechargeOrderParamsVO;
 
+import javax.annotation.Resource;
 import java.util.List;
 
 /**
@@ -39,7 +40,7 @@ public class PaymentApiImpl implements IPaymentApi {
      */
     private static final String SYSTEM_ALOW_PAYMENT = "system.alow.payment";
 
-    @Autowired
+    @Resource
     private IBlockApi blockApi;
 
     @Autowired

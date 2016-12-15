@@ -46,6 +46,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.Resource;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -59,21 +60,21 @@ public class OrderApiImpl implements IOrderApi {
 
     private static final Logger logger = LoggerFactory.getLogger( OrderApiImpl.class);
 
-    @Autowired
+    @Resource
     private IAccountApi accountApi;
     @Autowired
     private OrderMapper orderMapper;
-    @Autowired
+    @Resource
     private IOrderService orderService;
-    @Autowired
+    @Resource
     private ProductMapper productMapper;
-    @Autowired
+    @Resource
     private OrderLogMapper orderLogMapper;
     @Autowired
     private IOrderDetailService orderDetailService;
     @Autowired
     private IProductApi productApi;
-    @Autowired
+    @Resource
     private IBindMediaApi bindMediaApi;
     @Autowired
     private IMessagePushService messagePushService;

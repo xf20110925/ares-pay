@@ -37,6 +37,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import vo.param.PushMessageParam;
 
+import javax.annotation.Resource;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -58,13 +59,13 @@ public class WxpayOnlinePaymentServiceImpl implements IOnlinePaymentService{
     private static final String SYSTEM_CONFIG_WXPAY_API_KEY = "wxpay.api.key";
     private static final String SYSTEM_CONFIG_WXPAY_CREATE_ORDER_URL = "wxpay.create.order.url";
 
-    @Autowired
+    @Resource
     private ISystemConfigApi systemConfigApi;
     @Autowired
     private RechargeOrderMapper rechargeOrderMapper;
-    @Autowired
+    @Resource
     private IAccountApi accountApi;
-    @Autowired
+    @Resource
     private IBaiduPushApi baiduPushApi;
     @Autowired
     private BusService busService;

@@ -51,7 +51,7 @@ public class RechargeOrderApiImpl implements IRechargeOrderApi {
     private RechargeOrderMapper rechargeOrderMapper;
     @Autowired
     private IPaymentService paymentService;
-    @Autowired
+    @Resource
     private IBaiduPushApi baiduPushApi;
     @Resource(name = "offlinePaymentService")
     private IOfflinePaymentService offlinePaymentService;
