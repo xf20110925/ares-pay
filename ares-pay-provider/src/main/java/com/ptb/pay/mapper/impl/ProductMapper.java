@@ -19,11 +19,11 @@ public interface ProductMapper extends MyMapper<Product>{
     @ResultMap("BaseResultMap")
     Product selectByUidAndRelevantId(@Param("uid") Long ownerId, @Param("rUid") Long relevantId);
 
-    @Select("select * from ptb_product where owner_id=#{uid} order by create_time desc")
+    @Select("select * from ptb_product where owner_id=#{uid} order by deal_num desc, create_time desc")
     @ResultMap("BaseResultMap")
     List<Product> selectByUidOrderByCreateTime(@Param("uid") long userId);
 
-    @Select("select * from ptb_product where relevant_id=#{rid} order by create_time desc")
+    @Select("select * from ptb_product where relevant_id=#{rid} order by deal_num desc, create_time desc")
     @ResultMap("BaseResultMap")
     List<Product> selectByRelevantId(@Param("rid") long relevantId);
 
