@@ -116,7 +116,7 @@ public class RechargeOrderApiImpl implements IRechargeOrderApi {
         if (rechargeOrderQueryVO.getStatus() != null) {
             c.andStatusEqualTo(rechargeOrderQueryVO.getStatus());
         }
-        if(CollectionUtils.isEmpty(rechargeOrderQueryVO.getStatuss())){
+        if(!CollectionUtils.isEmpty(rechargeOrderQueryVO.getStatuss())){
             c.andStatusIn(rechargeOrderQueryVO.getStatuss());
         }
         //发票状态
