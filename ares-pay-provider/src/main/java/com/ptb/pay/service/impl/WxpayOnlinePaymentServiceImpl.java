@@ -18,6 +18,7 @@ import com.ptb.pay.model.RechargeOrder;
 import com.ptb.pay.model.RechargeOrderExample;
 import com.ptb.pay.model.vo.AccountRechargeParamMessageVO;
 import com.ptb.pay.service.BusService;
+import com.ptb.pay.service.ThirdPaymentNotifyLogService;
 import com.ptb.pay.service.interfaces.IOnlinePaymentService;
 import com.ptb.pay.utils.wxpay.GetWxOrderno;
 import com.ptb.pay.utils.wxpay.RequestHandler;
@@ -67,6 +68,8 @@ public class WxpayOnlinePaymentServiceImpl implements IOnlinePaymentService{
     private IBaiduPushApi baiduPushApi;
     @Autowired
     private BusService busService;
+    @Autowired
+    private ThirdPaymentNotifyLogService thirdPaymentNotifyLogService;
 
     @Override
     public String getPaymentInfo(String rechargeOrderNo, Long price) throws Exception{
@@ -215,6 +218,7 @@ public class WxpayOnlinePaymentServiceImpl implements IOnlinePaymentService{
 
     @Override
     public boolean notifyPayResult(Map<String, String> params) throws Exception {
+        thirdPaymentNotifyLogService.asynSaveWxpayNotifyLog( params);
         String msgxml = params.get("xml");
         Map map =  new GetWxOrderno().doXMLParse(msgxml);
         String result_code=(String) map.get("result_code");

@@ -18,6 +18,7 @@ import com.ptb.pay.model.RechargeOrder;
 import com.ptb.pay.model.RechargeOrderExample;
 import com.ptb.pay.model.vo.AccountRechargeParamMessageVO;
 import com.ptb.pay.service.BusService;
+import com.ptb.pay.service.ThirdPaymentNotifyLogService;
 import com.ptb.pay.service.interfaces.IOnlinePaymentService;
 import com.ptb.pay.utils.unionpay.AcpService;
 import com.ptb.pay.utils.unionpay.LogUtil;
@@ -63,6 +64,8 @@ public class UnionpayOnlinePaymentServiceImpl implements IOnlinePaymentService {
     private IBaiduPushApi baiduPushApi;
     @Autowired
     private BusService busService;
+    @Autowired
+    private ThirdPaymentNotifyLogService thirdPaymentNotifyLogService;
 
     @PostConstruct
     private void init(){
@@ -192,6 +195,7 @@ public class UnionpayOnlinePaymentServiceImpl implements IOnlinePaymentService {
 
     @Override
     public boolean notifyPayResult(Map<String, String> params) throws Exception {
+        thirdPaymentNotifyLogService.asynSaveUnionpayNotifyLog( params);
         String encoding = params.get("encoding");
         String rechargeOrderNo = params.get("orderId"); //订单号
         String respCode = params.get("respCode");

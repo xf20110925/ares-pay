@@ -30,7 +30,6 @@ public class ThirdPaymentNotifyLogService {
 
     @Async
     public void asynSaveAlipayNotifyLog(Map<String, String> params) throws Exception{
-
         ThirdPaymentNotifyLog log = new ThirdPaymentNotifyLog();
         try {
             log.setRechargeOrderNo(params.get("out_trade_no"));
@@ -42,6 +41,42 @@ public class ThirdPaymentNotifyLogService {
         } catch (Exception e) {
             e.printStackTrace();
             LOGGER.error("保存支付宝notify日志失败，log：" + JSONObject.toJSONString(log), e);
+        }
+
+    }
+
+    @Async
+    public void asynSaveWxpayNotifyLog(Map<String, String> params) throws Exception{
+        ThirdPaymentNotifyLog log = new ThirdPaymentNotifyLog();
+        try {
+            String out_trade_no  = (String) params.get("out_trade_no");
+            String sn=out_trade_no.split("\\|")[0];//获取订单编号
+            log.setRechargeOrderNo(sn);
+            log.setNotifyContent(JSON.toJSONString(params));
+            log.setNotifyTime(new Date());
+            log.setPayType(OnlinePaymentTypeEnum.WXPAY.getPaymentTypeId());
+            log.setTradeStatus(params.get("result_code"));
+            thirdPaymentNotifyLogMapper.insert(log);
+        } catch (Exception e) {
+            e.printStackTrace();
+            LOGGER.error("保存微信支付notify日志失败，log：" + JSONObject.toJSONString(log), e);
+        }
+
+    }
+
+    @Async
+    public void asynSaveUnionpayNotifyLog(Map<String, String> params) throws Exception{
+        ThirdPaymentNotifyLog log = new ThirdPaymentNotifyLog();
+        try {
+            log.setRechargeOrderNo(params.get("orderId"));
+            log.setNotifyContent(JSON.toJSONString(params));
+            log.setNotifyTime(new Date());
+            log.setPayType(OnlinePaymentTypeEnum.YLPAY.getPaymentTypeId());
+            log.setTradeStatus(params.get("respCode"));
+            thirdPaymentNotifyLogMapper.insert(log);
+        } catch (Exception e) {
+            e.printStackTrace();
+            LOGGER.error("保存银联支付notify日志失败，log：" + JSONObject.toJSONString(log), e);
         }
 
     }
