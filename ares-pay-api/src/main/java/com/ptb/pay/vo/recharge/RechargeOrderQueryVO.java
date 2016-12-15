@@ -1,6 +1,7 @@
 package com.ptb.pay.vo.recharge;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -25,8 +26,8 @@ public class RechargeOrderQueryVO  implements Serializable {
     private Date startTime;
     private Date endTime;
     private String verificationCode;
-    private List<Long> rechargeOrderIds;
-    private List<Integer> statuss;
+    private List<Long> rechargeOrderIds = new ArrayList<Long>();
+    private List<Integer> statuss = new ArrayList<Integer>();
 
     public List<Integer> getStatuss() {
         return statuss;
