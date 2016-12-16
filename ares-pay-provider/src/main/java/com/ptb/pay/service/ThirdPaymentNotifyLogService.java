@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.ptb.common.enums.OnlinePaymentTypeEnum;
 import com.ptb.pay.mapper.impl.ThirdPaymentNotifyLogMapper;
 import com.ptb.pay.model.ThirdPaymentNotifyLog;
+import com.ptb.utils.paytools.wxpay.GetWxOrderno;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,13 +50,16 @@ public class ThirdPaymentNotifyLogService {
     public void asynSaveWxpayNotifyLog(Map<String, String> params) throws Exception{
         ThirdPaymentNotifyLog log = new ThirdPaymentNotifyLog();
         try {
-            String out_trade_no  = (String) params.get("out_trade_no");
+            String msgxml = params.get("xml");
+            Map map =  new GetWxOrderno().doXMLParse(msgxml);
+            String result_code=(String) map.get("result_code");
+            String out_trade_no  = (String) map.get("out_trade_no");
             String sn=out_trade_no.split("\\|")[0];//获取订单编号
             log.setRechargeOrderNo(sn);
-            log.setNotifyContent(JSON.toJSONString(params));
+            log.setNotifyContent(JSON.toJSONString(map));
             log.setNotifyTime(new Date());
             log.setPayType(OnlinePaymentTypeEnum.WXPAY.getPaymentTypeId());
-            log.setTradeStatus(params.get("result_code"));
+            log.setTradeStatus(result_code);
             thirdPaymentNotifyLogMapper.insert(log);
         } catch (Exception e) {
             e.printStackTrace();
