@@ -159,7 +159,7 @@ public class OrderApiImpl implements IOrderApi {
                 throw new Exception();
             }
             //消息推送
-            if(!messagePushService.pushOrderMessage(salerId, order.getBuyerId(), order.getPtbOrderId(), OrderActionEnum.BUYER_SUBMIT_ORDER, DeviceTypeEnum.getDeviceTypeEnum(deviceType)))
+            if(!messagePushService.pushOrderMessage(salerId, order.getBuyerId(), order.getPtbOrderId(), OrderActionEnum.SALER_AGREE_REFUND, DeviceTypeEnum.getDeviceTypeEnum(deviceType)))
                 logger.error("seller agreeRefund message fail userId:" + salerId + " orderNo:" + order.getOrderNo());
 
             Order resultOrder = orderMapper.selectByPrimaryKey( orderId);
@@ -252,7 +252,7 @@ public class OrderApiImpl implements IOrderApi {
             Order resultOrder = orderMapper.selectByPrimaryKey(orderId);
             Map<String, Object> buyerOrderStatus = orderService.getBuyerOrderStatus(resultOrder.getOrderStatus().toString() + resultOrder.getSellerStatus() + resultOrder.getBuyerStatus());
             //消息推送
-            if(!messagePushService.pushOrderMessage(userId, order.getSellerId(), order.getPtbOrderId(), OrderActionEnum.BUYER_SUBMIT_ORDER, DeviceTypeEnum.getDeviceTypeEnum(deviceType)))
+            if(!messagePushService.pushOrderMessage(userId, order.getSellerId(), order.getPtbOrderId(), OrderActionEnum.BUYER_APPLY_REFUND, DeviceTypeEnum.getDeviceTypeEnum(deviceType)))
                 logger.error("send buyer refund message fail userId:" + userId + " orderNo:" + order.getOrderNo());
 
             ResponseVo responseVo = ReturnUtil.success("操作成功", buyerOrderStatus);

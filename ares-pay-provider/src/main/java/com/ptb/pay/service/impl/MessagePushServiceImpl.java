@@ -53,6 +53,12 @@ public class MessagePushServiceImpl implements IMessagePushService {
         }else if(orderActionEnum.getOrderAction() == OrderActionEnum.SALER_COMPLETE.getOrderAction()){
             message = "卖家已确认投放完成，请及时确认";
             keyMap.put("userType", UserTypeEnum.USER_IS_BUYER.getUserType());
+        }else if(orderActionEnum.getOrderAction() == OrderActionEnum.BUYER_APPLY_REFUND.getOrderAction()){
+            message = "买家发起了退款申请，请及时处理";
+            keyMap.put("userType", UserTypeEnum.USER_IS_SELLER.getUserType());
+        }else if(orderActionEnum.getOrderAction() == OrderActionEnum.SALER_AGREE_REFUND.getOrderAction()){
+            message = "卖家已同意退款申请，退款金额已自动转入钱包余额";
+            keyMap.put("userType", UserTypeEnum.USER_IS_BUYER.getUserType());
         }else {
             logger.error("Unknown message OrderActionEnum");
             return false;
