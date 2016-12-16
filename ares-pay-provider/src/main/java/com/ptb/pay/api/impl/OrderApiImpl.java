@@ -86,7 +86,7 @@ public class OrderApiImpl implements IOrderApi {
     @Transactional( rollbackFor = Exception.class, propagation = Propagation.REQUIRED)
     @Override
     public ResponseVo<Map<String,Object>> cancelApplyRefund(Long buyerId, Long orderId) throws Exception {
-        logger.info( "卖家取消申请退款。buyerId:{} orderId:{}", buyerId, orderId);
+        logger.info( "买家取消申请退款。buyerId:{} orderId:{}", buyerId, orderId);
         try {
             //参数校验
             if (!ParamUtil.checkParams(buyerId, orderId)) {
@@ -158,6 +158,10 @@ public class OrderApiImpl implements IOrderApi {
                 logger.error( "虚拟账户退款dubbo接口调用失败。salerId:{}", salerId);
                 throw new Exception();
             }
+            //消息推送
+            if(!messagePushService.pushOrderMessage(salerId, order.getBuyerId(), order.getPtbOrderId(), OrderActionEnum.BUYER_SUBMIT_ORDER, DeviceTypeEnum.getDeviceTypeEnum(deviceType)))
+                logger.error("seller agreeRefund message fail userId:" + salerId + " orderNo:" + order.getOrderNo());
+
             Order resultOrder = orderMapper.selectByPrimaryKey( orderId);
             return ReturnUtil.success( orderService.getSalerOrderStatus( resultOrder.getOrderStatus().toString()+resultOrder.getSellerStatus()+resultOrder.getBuyerStatus()));
         } catch ( Exception e){
@@ -210,6 +214,12 @@ public class OrderApiImpl implements IOrderApi {
             //更新订单状态并增加订单日志
             orderService.updateStatusBuyerPayment(order.getPtbOrderId(),userId,order.getOrderNo());
             Order resultOrder = orderMapper.selectByPrimaryKey(orderId);
+/*
+            //消息推送
+            if(!messagePushService.pushOrderMessage(userId, order.getSellerId(), order.getPtbOrderId(), OrderActionEnum.BUYER_SUBMIT_ORDER, DeviceTypeEnum.getDeviceTypeEnum(deviceType)))
+                logger.error("send buyer payment message fail userId:" + userId + " orderNo:" + order.getOrderNo());
+*/
+
             Map<String, Object> buyerOrderStatus = orderService.getBuyerOrderStatus(resultOrder.getOrderStatus().toString() + resultOrder.getSellerStatus() + resultOrder.getBuyerStatus());
             ResponseVo responseVo1 = ReturnUtil.success("操作成功", buyerOrderStatus);
             return responseVo1;
@@ -241,6 +251,10 @@ public class OrderApiImpl implements IOrderApi {
             orderService.updateStaterefund(orderId,userId, order.getOrderNo());
             Order resultOrder = orderMapper.selectByPrimaryKey(orderId);
             Map<String, Object> buyerOrderStatus = orderService.getBuyerOrderStatus(resultOrder.getOrderStatus().toString() + resultOrder.getSellerStatus() + resultOrder.getBuyerStatus());
+            //消息推送
+            if(!messagePushService.pushOrderMessage(userId, order.getSellerId(), order.getPtbOrderId(), OrderActionEnum.BUYER_SUBMIT_ORDER, DeviceTypeEnum.getDeviceTypeEnum(deviceType)))
+                logger.error("send buyer refund message fail userId:" + userId + " orderNo:" + order.getOrderNo());
+
             ResponseVo responseVo = ReturnUtil.success("操作成功", buyerOrderStatus);
             return responseVo;
         }catch (Exception e){
