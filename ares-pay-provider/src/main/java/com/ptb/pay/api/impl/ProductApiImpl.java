@@ -199,4 +199,10 @@ public class ProductApiImpl implements IProductApi {
         return ReturnUtil.success( result);
     }
 
+    @Override
+    public ResponseVo userOwnRawProduct(long userId, long relevantId) {
+        return productMapper.selectByUidAndRelevantId(userId, relevantId) == null ?
+                ReturnUtil.error(ErrorCode.PRODUCT_API_NO_EXISTS.getCode(), ErrorCode.PRODUCT_API_NO_EXISTS.getMessage()):
+                ReturnUtil.success();
+    }
 }

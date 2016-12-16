@@ -103,4 +103,14 @@ public interface IProductApi {
 //    public ResponseVo<List<Long>> getMediaBindIdsByOrderNos( List<String> orderNos);
 
     public ResponseVo<Map<String, Object>> getProductNameByOrdreNos( List<String> orderNos);
+
+
+    /**
+     * 用户商品中是否拥有该物品 1 有  0 没有
+     * @param userId 用户ID
+     * @param relevantId 物品ID
+     * @return
+     */
+    public ResponseVo  userOwnRawProduct(long userId, long relevantId);
+
 }

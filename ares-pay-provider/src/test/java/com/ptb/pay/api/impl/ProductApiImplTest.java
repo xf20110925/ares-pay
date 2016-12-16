@@ -54,4 +54,10 @@ public class ProductApiImplTest extends BaseTest {
         ResponseVo<Integer> responseVo = productApi.getUserProductNum(111);
         Assert.assertTrue(responseVo.getCode().equals("0"));
     }
+
+    @Test
+    public void userOwnRawProduct(){
+        ResponseVo responseVo = productApi.userOwnRawProduct(1089, 22);
+        System.out.println(responseVo.getCode());
+    }
 }
