@@ -1,13 +1,17 @@
 package com.ptb.pay.service.impl;
 
+import com.ptb.common.vo.ResponseVo;
+import com.ptb.pay.api.IProductApi;
 import com.ptb.pay.enums.*;
 import com.ptb.pay.mapper.impl.OrderDetailMapper;
 import com.ptb.pay.mapper.impl.OrderLogMapper;
 import com.ptb.pay.mapper.impl.OrderMapper;
 import com.ptb.pay.model.Order;
 import com.ptb.pay.model.OrderLog;
+import com.ptb.pay.service.interfaces.IOrderDetailService;
 import com.ptb.pay.service.interfaces.IOrderService;
 import com.ptb.pay.vo.order.OrderTimeAxis;
+import com.ptb.ucenter.api.IBindMediaApi;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.Resource;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -33,6 +38,15 @@ public class OrderServiceImpl implements IOrderService {
     private OrderLogMapper orderLogMapper;
     @Autowired
     private OrderDetailMapper orderDetailMapper;
+
+    @Resource
+    private IOrderDetailService orderDetailService;
+
+    @Resource
+    private IProductApi productApi;
+
+    @Resource
+    private IBindMediaApi bindMediaApi;
 
     private static Map<String, Object> salerOrderStatusMap = new HashMap<>();
     private static Map<String, Object> buyerOrderStatusMap = new HashMap<>();
@@ -218,7 +232,21 @@ public class OrderServiceImpl implements IOrderService {
 
     @Override
     @Transactional
-    public boolean buyerConfirmOrder(long buyer, Order order) {
+    public boolean buyerConfirmOrder(long userId, Order order) {
+        ResponseVo responseVo1;
+        //更新商品计数
+        Long productId = orderDetailService.getProductIdByOrderNo(order.getOrderNo());
+        if(productId != null) {
+            responseVo1 = productApi.updateProductDealNum(userId, productId);
+            if (!responseVo1.getCode().equals("0")) {
+                logger.error("buyerConfirm, update productDealNum error, orderNo:" + order.getOrderNo() + " productId:" + productId);
+                throw new RuntimeException("买家确认完成商品交易量更新失败");
+            }
+        }else{
+            logger.error("buyerConfirm, product not exists of orderNo:" + order.getOrderNo());
+            throw new RuntimeException("买家确认完成更新商品交易量，商品丢失");
+        }
+
         //修改订单状态
         Date date = new Date();
         order.setOrderStatus(OrderStatusEnum.ORDER_STATUS_DEAL_OVER.getStatus());
@@ -241,6 +269,19 @@ public class OrderServiceImpl implements IOrderService {
         ia = orderLogMapper.insert(orderLog);
         if(ia < 1)
             throw new RuntimeException("买家确认完成更新订单操作日志失败");
+
+        //上报用户中心交易成功
+        try {
+            responseVo1 = bindMediaApi.reportDealInfo(order.getSellerId(), order.getBuyerId(), 0);
+            if(!responseVo1.getCode().equals("0")){
+                //更新失败 add message to bus
+                logger.error("buyerConfirm, report dealSuccess to bindMediaApi orderNo:" + order.getOrderNo() + " sellerId:" + order.getSellerId() + " buyerId:" + order.getBuyerId());
+                throw new RuntimeException("买家确认完成上报uCenter失败");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("买家确认完成上报uCenter发生异常");
+        }
 
         return true;
     }

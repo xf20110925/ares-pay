@@ -25,6 +25,9 @@ import com.ptb.pay.model.Order;
 import com.ptb.pay.model.OrderLog;
 import com.ptb.pay.model.Product;
 import com.ptb.pay.model.order.OrderDetail;
+import com.ptb.pay.model.vo.BuyerConfirmOrderVO;
+import com.ptb.pay.model.vo.RetryMessageVO;
+import com.ptb.pay.service.OrderBusService;
 import com.ptb.pay.service.impl.OrderLogServiceImpl;
 import com.ptb.pay.service.interfaces.IMessagePushService;
 import com.ptb.pay.service.interfaces.IOrderDetailService;
@@ -80,6 +83,9 @@ public class OrderApiImpl implements IOrderApi {
     private IMessagePushService messagePushService;
     @Autowired
     private IOrderLogService orderLogService;
+
+    @Resource
+    private OrderBusService orderBusService;
 
     long adminId = 2;
 
@@ -484,15 +490,16 @@ public class OrderApiImpl implements IOrderApi {
                 //买家未付款, 操作失败
                 return ReturnUtil.error(ErrorCode.ORDER_API_5002.getCode(), ErrorCode.ORDER_API_5002.getMessage());
             }
-            //消息推送
-            if(!messagePushService.pushOrderMessage(userId, order.getBuyerId(), order.getPtbOrderId(), OrderActionEnum.SALER_COMPLETE, confirmOrderVO.getDeviceTypeEnum())) {
-                logger.error("send seller confirm order message fail userId:" + userId + " orderNo:" + order.getOrderNo());
-            }
 
             //修改相关状态
             boolean ret = orderService.sellerConfirmOrder(userId, order);
             if(!ret) {
                 return ReturnUtil.error(ErrorCode.PAY_API_COMMMON_1000.getCode(),ErrorCode.PAY_API_COMMMON_1000.getMessage());
+            }
+
+            //消息推送
+            if(!messagePushService.pushOrderMessage(userId, order.getBuyerId(), order.getPtbOrderId(), OrderActionEnum.SALER_COMPLETE, confirmOrderVO.getDeviceTypeEnum())) {
+                logger.error("send seller confirm order message fail userId:" + userId + " orderNo:" + order.getOrderNo());
             }
 
             return ReturnUtil.success(orderService.getSalerOrderStatus( ""+order.getOrderStatus()+order.getSellerStatus()+order.getBuyerStatus()));
@@ -513,7 +520,7 @@ public class OrderApiImpl implements IOrderApi {
 
             ResponseVo responseVo = null;
             //取消款项冻结
-            try {
+            /*try {
                 AccountThawParam accountThawParam = new AccountThawParam();
                 accountThawParam.setOrderNo(order.getOrderNo());
                 accountThawParam.setBuyerId(order.getBuyerId());
@@ -533,39 +540,26 @@ public class OrderApiImpl implements IOrderApi {
             } catch (Exception e) {
                 e.printStackTrace();
                 return ReturnUtil.error(ErrorCode.PAY_API_COMMMON_1000.getCode(), ErrorCode.PAY_API_COMMMON_1000.getMessage());
-            }
+            }*/
 
             try {
-                //消息推送
-                if(!messagePushService.pushOrderMessage(userId, order.getSellerId(), order.getPtbOrderId(), OrderActionEnum.BUYER_COMPLETE, confirmOrderVO.getDeviceTypeEnum()))
-                    logger.error("send buyer confirm order message fail userId:" + userId + " orderNo:" + order.getOrderNo());
-
-                //上报用户中心交易成功
-                ResponseVo responseVo1 = bindMediaApi.reportDealInfo(order.getSellerId(), order.getBuyerId(), 0);
-                if(!responseVo1.getCode().equals("0")){
-                    //更新失败 add message to bus
-                    logger.error("buyerConfirm, report dealSuccess to bindMediaApi orderNo:" + order.getOrderNo() + " sellerId:" + order.getSellerId() + " buyerId:" + order.getBuyerId());
-                }
-                //更新商品计数
-                Long productId = orderDetailService.getProductIdByOrderNo(order.getOrderNo());
-                if(productId != null) {
-                    responseVo1 = productApi.updateProductDealNum(userId, productId);
-                    if (!responseVo1.getCode().equals("0")) {
-                        //更新失败 add message to bus
-                        logger.error("buyerConfirm, update productDealNum error, orderNo:" + order.getOrderNo() + " productId:" + productId);
-                    }
-                }else{
-                    logger.error("buyerConfirm, product not exists of orderNo:" + order.getOrderNo());
-                }
-                //更新订单状态 与 订单操作日志
-                boolean ret = orderService.buyerConfirmOrder(userId, order);
-                if(!ret){
-                    //更新失败 add message to bus
-                    logger.error("buyerConfirm, order info and order_log info update error, orderNo:" + order.getOrderNo());
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
+                //确认订单 更新相关状态
+                orderService.buyerConfirmOrder(userId, order);
+            } catch (Exception ee){
+                ee.printStackTrace();
+                //add message to bus
+                orderBusService.sendAccountRechargeRetryMessage(
+                        new RetryMessageVO<>(OrderActionEnum.BUYER_COMPLETE,
+                                "订单状态更新失败",
+                                "买家付款成功，更新相关状态失败，订单号："+ order.getOrderNo(),
+                                new BuyerConfirmOrderVO(userId, order))
+                );
             }
+
+            //消息推送
+            if(!messagePushService.pushOrderMessage(userId, order.getSellerId(), order.getPtbOrderId(), OrderActionEnum.BUYER_COMPLETE, confirmOrderVO.getDeviceTypeEnum()))
+                logger.error("send buyer confirm order message fail userId:" + userId + " orderNo:" + order.getOrderNo());
+
             return ReturnUtil.success(orderService.getBuyerOrderStatus(""+order.getOrderStatus()+order.getSellerStatus()+order.getBuyerStatus()));
         }else{
             return ReturnUtil.error("","未知用户类型");

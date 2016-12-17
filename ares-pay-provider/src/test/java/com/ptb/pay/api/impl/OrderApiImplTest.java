@@ -123,13 +123,13 @@ public class OrderApiImplTest extends BaseTest {
     @Test
     public void buyerConfirmOrder(){
         ConfirmOrderReqVO confirmOrderReqVO = new ConfirmOrderReqVO();
-        confirmOrderReqVO.setOrderId(5);
-        confirmOrderReqVO.setUserId(1111);
+        confirmOrderReqVO.setOrderId(2);
+        confirmOrderReqVO.setUserId(777);
         confirmOrderReqVO.setUserType(UserTypeEnum.USER_IS_BUYER.getUserType());
         confirmOrderReqVO.setDeviceTypeEnum(DeviceTypeEnum.android);
         confirmOrderReqVO.setPlatformEnum(PlatformEnum.xiaomi);
         confirmOrderReqVO.setPassword("E10ADC3949BA59ABBE56E057F20F883E");
-        orderApi.confirmOrder(1111, confirmOrderReqVO);
+        orderApi.confirmOrder(777, confirmOrderReqVO);
     }
 
     @Test
