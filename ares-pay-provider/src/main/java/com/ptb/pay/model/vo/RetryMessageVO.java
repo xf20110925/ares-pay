@@ -3,7 +3,7 @@ package com.ptb.pay.model.vo;
 /**
  * Created by MyThinkpad on 2016/12/17.
  */
-public class RetryMessageVO<B,T> {
+public class RetryMessageVO<T,B> {
     private T type;
     private String title;
     private String message;

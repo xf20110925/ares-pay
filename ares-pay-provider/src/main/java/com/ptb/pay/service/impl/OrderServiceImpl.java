@@ -234,6 +234,7 @@ public class OrderServiceImpl implements IOrderService {
     @Transactional
     public boolean buyerConfirmOrder(long userId, Order order) {
         ResponseVo responseVo1;
+
         //更新商品计数
         Long productId = orderDetailService.getProductIdByOrderNo(order.getOrderNo());
         if(productId != null) {

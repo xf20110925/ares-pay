@@ -1,6 +1,8 @@
 package com.ptb.pay.service;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.TypeReference;
 import com.ptb.gaia.bus.Bus;
 import com.ptb.gaia.bus.kafka.KafkaBus;
 import com.ptb.gaia.bus.message.Message;
@@ -53,12 +55,12 @@ public class OrderBusService {
             String jsonStr = new String(message);
             LOGGER.info("recieve message :" + jsonStr);
             if (StringUtils.isNotBlank(jsonStr)) {
-                Message msg = JSONObject.parseObject(jsonStr, Message.class);
-                RetryMessageVO messageVO = JSONObject.toJavaObject((JSONObject) msg.getBody(), RetryMessageVO.class);
+                Message<RetryMessageVO<OrderActionEnum, Object>> msg = JSON.parseObject(jsonStr, new TypeReference<Message<RetryMessageVO<OrderActionEnum, Object>>>(){});
+                RetryMessageVO messageVO = msg.getBody();
                 OrderActionEnum orderActionEnum = (OrderActionEnum) messageVO.getType();
                 try {
                     if(orderActionEnum == OrderActionEnum.BUYER_COMPLETE) {
-                        BuyerConfirmOrderVO confirmOrderVO = (BuyerConfirmOrderVO) messageVO.getBody();
+                        BuyerConfirmOrderVO confirmOrderVO = JSON.parseObject(JSON.toJSONString(messageVO.getBody()), BuyerConfirmOrderVO.class);
                         if(!orderService.buyerConfirmOrder(confirmOrderVO.getUserId(), confirmOrderVO.getOrder()))
                             //失败重试
                             sendAccountRechargeRetryMessage(messageVO);

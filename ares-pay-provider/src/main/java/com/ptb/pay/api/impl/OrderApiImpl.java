@@ -471,7 +471,7 @@ public class OrderApiImpl implements IOrderApi {
     }
 
     @Override
-    @Transactional
+    //@Transactional
     public ResponseVo confirmOrder(long userId, ConfirmOrderReqVO confirmOrderVO){
         //参数校验
         Order order = orderMapper.selectByPrimaryKey(confirmOrderVO.getOrderId());
@@ -520,7 +520,7 @@ public class OrderApiImpl implements IOrderApi {
 
             ResponseVo responseVo = null;
             //取消款项冻结
-            /*try {
+            try {
                 AccountThawParam accountThawParam = new AccountThawParam();
                 accountThawParam.setOrderNo(order.getOrderNo());
                 accountThawParam.setBuyerId(order.getBuyerId());
@@ -540,20 +540,24 @@ public class OrderApiImpl implements IOrderApi {
             } catch (Exception e) {
                 e.printStackTrace();
                 return ReturnUtil.error(ErrorCode.PAY_API_COMMMON_1000.getCode(), ErrorCode.PAY_API_COMMMON_1000.getMessage());
-            }*/
+            }
 
             try {
                 //确认订单 更新相关状态
                 orderService.buyerConfirmOrder(userId, order);
             } catch (Exception ee){
-                ee.printStackTrace();
+                logger.error(ee.getMessage());
                 //add message to bus
-                orderBusService.sendAccountRechargeRetryMessage(
+                try {
+                    orderBusService.sendAccountRechargeRetryMessage(
                         new RetryMessageVO<>(OrderActionEnum.BUYER_COMPLETE,
                                 "订单状态更新失败",
-                                "买家付款成功，更新相关状态失败，订单号："+ order.getOrderNo(),
+                                "买家付款成功，更新相关状态失败，订单号：" + order.getOrderNo(),
                                 new BuyerConfirmOrderVO(userId, order))
-                );
+                    );
+                }catch (Exception e){
+                   //微信报警
+                }
             }
 
             //消息推送

@@ -9,6 +9,8 @@ public class BuyerConfirmOrderVO {
     private long userId;
     private Order order;
 
+    public BuyerConfirmOrderVO(){}
+
     public BuyerConfirmOrderVO(long userId, Order order) {
         this.userId = userId;
         this.order = order;
