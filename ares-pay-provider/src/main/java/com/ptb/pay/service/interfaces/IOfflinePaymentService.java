@@ -17,5 +17,5 @@ public interface IOfflinePaymentService {
      * @return 
      * @version 1.0  2016-12-07 18:49 by wgh（guanhua.wang@pintuibao.cn）创建
      */ 
-    boolean recharge(RechargeOrder rechargeOrder, Long adminId) throws Exception;
+    boolean recharge(RechargeOrder rechargeOrder, Long adminId, Long rechargeAmount) throws Exception;
 }

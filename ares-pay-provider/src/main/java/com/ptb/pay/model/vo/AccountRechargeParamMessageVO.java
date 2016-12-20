@@ -12,7 +12,16 @@ public class AccountRechargeParamMessageVO {
 
     private AccountRechargeParam accountRechargeParam;
     private Long adminId;
+    private String remarks;
     private int sendTimes = 0;
+
+    public String getRemarks() {
+        return remarks;
+    }
+
+    public void setRemarks(String remarks) {
+        this.remarks = remarks;
+    }
 
     public AccountRechargeParam getAccountRechargeParam() {
         return accountRechargeParam;

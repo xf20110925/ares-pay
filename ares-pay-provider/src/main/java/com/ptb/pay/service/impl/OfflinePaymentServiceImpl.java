@@ -68,7 +68,7 @@ public class OfflinePaymentServiceImpl implements IOfflinePaymentService {
      * @return
      * @version 1.0  2016-11-16 17:07 by wgh（guanhua.wang@pintuibao.cn）创建
      */
-    private void sendRetryMessage(AccountRechargeParam rechargeParam, Long adminId) {
+    private void sendRetryMessage(AccountRechargeParam rechargeParam, Long adminId, String remarks) {
         AccountRechargeParamMessageVO messageVO = new AccountRechargeParamMessageVO();
         messageVO.setAccountRechargeParam(rechargeParam);
         messageVO.setAdminId(adminId);
@@ -77,7 +77,13 @@ public class OfflinePaymentServiceImpl implements IOfflinePaymentService {
     }
 
     @Override
-    public boolean recharge(RechargeOrder rechargeOrder, Long adminId) throws Exception {
+    public boolean recharge(RechargeOrder rechargeOrder, Long adminId, Long rechargeAmount) throws Exception {
+
+        String remarks = null;
+        if(!rechargeOrder.getTotalAmount().equals(rechargeAmount)){
+            remarks = "管理员修改线下充值金额，原金额：" + rechargeOrder.getTotalAmount() + "，充值金额：" + rechargeAmount;
+            rechargeOrder.setTotalAmount(rechargeAmount);
+        }
 
         AccountRechargeParam rechargeParam = new AccountRechargeParam();
         try {
@@ -95,7 +101,7 @@ public class OfflinePaymentServiceImpl implements IOfflinePaymentService {
 
             ResponseVo<PtbAccountVo> repsonseVO = accountApi.recharge(rechargeParam);
             if (repsonseVO == null || !"0".equals(repsonseVO.getCode())) {
-                sendRetryMessage(rechargeParam, adminId);
+                sendRetryMessage(rechargeParam, adminId, remarks);
             } else {
                 LOGGER.info("充值订单号：" + rechargeOrder.getRechargeOrderNo() + "充值成功!");
                 try {
@@ -116,11 +122,11 @@ public class OfflinePaymentServiceImpl implements IOfflinePaymentService {
                     LOGGER.error( "线下充值消息推送失败。errorMsg:{}", e.getMessage());
                 }
                 rechargeOrderLogService.saveAdminOpLog(rechargeParam.getOrderNo(),
-                        RechargeOrderLogActionTypeEnum.PAYED.getActionType(), null, adminId);
+                        RechargeOrderLogActionTypeEnum.OFFLINE_RECHARGE.getActionType(), remarks, adminId);
             }
         } catch (Exception e) {
             e.printStackTrace();
-            sendRetryMessage(rechargeParam, adminId);
+            sendRetryMessage(rechargeParam, adminId, remarks);
             LOGGER.error("线下充值失败，放入消息队列重试,params:" + JSONObject.toJSONString(rechargeParam));
         } finally {
             rechargeOrder.setStatus(RechargeOrderStatusEnum.paid.getRechargeOrderStatus());

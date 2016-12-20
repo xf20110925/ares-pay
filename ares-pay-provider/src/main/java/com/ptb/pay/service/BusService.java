@@ -83,11 +83,11 @@ public class BusService {
                         ResponseVo<PtbAccountVo> repsonseVO = accountApi.recharge(rechargeParam);
                         if (repsonseVO == null || !"0".equals(repsonseVO.getCode())) {
                             sendAccountRechargeRetryMessage(messageVO);
-                        }else{
-                            if(rechargeParam.getPayMethod() == PaymentMethodEnum.offline.getPaymentMethod()){
+                        } else {
+                            if (rechargeParam.getPayMethod() == PaymentMethodEnum.offline.getPaymentMethod()) {
                                 rechargeOrderLogService.saveAdminOpLog(rechargeParam.getOrderNo(),
-                                        RechargeOrderLogActionTypeEnum.OFFLINE_RECHARGE.getActionType(), null, rechargeParam.getUserId());
-                            }else {
+                                        RechargeOrderLogActionTypeEnum.OFFLINE_RECHARGE.getActionType(), messageVO.getRemarks(), messageVO.getAdminId());
+                            } else {
                                 rechargeOrderLogService.saveUserOpLog(rechargeParam.getOrderNo(),
                                         RechargeOrderLogActionTypeEnum.PAYED.getActionType(), null, rechargeParam.getUserId());
                             }

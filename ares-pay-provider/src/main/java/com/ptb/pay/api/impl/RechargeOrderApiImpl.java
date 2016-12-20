@@ -251,11 +251,8 @@ public class RechargeOrderApiImpl implements IRechargeOrderApi {
             return ReturnUtil.error(CommonErrorCode.COMMMON_ERROR_ARGSERROR.getCode(),
                     CommonErrorCode.COMMMON_ERROR_ARGSERROR.getMessage());
         }
-        if (!rechargeOrder.getTotalAmount().equals(rechargeAmount)) {
-            rechargeOrder.setTotalAmount(rechargeAmount);
-        }
 
-        boolean result = offlinePaymentService.recharge(rechargeOrder, adminId);
+        boolean result = offlinePaymentService.recharge(rechargeOrder, adminId, rechargeAmount);
         if (result) {
             return ReturnUtil.success();
         }
