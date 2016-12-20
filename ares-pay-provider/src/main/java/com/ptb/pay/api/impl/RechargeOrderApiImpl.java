@@ -226,17 +226,17 @@ public class RechargeOrderApiImpl implements IRechargeOrderApi {
         }
         int result = rechargeOrderMapper.updateByExampleSelective(rechargeOrder, example);
         if (result > 0) {
-            if(RechargeOrderInvoiceStatusEnum.waiting.getRechargeOrderInvoiceStatus() == rechargeOrderVO.getInvoiceStatus()){ //用户提交发票
-                List<RechargeOrder> rechargeOrders = rechargeOrderMapper.selectByExample(example);
-                if(!CollectionUtils.isEmpty(rechargeOrders)){
-                    for (RechargeOrder order : rechargeOrders) {
+            List<RechargeOrder> rechargeOrders = rechargeOrderMapper.selectByExample(example);
+            if(!CollectionUtils.isEmpty(rechargeOrders)){
+                for (RechargeOrder order : rechargeOrders) {
+                    if(RechargeOrderInvoiceStatusEnum.waiting.getRechargeOrderInvoiceStatus() == rechargeOrderVO.getInvoiceStatus()){ //用户提交发票
                         rechargeOrderLogService.saveUserOpLog(order.getRechargeOrderNo(),
                                 RechargeOrderLogActionTypeEnum.SUBMIT_INVOICE.getActionType(), null, order.getUserId());
+                    }else if(RechargeOrderInvoiceStatusEnum.opened.getRechargeOrderInvoiceStatus() == rechargeOrderVO.getInvoiceStatus()){ //管理员确认发票
+                        rechargeOrderLogService.saveAdminOpLog(order.getRechargeOrderNo(),
+                                RechargeOrderLogActionTypeEnum.CONFIRM_INVOICE.getActionType(), null, adminId);
                     }
                 }
-            }else if(RechargeOrderInvoiceStatusEnum.opened.getRechargeOrderInvoiceStatus() == rechargeOrderVO.getInvoiceStatus()){ //管理员确认发票
-                rechargeOrderLogService.saveAdminOpLog(rechargeOrderVO.getRechargeOrderNo(),
-                        RechargeOrderLogActionTypeEnum.CONFIRM_INVOICE.getActionType(), null, adminId);
             }
             return ReturnUtil.success();
         }
