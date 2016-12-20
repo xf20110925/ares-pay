@@ -1,0 +1,238 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ptb.pay.mapper.impl.RechargeOrderLogMapper" >
+  <resultMap id="BaseResultMap" type="com.ptb.pay.model.RechargeOrderLog" >
+    <id column="ptb_order_log_id" property="ptbOrderLogId" jdbcType="BIGINT" />
+    <result column="recharge_order_no" property="rechargeOrderNo" jdbcType="VARCHAR" />
+    <result column="action_type" property="actionType" jdbcType="TINYINT" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="remarks" property="remarks" jdbcType="VARCHAR" />
+    <result column="user_id" property="userId" jdbcType="BIGINT" />
+    <result column="user_type" property="userType" jdbcType="TINYINT" />
+  </resultMap>
+  <sql id="Example_Where_Clause" >
+    <where >
+      <foreach collection="oredCriteria" item="criteria" separator="or" >
+        <if test="criteria.valid" >
+          <trim prefix="(" suffix=")" prefixOverrides="and" >
+            <foreach collection="criteria.criteria" item="criterion" >
+              <choose >
+                <when test="criterion.noValue" >
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue" >
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue" >
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue" >
+                  and ${criterion.condition}
+                  <foreach collection="criterion.value" item="listItem" open="(" close=")" separator="," >
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Update_By_Example_Where_Clause" >
+    <where >
+      <foreach collection="example.oredCriteria" item="criteria" separator="or" >
+        <if test="criteria.valid" >
+          <trim prefix="(" suffix=")" prefixOverrides="and" >
+            <foreach collection="criteria.criteria" item="criterion" >
+              <choose >
+                <when test="criterion.noValue" >
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue" >
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue" >
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue" >
+                  and ${criterion.condition}
+                  <foreach collection="criterion.value" item="listItem" open="(" close=")" separator="," >
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List" >
+    ptb_order_log_id, recharge_order_no, action_type, create_time, remarks, user_id, 
+    user_type
+  </sql>
+  <select id="selectByExample" resultMap="BaseResultMap" parameterType="com.ptb.pay.model.RechargeOrderLogExample" >
+    select
+    <if test="distinct" >
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from ptb_recharge_order_log
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+  </select>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select 
+    <include refid="Base_Column_List" />
+    from ptb_recharge_order_log
+    where ptb_order_log_id = #{ptbOrderLogId,jdbcType=BIGINT}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+    delete from ptb_recharge_order_log
+    where ptb_order_log_id = #{ptbOrderLogId,jdbcType=BIGINT}
+  </delete>
+  <delete id="deleteByExample" parameterType="com.ptb.pay.model.RechargeOrderLogExample" >
+    delete from ptb_recharge_order_log
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+  </delete>
+  <insert id="insert" parameterType="com.ptb.pay.model.RechargeOrderLog" >
+    insert into ptb_recharge_order_log (ptb_order_log_id, recharge_order_no, action_type, 
+      create_time, remarks, user_id, 
+      user_type)
+    values (#{ptbOrderLogId,jdbcType=BIGINT}, #{rechargeOrderNo,jdbcType=VARCHAR}, #{actionType,jdbcType=TINYINT}, 
+      #{createTime,jdbcType=TIMESTAMP}, #{remarks,jdbcType=VARCHAR}, #{userId,jdbcType=BIGINT}, 
+      #{userType,jdbcType=BIGINT})
+  </insert>
+  <insert id="insertSelective" parameterType="com.ptb.pay.model.RechargeOrderLog" >
+    insert into ptb_recharge_order_log
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="ptbOrderLogId != null" >
+        ptb_order_log_id,
+      </if>
+      <if test="rechargeOrderNo != null" >
+        recharge_order_no,
+      </if>
+      <if test="actionType != null" >
+        action_type,
+      </if>
+      <if test="createTime != null" >
+        create_time,
+      </if>
+      <if test="remarks != null" >
+        remarks,
+      </if>
+      <if test="userId != null" >
+        user_id,
+      </if>
+      <if test="userType != null" >
+        user_type,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="ptbOrderLogId != null" >
+        #{ptbOrderLogId,jdbcType=BIGINT},
+      </if>
+      <if test="rechargeOrderNo != null" >
+        #{rechargeOrderNo,jdbcType=VARCHAR},
+      </if>
+      <if test="actionType != null" >
+        #{actionType,jdbcType=TINYINT},
+      </if>
+      <if test="createTime != null" >
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="remarks != null" >
+        #{remarks,jdbcType=VARCHAR},
+      </if>
+      <if test="userId != null" >
+        #{userId,jdbcType=BIGINT},
+      </if>
+      <if test="userType != null" >
+        #{userType,jdbcType=BIGINT},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByExampleSelective" parameterType="map" >
+    update ptb_recharge_order_log
+    <set >
+      <if test="record.ptbOrderLogId != null" >
+        ptb_order_log_id = #{record.ptbOrderLogId,jdbcType=BIGINT},
+      </if>
+      <if test="record.rechargeOrderNo != null" >
+        recharge_order_no = #{record.rechargeOrderNo,jdbcType=VARCHAR},
+      </if>
+      <if test="record.actionType != null" >
+        action_type = #{record.actionType,jdbcType=TINYINT},
+      </if>
+      <if test="record.createTime != null" >
+        create_time = #{record.createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="record.remarks != null" >
+        remarks = #{record.remarks,jdbcType=VARCHAR},
+      </if>
+      <if test="record.userId != null" >
+        user_id = #{record.userId,jdbcType=BIGINT},
+      </if>
+      <if test="record.userType != null" >
+        user_type = #{record.userType,jdbcType=BIGINT},
+      </if>
+    </set>
+    <if test="_parameter != null" >
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map" >
+    update ptb_recharge_order_log
+    set ptb_order_log_id = #{record.ptbOrderLogId,jdbcType=BIGINT},
+      recharge_order_no = #{record.rechargeOrderNo,jdbcType=VARCHAR},
+      action_type = #{record.actionType,jdbcType=TINYINT},
+      create_time = #{record.createTime,jdbcType=TIMESTAMP},
+      remarks = #{record.remarks,jdbcType=VARCHAR},
+      user_id = #{record.userId,jdbcType=BIGINT},
+      user_type = #{record.userType,jdbcType=BIGINT}
+    <if test="_parameter != null" >
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByPrimaryKeySelective" parameterType="com.ptb.pay.model.RechargeOrderLog" >
+    update ptb_recharge_order_log
+    <set >
+      <if test="rechargeOrderNo != null" >
+        recharge_order_no = #{rechargeOrderNo,jdbcType=VARCHAR},
+      </if>
+      <if test="actionType != null" >
+        action_type = #{actionType,jdbcType=TINYINT},
+      </if>
+      <if test="createTime != null" >
+        create_time = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="remarks != null" >
+        remarks = #{remarks,jdbcType=VARCHAR},
+      </if>
+      <if test="userId != null" >
+        user_id = #{userId,jdbcType=BIGINT},
+      </if>
+      <if test="userType != null" >
+        user_type = #{userType,jdbcType=BIGINT},
+      </if>
+    </set>
+    where ptb_order_log_id = #{ptbOrderLogId,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.ptb.pay.model.RechargeOrderLog" >
+    update ptb_recharge_order_log
+    set recharge_order_no = #{rechargeOrderNo,jdbcType=VARCHAR},
+      action_type = #{actionType,jdbcType=TINYINT},
+      create_time = #{createTime,jdbcType=TIMESTAMP},
+      remarks = #{remarks,jdbcType=VARCHAR},
+      user_id = #{userId,jdbcType=BIGINT},
+      user_type = #{userType,jdbcType=BIGINT}
+    where ptb_order_log_id = #{ptbOrderLogId,jdbcType=BIGINT}
+  </update>
+</mapper>

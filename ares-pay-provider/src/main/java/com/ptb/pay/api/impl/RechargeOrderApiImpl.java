@@ -4,16 +4,19 @@ import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.ptb.common.enums.DeviceTypeEnum;
 import com.ptb.common.enums.PaymentMethodEnum;
+import com.ptb.common.enums.RechargeOrderInvoiceStatusEnum;
 import com.ptb.common.errorcode.CommonErrorCode;
 import com.ptb.common.vo.ResponseVo;
 import com.ptb.pay.api.IRechargeOrderApi;
 import com.ptb.pay.conf.payment.OfflinePaymentConfig;
+import com.ptb.pay.enums.RechargeOrderLogActionTypeEnum;
 import com.ptb.pay.mapper.impl.RechargeOrderMapper;
 import com.ptb.pay.model.RechargeOrder;
 import com.ptb.pay.model.RechargeOrderExample;
 import com.ptb.pay.service.factory.RechargeOrderServiceFactory;
 import com.ptb.pay.service.interfaces.IOfflinePaymentService;
 import com.ptb.pay.service.interfaces.IPaymentService;
+import com.ptb.pay.service.interfaces.IRechargeOrderLogService;
 import com.ptb.pay.service.interfaces.IRechargeOrderService;
 import com.ptb.pay.vo.recharge.RechargeOrderParamsVO;
 import com.ptb.pay.vo.recharge.RechargeOrderQueryVO;
@@ -55,6 +58,8 @@ public class RechargeOrderApiImpl implements IRechargeOrderApi {
     private IBaiduPushApi baiduPushApi;
     @Resource(name = "offlinePaymentService")
     private IOfflinePaymentService offlinePaymentService;
+    @Autowired
+    private IRechargeOrderLogService rechargeOrderLogService;
 
     @Override
     public ResponseVo<Map<String, Object>> createRechargeOrder(RechargeOrderParamsVO paramsVO) throws Exception {
@@ -206,7 +211,7 @@ public class RechargeOrderApiImpl implements IRechargeOrderApi {
     }
 
     @Override
-    public ResponseVo<Object> updateInvoiceStatus(RechargeOrderVO rechargeOrderVO, List<Long> rechargeOrderIds, Long invoiceId) throws Exception {
+    public ResponseVo<Object> updateInvoiceStatus(RechargeOrderVO rechargeOrderVO, List<Long> rechargeOrderIds, Long invoiceId, Long adminId) throws Exception {
         RechargeOrder rechargeOrder = new RechargeOrder();
         rechargeOrder.setInvoiceStatus(rechargeOrderVO.getInvoiceStatus());
         rechargeOrder.setInvoiceId(rechargeOrderVO.getInvoiceId());
@@ -221,6 +226,18 @@ public class RechargeOrderApiImpl implements IRechargeOrderApi {
         }
         int result = rechargeOrderMapper.updateByExampleSelective(rechargeOrder, example);
         if (result > 0) {
+            if(RechargeOrderInvoiceStatusEnum.waiting.getRechargeOrderInvoiceStatus() == rechargeOrderVO.getInvoiceStatus()){ //用户提交发票
+                List<RechargeOrder> rechargeOrders = rechargeOrderMapper.selectByExample(example);
+                if(!CollectionUtils.isEmpty(rechargeOrders)){
+                    for (RechargeOrder order : rechargeOrders) {
+                        rechargeOrderLogService.saveUserOpLog(order.getRechargeOrderNo(),
+                                RechargeOrderLogActionTypeEnum.SUBMIT_INVOICE.getActionType(), null, order.getUserId());
+                    }
+                }
+            }else if(RechargeOrderInvoiceStatusEnum.opened.getRechargeOrderInvoiceStatus() == rechargeOrderVO.getInvoiceStatus()){ //管理员确认发票
+                rechargeOrderLogService.saveAdminOpLog(rechargeOrderVO.getRechargeOrderNo(),
+                        RechargeOrderLogActionTypeEnum.CONFIRM_INVOICE.getActionType(), null, adminId);
+            }
             return ReturnUtil.success();
         }
         return ReturnUtil.error(CommonErrorCode.COMMMON_ERROR_OPTERROR.getCode(),
@@ -228,7 +245,7 @@ public class RechargeOrderApiImpl implements IRechargeOrderApi {
     }
 
     @Override
-    public ResponseVo offlineRecharge(Long rechargeOrderId, Long rechargeAmount) throws Exception {
+    public ResponseVo offlineRecharge(Long rechargeOrderId, Long rechargeAmount, Long adminId) throws Exception {
         RechargeOrder rechargeOrder = rechargeOrderMapper.selectByPrimaryKey(rechargeOrderId);
         if (rechargeOrder == null) {
             return ReturnUtil.error(CommonErrorCode.COMMMON_ERROR_ARGSERROR.getCode(),
@@ -238,7 +255,7 @@ public class RechargeOrderApiImpl implements IRechargeOrderApi {
             rechargeOrder.setTotalAmount(rechargeAmount);
         }
 
-        boolean result = offlinePaymentService.recharge(rechargeOrder);
+        boolean result = offlinePaymentService.recharge(rechargeOrder, adminId);
         if (result) {
             return ReturnUtil.success();
         }

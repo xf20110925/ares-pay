@@ -9,11 +9,13 @@ import com.ptb.common.enums.DeviceTypeEnum;
 import com.ptb.common.enums.PlatformEnum;
 import com.ptb.common.enums.RechargeOrderStatusEnum;
 import com.ptb.common.vo.ResponseVo;
+import com.ptb.pay.enums.RechargeOrderLogActionTypeEnum;
 import com.ptb.pay.mapper.impl.RechargeOrderMapper;
 import com.ptb.pay.model.RechargeOrder;
 import com.ptb.pay.model.vo.AccountRechargeParamMessageVO;
 import com.ptb.pay.service.BusService;
 import com.ptb.pay.service.interfaces.IOfflinePaymentService;
+import com.ptb.pay.service.interfaces.IRechargeOrderLogService;
 import com.ptb.service.api.IBaiduPushApi;
 import com.ptb.utils.encrypt.SignUtil;
 import com.ptb.utils.tool.ChangeMoneyUtil;
@@ -32,7 +34,7 @@ import java.util.Map;
 import java.util.TreeMap;
 
 /**
- * Description:支付宝相关接口
+ * Description:线下充值业务实现类
  * All Rights Reserved.
  *
  * @version 1.0  2016-11-08 13:11  by wgh（guanhua.wang@pintuibao.cn）创建
@@ -55,6 +57,9 @@ public class OfflinePaymentServiceImpl implements IOfflinePaymentService {
     @Autowired
     private RechargeOrderMapper rechargeOrderMapper;
 
+    @Autowired
+    private IRechargeOrderLogService rechargeOrderLogService;
+
     /**
      * Description: 发送重试消息
      * All Rights Reserved.
@@ -63,15 +68,16 @@ public class OfflinePaymentServiceImpl implements IOfflinePaymentService {
      * @return
      * @version 1.0  2016-11-16 17:07 by wgh（guanhua.wang@pintuibao.cn）创建
      */
-    private void sendRetryMessage(AccountRechargeParam rechargeParam) {
+    private void sendRetryMessage(AccountRechargeParam rechargeParam, Long adminId) {
         AccountRechargeParamMessageVO messageVO = new AccountRechargeParamMessageVO();
         messageVO.setAccountRechargeParam(rechargeParam);
+        messageVO.setAdminId(adminId);
         LOGGER.info("发送重试充值消息：" + JSONObject.toJSONString(messageVO));
         busService.sendAccountRechargeRetryMessage(messageVO);
     }
 
     @Override
-    public boolean recharge(RechargeOrder rechargeOrder) throws Exception {
+    public boolean recharge(RechargeOrder rechargeOrder, Long adminId) throws Exception {
 
         AccountRechargeParam rechargeParam = new AccountRechargeParam();
         try {
@@ -89,7 +95,7 @@ public class OfflinePaymentServiceImpl implements IOfflinePaymentService {
 
             ResponseVo<PtbAccountVo> repsonseVO = accountApi.recharge(rechargeParam);
             if (repsonseVO == null || !"0".equals(repsonseVO.getCode())) {
-                sendRetryMessage(rechargeParam);
+                sendRetryMessage(rechargeParam, adminId);
             } else {
                 LOGGER.info("充值订单号：" + rechargeOrder.getRechargeOrderNo() + "充值成功!");
                 try {
@@ -109,10 +115,12 @@ public class OfflinePaymentServiceImpl implements IOfflinePaymentService {
                 }catch (Exception e){
                     LOGGER.error( "线下充值消息推送失败。errorMsg:{}", e.getMessage());
                 }
+                rechargeOrderLogService.saveAdminOpLog(rechargeParam.getOrderNo(),
+                        RechargeOrderLogActionTypeEnum.PAYED.getActionType(), null, adminId);
             }
         } catch (Exception e) {
             e.printStackTrace();
-            sendRetryMessage(rechargeParam);
+            sendRetryMessage(rechargeParam, adminId);
             LOGGER.error("线下充值失败，放入消息队列重试,params:" + JSONObject.toJSONString(rechargeParam));
         } finally {
             rechargeOrder.setStatus(RechargeOrderStatusEnum.paid.getRechargeOrderStatus());

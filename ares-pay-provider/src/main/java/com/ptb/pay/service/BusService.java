@@ -6,14 +6,17 @@ import com.alibaba.fastjson.JSONObject;
 import com.ptb.account.api.IAccountApi;
 import com.ptb.account.vo.PtbAccountVo;
 import com.ptb.account.vo.param.AccountRechargeParam;
+import com.ptb.common.enums.PaymentMethodEnum;
 import com.ptb.common.vo.ResponseVo;
 import com.ptb.gaia.bus.Bus;
 import com.ptb.gaia.bus.kafka.KafkaBus;
 import com.ptb.gaia.bus.message.Message;
 import com.ptb.pay.enums.RechargeFailedLogStatusEnum;
+import com.ptb.pay.enums.RechargeOrderLogActionTypeEnum;
 import com.ptb.pay.mapper.impl.RechargeFailedLogMapper;
 import com.ptb.pay.model.RechargeFailedLog;
 import com.ptb.pay.model.vo.AccountRechargeParamMessageVO;
+import com.ptb.pay.service.interfaces.IRechargeOrderLogService;
 import com.ptb.utils.encrypt.SignUtil;
 import com.ptb.utils.tool.ShellUtil;
 import org.apache.commons.lang.StringUtils;
@@ -54,6 +57,9 @@ public class BusService {
     @Autowired
     private RechargeFailedLogMapper rechargeFailedLogMapper;
 
+    @Autowired
+    private IRechargeOrderLogService rechargeOrderLogService;
+
     private static Logger LOGGER = LoggerFactory.getLogger(BusService.class);
 
     @PostConstruct
@@ -77,6 +83,14 @@ public class BusService {
                         ResponseVo<PtbAccountVo> repsonseVO = accountApi.recharge(rechargeParam);
                         if (repsonseVO == null || !"0".equals(repsonseVO.getCode())) {
                             sendAccountRechargeRetryMessage(messageVO);
+                        }else{
+                            if(rechargeParam.getPayMethod() == PaymentMethodEnum.offline.getPaymentMethod()){
+                                rechargeOrderLogService.saveAdminOpLog(rechargeParam.getOrderNo(),
+                                        RechargeOrderLogActionTypeEnum.OFFLINE_RECHARGE.getActionType(), null, rechargeParam.getUserId());
+                            }else {
+                                rechargeOrderLogService.saveUserOpLog(rechargeParam.getOrderNo(),
+                                        RechargeOrderLogActionTypeEnum.PAYED.getActionType(), null, rechargeParam.getUserId());
+                            }
                         }
                     } catch (Exception e) {
                         e.printStackTrace();

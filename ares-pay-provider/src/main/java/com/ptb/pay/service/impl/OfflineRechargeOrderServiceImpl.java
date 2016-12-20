@@ -3,9 +3,11 @@ package com.ptb.pay.service.impl;
 import com.ptb.common.enums.RechargeOrderInvoiceStatusEnum;
 import com.ptb.common.enums.RechargeOrderStatusEnum;
 import com.ptb.pay.conf.payment.OfflinePaymentConfig;
+import com.ptb.pay.enums.RechargeOrderLogActionTypeEnum;
 import com.ptb.pay.mapper.impl.RechargeOrderMapper;
 import com.ptb.pay.model.RechargeOrder;
 import com.ptb.pay.service.interfaces.IPaymentService;
+import com.ptb.pay.service.interfaces.IRechargeOrderLogService;
 import com.ptb.pay.service.interfaces.IRechargeOrderService;
 import com.ptb.pay.vo.recharge.RechargeOrderParamsVO;
 import com.ptb.utils.tool.GenerateOrderNoUtil;
@@ -31,8 +33,12 @@ public class OfflineRechargeOrderServiceImpl implements IRechargeOrderService {
 
     @Autowired
     private RechargeOrderMapper rechargeOrderMapper;
+
     @Autowired
     private IPaymentService paymentService;
+
+    @Autowired
+    private IRechargeOrderLogService rechargeOrderLogService;
 
     @Override
     public RechargeOrder createRechargeOrder(RechargeOrderParamsVO paramsVO) throws Exception {
@@ -55,6 +61,9 @@ public class OfflineRechargeOrderServiceImpl implements IRechargeOrderService {
         rechargeOrder.setInvoiceStatus(RechargeOrderInvoiceStatusEnum.noopen.getRechargeOrderInvoiceStatus());
         rechargeOrder.setDeviceType(paramsVO.getDeviceType());
         rechargeOrderMapper.insert(rechargeOrder);
+
+        rechargeOrderLogService.saveUserOpLog(rechargeOrder.getRechargeOrderNo(),
+                RechargeOrderLogActionTypeEnum.CREATED.getActionType(), null, rechargeOrder.getUserId());
         return rechargeOrder;
     }
 

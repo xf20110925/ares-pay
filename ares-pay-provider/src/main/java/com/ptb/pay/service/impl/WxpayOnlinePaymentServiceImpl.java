@@ -13,6 +13,7 @@ import com.ptb.common.enums.DeviceTypeEnum;
 import com.ptb.common.enums.PlatformEnum;
 import com.ptb.common.enums.RechargeOrderStatusEnum;
 import com.ptb.common.vo.ResponseVo;
+import com.ptb.pay.enums.RechargeOrderLogActionTypeEnum;
 import com.ptb.pay.mapper.impl.RechargeOrderMapper;
 import com.ptb.pay.model.RechargeOrder;
 import com.ptb.pay.model.RechargeOrderExample;
@@ -20,6 +21,7 @@ import com.ptb.pay.model.vo.AccountRechargeParamMessageVO;
 import com.ptb.pay.service.BusService;
 import com.ptb.pay.service.ThirdPaymentNotifyLogService;
 import com.ptb.pay.service.interfaces.IOnlinePaymentService;
+import com.ptb.pay.service.interfaces.IRechargeOrderLogService;
 import com.ptb.pay.vo.CheckPayResultVO;
 import com.ptb.service.api.IBaiduPushApi;
 import com.ptb.service.api.ISystemConfigApi;
@@ -71,6 +73,8 @@ public class WxpayOnlinePaymentServiceImpl implements IOnlinePaymentService{
     private BusService busService;
     @Autowired
     private ThirdPaymentNotifyLogService thirdPaymentNotifyLogService;
+    @Autowired
+    private IRechargeOrderLogService rechargeOrderLogService;
 
     @Override
     public String getPaymentInfo(String rechargeOrderNo, Long price) throws Exception{
@@ -308,6 +312,8 @@ public class WxpayOnlinePaymentServiceImpl implements IOnlinePaymentService{
                     }catch (Exception e){
                         LOGGER.error( "线上充值消息推送失败。errorMsg:{}", e.getMessage());
                     }
+                    rechargeOrderLogService.saveUserOpLog(rechargeOrder.getRechargeOrderNo(),
+                            RechargeOrderLogActionTypeEnum.PAYED.getActionType(), null, rechargeOrder.getUserId());
                 }
             } catch (Exception e) {
                 e.printStackTrace();

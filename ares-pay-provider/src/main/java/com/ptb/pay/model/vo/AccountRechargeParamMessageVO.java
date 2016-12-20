@@ -11,6 +11,7 @@ import com.ptb.account.vo.param.AccountRechargeParam;
 public class AccountRechargeParamMessageVO {
 
     private AccountRechargeParam accountRechargeParam;
+    private Long adminId;
     private int sendTimes = 0;
 
     public AccountRechargeParam getAccountRechargeParam() {
@@ -27,5 +28,13 @@ public class AccountRechargeParamMessageVO {
 
     public void setSendTimes(int sendTimes) {
         this.sendTimes = sendTimes;
+    }
+
+    public Long getAdminId() {
+        return adminId;
+    }
+
+    public void setAdminId(Long adminId) {
+        this.adminId = adminId;
     }
 }
