@@ -110,7 +110,7 @@ public class OfflinePaymentServiceImpl implements IOfflinePaymentService {
                     param.setUserId(rechargeOrder.getUserId());
                     param.setDeviceType(DeviceTypeEnum.getDeviceTypeEnum(rechargeOrder.getDeviceType()));
                     param.setTitle("充值成功（线下打款）");
-                    param.setMessage("提交充值金额" + ChangeMoneyUtil.fromFenToYuan(rechargeOrder.getTotalAmount()) + "元，审核已通过，充值金额已自动转入钱包余额");
+                    param.setMessage("线下打款金额" + ChangeMoneyUtil.fromFenToYuan(rechargeOrder.getTotalAmount()) + "元，审核已通过，充值金额已自动转入钱包余额");
                     param.setMessageType(MessageTypeEnum.OFFLINE_RECHARGE.getMessageType());
                     Map<String, Object> keyMap = new HashMap<>();
                     keyMap.put("id", rechargeOrder.getPtbRechargeOrderId());
