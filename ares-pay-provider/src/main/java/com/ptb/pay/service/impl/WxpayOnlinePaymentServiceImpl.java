@@ -23,21 +23,17 @@ import com.ptb.pay.service.ThirdPaymentNotifyLogService;
 import com.ptb.pay.service.interfaces.IOnlinePaymentService;
 import com.ptb.pay.service.interfaces.IRechargeOrderLogService;
 import com.ptb.pay.vo.CheckPayResultVO;
-import com.ptb.service.api.IBaiduPushApi;
 import com.ptb.service.api.ISystemConfigApi;
 import com.ptb.utils.date.DateUtil;
 import com.ptb.utils.encrypt.SignUtil;
 import com.ptb.utils.paytools.wxpay.GetWxOrderno;
 import com.ptb.utils.paytools.wxpay.RequestHandler;
-import com.ptb.utils.tool.ChangeMoneyUtil;
 import com.ptb.utils.tool.RandomUtil;
-import enums.MessageTypeEnum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
-import vo.param.PushMessageParam;
 
 import javax.annotation.Resource;
 import java.util.*;
@@ -67,8 +63,6 @@ public class WxpayOnlinePaymentServiceImpl implements IOnlinePaymentService{
     private RechargeOrderMapper rechargeOrderMapper;
     @Resource
     private IAccountApi accountApi;
-    @Resource
-    private IBaiduPushApi baiduPushApi;
     @Autowired
     private BusService busService;
     @Autowired
@@ -285,6 +279,7 @@ public class WxpayOnlinePaymentServiceImpl implements IOnlinePaymentService{
                 rechargeParam.setPayMethod(rechargeOrder.getPayMethod());
                 rechargeParam.setPlatformNo(PlatformEnum.xiaomi);
                 rechargeParam.setOrderNo(sn);
+                rechargeParam.setRechargeOrderId( rechargeOrder.getPtbRechargeOrderId());
                 //隐式加密
                 TreeMap toSign = JSONObject.parseObject(JSONObject.toJSONString(rechargeParam), TreeMap.class);
                 String signKey = SignUtil.getSignKey(toSign);
@@ -295,23 +290,6 @@ public class WxpayOnlinePaymentServiceImpl implements IOnlinePaymentService{
                     sendRetryMessage(rechargeParam);
                 } else {
                     LOGGER.info("充值订单号：{} 充值成功!", sn);
-                    try {
-                        //推送消息
-                        PushMessageParam param = new PushMessageParam();
-                        param.setUserId(rechargeOrder.getUserId());
-                        param.setDeviceType(DeviceTypeEnum.getDeviceTypeEnum(rechargeOrder.getDeviceType()));
-                        param.setTitle("充值成功（在线充值）");
-                        param.setMessage("恭喜您，成功充值" + ChangeMoneyUtil.fromFenToYuan(rechargeOrder.getTotalAmount()) + "元，已自动转入钱包余额");
-                        param.setMessageType(MessageTypeEnum.ONLINE_RECHARGE.getMessageType());
-                        Map<String, Object> keyMap = new HashMap<>();
-                        keyMap.put("id", rechargeOrder.getPtbRechargeOrderId());
-                        param.setContentParam( keyMap);
-                        param.setNeedSaveMessage( true);
-                        param.setNeedPushMessage( true);
-                        baiduPushApi.pushMessage(param);
-                    }catch (Exception e){
-                        LOGGER.error( "线上充值消息推送失败。errorMsg:{}", e.getMessage());
-                    }
                     rechargeOrderLogService.saveUserOpLog(rechargeOrder.getRechargeOrderNo(),
                             RechargeOrderLogActionTypeEnum.PAYED.getActionType(), null, rechargeOrder.getUserId());
                 }
