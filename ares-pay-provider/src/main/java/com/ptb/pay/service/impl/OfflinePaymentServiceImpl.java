@@ -18,19 +18,14 @@ import com.ptb.pay.service.interfaces.IOfflinePaymentService;
 import com.ptb.pay.service.interfaces.IRechargeOrderLogService;
 import com.ptb.service.api.IBaiduPushApi;
 import com.ptb.utils.encrypt.SignUtil;
-import com.ptb.utils.tool.ChangeMoneyUtil;
-import enums.MessageTypeEnum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import vo.param.PushMessageParam;
 
 import javax.annotation.Resource;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.TreeMap;
 
 /**
@@ -72,6 +67,7 @@ public class OfflinePaymentServiceImpl implements IOfflinePaymentService {
         AccountRechargeParamMessageVO messageVO = new AccountRechargeParamMessageVO();
         messageVO.setAccountRechargeParam(rechargeParam);
         messageVO.setAdminId(adminId);
+        messageVO.setRemarks(remarks);
         LOGGER.info("发送重试充值消息：" + JSONObject.toJSONString(messageVO));
         busService.sendAccountRechargeRetryMessage(messageVO);
     }
@@ -94,6 +90,7 @@ public class OfflinePaymentServiceImpl implements IOfflinePaymentService {
             rechargeParam.setPayMethod(rechargeOrder.getPayMethod());
             rechargeParam.setPlatformNo(PlatformEnum.xiaomi);
             rechargeParam.setOrderNo(rechargeOrder.getRechargeOrderNo());
+            rechargeParam.setRechargeOrderId(rechargeOrder.getPtbRechargeOrderId());
             //隐式加密
             TreeMap toSign = JSONObject.parseObject(JSONObject.toJSONString(rechargeParam), TreeMap.class);
             String sign = SignUtil.getSignKey(toSign);
@@ -104,23 +101,6 @@ public class OfflinePaymentServiceImpl implements IOfflinePaymentService {
                 sendRetryMessage(rechargeParam, adminId, remarks);
             } else {
                 LOGGER.info("充值订单号：" + rechargeOrder.getRechargeOrderNo() + "充值成功!");
-                try {
-                    //推送消息
-                    PushMessageParam param = new PushMessageParam();
-                    param.setUserId(rechargeOrder.getUserId());
-                    param.setDeviceType(DeviceTypeEnum.getDeviceTypeEnum(rechargeOrder.getDeviceType()));
-                    param.setTitle("充值成功（线下打款）");
-                    param.setMessage("线下打款金额" + ChangeMoneyUtil.fromFenToYuan(rechargeOrder.getTotalAmount()) + "元，审核已通过，充值金额已自动转入钱包余额");
-                    param.setMessageType(MessageTypeEnum.OFFLINE_RECHARGE.getMessageType());
-                    Map<String, Object> keyMap = new HashMap<>();
-                    keyMap.put("id", rechargeOrder.getPtbRechargeOrderId());
-                    param.setContentParam( keyMap);
-                    param.setNeedSaveMessage( true);
-                    param.setNeedPushMessage( true);
-                    baiduPushApi.pushMessage(param);
-                }catch (Exception e){
-                    LOGGER.error( "线下充值消息推送失败。errorMsg:{}", e.getMessage());
-                }
                 rechargeOrderLogService.saveAdminOpLog(rechargeParam.getOrderNo(),
                         RechargeOrderLogActionTypeEnum.OFFLINE_RECHARGE.getActionType(), remarks, adminId);
             }
