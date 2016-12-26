@@ -1,9 +1,11 @@
 package com.ptb.pay.vo.recharge;
 
+import java.io.Serializable;
 import java.util.Date;
 
-public class RechargeFailedLogVO {
+public class RechargeFailedLogVO implements Serializable {
 
+    private static final long serialVersionUID = 1208129640307855113L;
     private Long ptbRechargeFailedLogId;
 
     private String rechargeOrderNo;
