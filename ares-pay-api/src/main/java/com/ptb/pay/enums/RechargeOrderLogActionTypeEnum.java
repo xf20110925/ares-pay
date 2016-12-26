@@ -13,6 +13,7 @@ public enum RechargeOrderLogActionTypeEnum {
     SUBMIT_INVOICE(4, " 用户提交发票"),
     CONFIRM_INVOICE(5, "管理员确认已开发票并邮寄"),
     UPDATE_PROCESSING_AMOUNT(6, "系统更新手续费"),
+    ADMIN_DEAL_FAILED(8, "管理员补单")
     ;
 
     int actionType;

@@ -10,17 +10,15 @@ import com.ptb.common.vo.ResponseVo;
 import com.ptb.pay.api.IRechargeOrderApi;
 import com.ptb.pay.conf.payment.OfflinePaymentConfig;
 import com.ptb.pay.enums.RechargeOrderLogActionTypeEnum;
+import com.ptb.pay.mapper.impl.RechargeFailedLogMapper;
 import com.ptb.pay.mapper.impl.RechargeOrderMapper;
+import com.ptb.pay.model.RechargeFailedLog;
+import com.ptb.pay.model.RechargeFailedLogExample;
 import com.ptb.pay.model.RechargeOrder;
 import com.ptb.pay.model.RechargeOrderExample;
 import com.ptb.pay.service.factory.RechargeOrderServiceFactory;
-import com.ptb.pay.service.interfaces.IOfflinePaymentService;
-import com.ptb.pay.service.interfaces.IPaymentService;
-import com.ptb.pay.service.interfaces.IRechargeOrderLogService;
-import com.ptb.pay.service.interfaces.IRechargeOrderService;
-import com.ptb.pay.vo.recharge.RechargeOrderParamsVO;
-import com.ptb.pay.vo.recharge.RechargeOrderQueryVO;
-import com.ptb.pay.vo.recharge.RechargeOrderVO;
+import com.ptb.pay.service.interfaces.*;
+import com.ptb.pay.vo.recharge.*;
 import com.ptb.service.api.IBaiduPushApi;
 import com.ptb.utils.service.ReturnUtil;
 import com.ptb.utils.tool.ChangeMoneyUtil;
@@ -60,6 +58,10 @@ public class RechargeOrderApiImpl implements IRechargeOrderApi {
     private IOfflinePaymentService offlinePaymentService;
     @Autowired
     private IRechargeOrderLogService rechargeOrderLogService;
+    @Autowired
+    private RechargeFailedLogMapper rechargeFailedLogMapper;
+    @Autowired
+    private IFailedRechargeOrderService failedRechargeOrderService;
 
     @Override
     public ResponseVo<Map<String, Object>> createRechargeOrder(RechargeOrderParamsVO paramsVO) throws Exception {
@@ -81,8 +83,8 @@ public class RechargeOrderApiImpl implements IRechargeOrderApi {
                 Map<String, Object> keyMap = new HashMap<>();
                 keyMap.put("id", rechargeOrder.getPtbRechargeOrderId());
                 param.setContentParam(keyMap);
-                param.setNeedPushMessage( false);
-                param.setNeedSaveMessage( true);
+                param.setNeedPushMessage(false);
+                param.setNeedSaveMessage(true);
                 baiduPushApi.pushMessage(param);
             } catch (Exception e) {
                 logger.error("线下打款消息推送失败。errorMsg:{}", e.getMessage());
@@ -121,7 +123,7 @@ public class RechargeOrderApiImpl implements IRechargeOrderApi {
         if (rechargeOrderQueryVO.getStatus() != null) {
             c.andStatusEqualTo(rechargeOrderQueryVO.getStatus());
         }
-        if(!CollectionUtils.isEmpty(rechargeOrderQueryVO.getStatuss())){
+        if (!CollectionUtils.isEmpty(rechargeOrderQueryVO.getStatuss())) {
             c.andStatusIn(rechargeOrderQueryVO.getStatuss());
         }
         //发票状态
@@ -227,12 +229,12 @@ public class RechargeOrderApiImpl implements IRechargeOrderApi {
         int result = rechargeOrderMapper.updateByExampleSelective(rechargeOrder, example);
         if (result > 0) {
             List<RechargeOrder> rechargeOrders = rechargeOrderMapper.selectByExample(example);
-            if(!CollectionUtils.isEmpty(rechargeOrders)){
+            if (!CollectionUtils.isEmpty(rechargeOrders)) {
                 for (RechargeOrder order : rechargeOrders) {
-                    if(RechargeOrderInvoiceStatusEnum.waiting.getRechargeOrderInvoiceStatus() == rechargeOrderVO.getInvoiceStatus()){ //用户提交发票
+                    if (RechargeOrderInvoiceStatusEnum.waiting.getRechargeOrderInvoiceStatus() == rechargeOrderVO.getInvoiceStatus()) { //用户提交发票
                         rechargeOrderLogService.saveUserOpLog(order.getRechargeOrderNo(),
                                 RechargeOrderLogActionTypeEnum.SUBMIT_INVOICE.getActionType(), null, order.getUserId());
-                    }else if(RechargeOrderInvoiceStatusEnum.opened.getRechargeOrderInvoiceStatus() == rechargeOrderVO.getInvoiceStatus()){ //管理员确认发票
+                    } else if (RechargeOrderInvoiceStatusEnum.opened.getRechargeOrderInvoiceStatus() == rechargeOrderVO.getInvoiceStatus()) { //管理员确认发票
                         rechargeOrderLogService.saveAdminOpLog(order.getRechargeOrderNo(),
                                 RechargeOrderLogActionTypeEnum.CONFIRM_INVOICE.getActionType(), null, adminId);
                     }
@@ -258,5 +260,81 @@ public class RechargeOrderApiImpl implements IRechargeOrderApi {
         }
         return ReturnUtil.error(CommonErrorCode.COMMMON_ERROR_INERERROR.getCode(),
                 CommonErrorCode.COMMMON_ERROR_INERERROR.getMessage());
+    }
+
+    @Override
+    public ResponseVo<Object> getFailedRechargeOrderListByPage(int pageNum, int pageSize, FailedRechargeOrderQueryVO failedRechargeOrderQueryVO) throws Exception {
+        RechargeFailedLogExample example = new RechargeFailedLogExample();
+
+        RechargeFailedLogExample.Criteria c = example.createCriteria();
+        //充值订单号
+        if (StringUtils.isNotBlank(failedRechargeOrderQueryVO.getRechargeOrderNo())) {
+            c.andRechargeOrderNoEqualTo(failedRechargeOrderQueryVO.getRechargeOrderNo());
+        }
+        //充值状态
+        if (failedRechargeOrderQueryVO.getStatus() != null) {
+            c.andStatusEqualTo(failedRechargeOrderQueryVO.getStatus());
+        }
+        //创建时间
+        if (failedRechargeOrderQueryVO.getStartTime() != null) {
+            c.andCreateTimeGreaterThanOrEqualTo(failedRechargeOrderQueryVO.getStartTime());
+        }
+        //创建时间
+        if (failedRechargeOrderQueryVO.getEndTime() != null) {
+            c.andCreateTimeLessThanOrEqualTo(failedRechargeOrderQueryVO.getEndTime());
+        }
+
+        example.setOrderByClause("create_time desc");
+
+        PageHelper.startPage(pageNum, pageSize); //开启分页查询，通过拦截器实现，紧接着执行的sql会被拦截
+        List<RechargeFailedLog> failedOrders = rechargeFailedLogMapper.selectByExample(example);
+        List<RechargeFailedLogVO> returnData = new ArrayList<RechargeFailedLogVO>();
+        PageInfo pageInfo = new PageInfo(failedOrders);
+        if (CollectionUtils.isEmpty(failedOrders)) {
+            return ReturnUtil.success(pageInfo);
+        }
+        for (RechargeFailedLog failedOrder : failedOrders) {
+            RechargeFailedLogVO rechargeFailedLogVO = new RechargeFailedLogVO();
+            rechargeFailedLogVO.setTotalAmount(failedOrder.getTotalAmount());
+            rechargeFailedLogVO.setCreateTime(failedOrder.getCreateTime());
+            rechargeFailedLogVO.setPtbRechargeFailedLogId(failedOrder.getPtbRechargeFailedLogId());
+            rechargeFailedLogVO.setRechargeOrderNo(failedOrder.getRechargeOrderNo());
+            rechargeFailedLogVO.setStatus(failedOrder.getStatus());
+            returnData.add(rechargeFailedLogVO);
+        }
+        pageInfo.setList(returnData);
+        return ReturnUtil.success(pageInfo);
+    }
+
+    @Override
+    public ResponseVo<RechargeFailedLogVO> getFailedRechargeOrder(Long failedRechargeOrderId) {
+        RechargeFailedLog log = rechargeFailedLogMapper.selectByPrimaryKey(failedRechargeOrderId);
+        if (log != null) {
+            RechargeFailedLogVO rechargeFailedLogVO = new RechargeFailedLogVO();
+            rechargeFailedLogVO.setStatus(log.getStatus());
+            rechargeFailedLogVO.setRechargeOrderNo(log.getRechargeOrderNo());
+            rechargeFailedLogVO.setPtbRechargeFailedLogId(log.getPtbRechargeFailedLogId());
+            rechargeFailedLogVO.setCreateTime(log.getCreateTime());
+            rechargeFailedLogVO.setTotalAmount(log.getTotalAmount());
+            return ReturnUtil.success(rechargeFailedLogVO);
+        }
+        return ReturnUtil.error(CommonErrorCode.COMMMON_ERROR_ARGSERROR.getCode(), CommonErrorCode.COMMMON_ERROR_ARGSERROR.getMessage());
+    }
+
+    @Override
+    public ResponseVo rechargeFailedOrder(Long failedRechargeOrderId, Long adminId) {
+        RechargeFailedLog log = rechargeFailedLogMapper.selectByPrimaryKey(failedRechargeOrderId);
+        if (log == null) {
+            return ReturnUtil.error(CommonErrorCode.COMMMON_ERROR_ARGSERROR.getCode(), CommonErrorCode.COMMMON_ERROR_ARGSERROR.getMessage());
+        }
+        try {
+            boolean result = failedRechargeOrderService.recharge(log, adminId);
+            if (result) {
+                return ReturnUtil.success();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return ReturnUtil.error(CommonErrorCode.COMMMON_ERROR_INERERROR.getCode(), CommonErrorCode.COMMMON_ERROR_INERERROR.getMessage());
     }
 }
