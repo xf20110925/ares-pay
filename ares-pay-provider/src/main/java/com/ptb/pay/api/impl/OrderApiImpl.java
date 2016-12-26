@@ -220,11 +220,9 @@ public class OrderApiImpl implements IOrderApi {
             //更新订单状态并增加订单日志
             orderService.updateStatusBuyerPayment(order.getPtbOrderId(),userId,order.getOrderNo());
             Order resultOrder = orderMapper.selectByPrimaryKey(orderId);
-/*
             //消息推送
             if(!messagePushService.pushOrderMessage(userId, order.getSellerId(), order.getPtbOrderId(), OrderActionEnum.BUYER_SUBMIT_ORDER, DeviceTypeEnum.getDeviceTypeEnum(deviceType)))
                 logger.error("send buyer payment message fail userId:" + userId + " orderNo:" + order.getOrderNo());
-*/
 
             Map<String, Object> buyerOrderStatus = orderService.getBuyerOrderStatus(resultOrder.getOrderStatus().toString() + resultOrder.getSellerStatus() + resultOrder.getBuyerStatus());
             ResponseVo responseVo1 = ReturnUtil.success("操作成功", buyerOrderStatus);
