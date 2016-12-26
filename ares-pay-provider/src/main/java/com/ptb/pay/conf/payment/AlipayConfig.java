@@ -22,6 +22,7 @@ public class AlipayConfig {
     private String method = "alipay.trade.app.pay";
     private String signType = "RSA";
     private String productCode = "QUICK_MSECURITY_PAY";
+    private String enablePayChannels = "balance,moneyFund,debitCardExpress"; //可用支付渠道，余额，余额宝，借记卡快捷
 //    -------------------pc start------------------------------------
     private String pcNotifyUrl;
     private String pcReturnUrl;
@@ -30,6 +31,23 @@ public class AlipayConfig {
     private String paymentType = "1";
     // 调用的接口名，无需修改
     private String pcService = "create_direct_pay_by_user";
+    private String enablePaymethod = "directPay^bankPay^debitCardExpress"; //pc 可用支付渠道，余额，网银，借记卡快捷
+
+    public String getEnablePaymethod() {
+        return enablePaymethod;
+    }
+
+    public void setEnablePaymethod(String enablePaymethod) {
+        this.enablePaymethod = enablePaymethod;
+    }
+
+    public String getEnablePayChannels() {
+        return enablePayChannels;
+    }
+
+    public void setEnablePayChannels(String enablePayChannels) {
+        this.enablePayChannels = enablePayChannels;
+    }
 
     public String getVersion() {
         return version;

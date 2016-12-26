@@ -153,6 +153,7 @@ public class AlipayOnlinePaymentServiceImpl implements IOnlinePaymentService {
         toSignParams.put("sign_type", alipayConfig.getSignType());
         toSignParams.put("timestamp", DateFormatUtils.format(new Date(), "yyyy-MM-dd HH:mm:ss"));
         toSignParams.put("version", alipayConfig.getVersion());
+        toSignParams.put("enable_pay_channels", alipayConfig.getEnablePayChannels());
 
         String sign = null;
         /**
@@ -198,6 +199,7 @@ public class AlipayOnlinePaymentServiceImpl implements IOnlinePaymentService {
         sParaTemp.put("total_fee", ChangeMoneyUtil.fromFenToYuan(String.valueOf(price)));
         sParaTemp.put("body", alipayConfig.getBody());
         sParaTemp.put("extra_common_param", DeviceTypeEnum.PC.getDeviceType()); //扩展参数
+        sParaTemp.put("enable_paymethod", alipayConfig.getEnablePaymethod());
 
         //其他业务参数根据在线开发文档，添加参数.文档地址:https://doc.open.alipay.com/doc2/detail.htm?spm=a219a.7629140.0.0.O9yorI&treeId=62&articleId=103740&docType=1
         //如sParaTemp.put("参数名","参数值");
