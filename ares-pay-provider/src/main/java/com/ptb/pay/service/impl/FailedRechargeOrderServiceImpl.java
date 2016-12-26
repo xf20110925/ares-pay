@@ -29,7 +29,7 @@ import java.util.TreeMap;
  *
  * @version 1.0  2016-11-08 13:11  by wgh（guanhua.wang@pintuibao.cn）创建
  */
-@Service("offlinePaymentService")
+@Service("failedRechargeOrderService")
 @Transactional
 public class FailedRechargeOrderServiceImpl implements IFailedRechargeOrderService {
 
