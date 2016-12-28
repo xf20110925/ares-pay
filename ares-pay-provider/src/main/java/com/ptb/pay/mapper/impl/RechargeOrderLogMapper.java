@@ -27,4 +27,6 @@ public interface RechargeOrderLogMapper extends MyMapper<RechargeOrderLog> {
     int updateByPrimaryKeySelective(RechargeOrderLog record);
 
     int updateByPrimaryKey(RechargeOrderLog record);
+
+    void batchInsert( List<RechargeOrderLog> list);
 }

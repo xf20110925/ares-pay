@@ -102,6 +102,15 @@
       <include refid="Example_Where_Clause" />
     </if>
   </delete>
+  <insert id="batchInsert" parameterType="java.util.List">
+    insert into ptb_recharge_order_log (recharge_order_no, action_type,
+      create_time, remarks, user_id, user_type)
+    values
+    <foreach collection="list" item="item" index="index" separator="," >
+      (#{item.rechargeOrderNo},#{item.actionType},#{item.createTime},#{item.remarks},#{item.userId},#{item.userType})
+    </foreach>
+
+  </insert>
   <insert id="insert" parameterType="com.ptb.pay.model.RechargeOrderLog" >
     insert into ptb_recharge_order_log (ptb_order_log_id, recharge_order_no, action_type, 
       create_time, remarks, user_id, 
