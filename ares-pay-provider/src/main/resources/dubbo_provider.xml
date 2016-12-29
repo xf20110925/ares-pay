@@ -7,8 +7,6 @@
 
 	<description>dubbo provider配置</description>
 
-	<dubbo:monitor protocol="registry" />
-
 	<dubbo:service interface="com.ptb.pay.api.IPaymentApi"
 		ref="paymentApi" registry="payProvider" loadbalance="roundrobin"
 		owner="wgh" version="1.0" />
