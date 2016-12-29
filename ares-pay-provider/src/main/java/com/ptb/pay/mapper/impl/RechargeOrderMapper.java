@@ -9,6 +9,8 @@ import org.apache.ibatis.annotations.Select;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Map;
+
 @Component
 public interface RechargeOrderMapper extends MyMapper<RechargeOrder> {
     int deleteByExample(RechargeOrderExample example);
@@ -36,4 +38,6 @@ public interface RechargeOrderMapper extends MyMapper<RechargeOrder> {
     RechargeOrder selectByIdAndUserId( @Param("rechargeOrderId")Long rechargeOrderId, @Param("userId") Long userId);
 
     RechargeOrder selectOne( @Param("rechargeOrderId")Long rechargeOrderId, @Param("rechargeOrderNo") String rechargeOrderNo, @Param("userId") Long userId);
+
+    void batchUpdateFee( List<Map<String, Object>> list);
 }

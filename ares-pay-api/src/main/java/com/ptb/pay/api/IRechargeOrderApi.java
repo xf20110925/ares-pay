@@ -96,5 +96,12 @@ public interface IRechargeOrderApi {
      * @version 1.0  2016-12-26 11:09 by wgh（guanhua.wang@pintuibao.cn）创建
      */ 
     ResponseVo rechargeFailedOrder(Long failedRechargeOrderId, Long adminId);
+
+    /**
+     * 批量更新手续费接口
+     * @param payFee
+     * @return
+     */
+    ResponseVo batchUpdatePayFee( List<Map<String, Object>> payFee);
 }
 

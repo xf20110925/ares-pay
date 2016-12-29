@@ -11,6 +11,7 @@ import com.ptb.pay.api.IRechargeOrderApi;
 import com.ptb.pay.conf.payment.OfflinePaymentConfig;
 import com.ptb.pay.enums.RechargeOrderLogActionTypeEnum;
 import com.ptb.pay.mapper.impl.RechargeFailedLogMapper;
+import com.ptb.pay.mapper.impl.RechargeOrderLogMapper;
 import com.ptb.pay.mapper.impl.RechargeOrderMapper;
 import com.ptb.pay.model.RechargeFailedLog;
 import com.ptb.pay.model.RechargeFailedLogExample;
@@ -336,5 +337,16 @@ public class RechargeOrderApiImpl implements IRechargeOrderApi {
             e.printStackTrace();
         }
         return ReturnUtil.error(CommonErrorCode.COMMMON_ERROR_INERERROR.getCode(), CommonErrorCode.COMMMON_ERROR_INERERROR.getMessage());
+    }
+
+    @Override
+    public ResponseVo batchUpdatePayFee(List<Map<String, Object>> payFee) {
+        if ( !CollectionUtils.isEmpty( payFee)){
+            //批量更新手续费
+            rechargeOrderMapper.batchUpdateFee( payFee);
+            //批量保存日志
+            rechargeOrderLogService.batchSaveLog( payFee);
+        }
+        return ReturnUtil.success();
     }
 }

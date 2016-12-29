@@ -125,6 +125,15 @@
       <include refid="Example_Where_Clause" />
     </if>
   </delete>
+  <update id="batchUpdateFee" parameterType="java.util.List">
+    <foreach collection="list" item="item" index="index" open="" close="" separator=";">
+      update ptb_recharge_order
+      <set>
+        processing_amount=${item.processingAmount}
+      </set>
+      where recharge_order_no = '${item.rechargeOrderNo}'
+    </foreach>
+  </update>
   <insert id="insert" parameterType="com.ptb.pay.model.RechargeOrder" >
     insert into ptb_recharge_order (ptb_recharge_order_id, recharge_order_no, 
       pay_type, user_id, pay_method, 
