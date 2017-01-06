@@ -2,7 +2,6 @@ package com.ptb.pay.mapper.impl;
 
 import com.ptb.pay.mapper.MyMapper;
 import com.ptb.pay.model.Order;
-import com.ptb.pay.vo.order.OrderListVO;
 import com.ptb.pay.vo.order.OrderQueryVO;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.ResultMap;
@@ -41,4 +40,12 @@ public interface OrderMapper extends MyMapper<Order> {
 
     @ResultMap("BaseResultMap")
     List<Order> selectDynamics(OrderQueryVO orderQueryVO);
+
+    @Select("select * from ptb_order where seller_id = #{userId} and last_modify_time BETWEEN #{beginDate} and #{endDate} and last_modifier_id != #{userId}")
+    @ResultMap("BaseResultMap")
+    List<Order> getSellerOrderChangeList( Long userId, Date beginDate, Date endDate);
+
+    @Select("select * from ptb_order where buyer_id = #{userId} and last_modify_time BETWEEN #{beginDate} and #{endDate} and last_modifier_id != #{userId}")
+    @ResultMap("BaseResultMap")
+    List<Order> getBuyerOrderChangeList( Long userId, Date beginDate, Date endDate);
 }

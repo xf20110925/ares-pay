@@ -772,4 +772,28 @@ public class OrderApiImpl implements IOrderApi {
         return ReturnUtil.success(orderService.getBuyerOrderStatus(""+order.getOrderStatus()+order.getSellerStatus()+order.getBuyerStatus()));
     }
 
+    @Override
+    public ResponseVo<Map<String, Object>> getOrderChangeStatus(Map<String, Object> param) {
+        Map<String, Object> data = new HashMap<>();
+        Long userId = (Long)param.get("userId");
+        Long sellerOrderLastVisitTime = (Long)param.get("sellerOrderLastVisitTime");
+        Long buyerOrderLastVisitTime = (Long)param.get("buyerOrderLastVisitTime");
+        Date sellerDate = new Date( sellerOrderLastVisitTime);
+        Date buyerDate = new Date( buyerOrderLastVisitTime);
+        Date currentDate = new Date();
+        List<Order> sellerOrderList = orderMapper.getSellerOrderChangeList( userId, sellerDate, currentDate);
+        List<Order> buyerOrderList = orderMapper.getBuyerOrderChangeList( userId, buyerDate, currentDate);
+        int buyerOrderChanged = 0;
+        int sellerOrderChanged = 0;
+        if (CollectionUtils.isNotEmpty( sellerOrderList)){
+            sellerOrderChanged = 1;
+        }
+        if (CollectionUtils.isNotEmpty( buyerOrderList)){
+            buyerOrderChanged = 1;
+        }
+        data.put( "buyerOrderChanged", buyerOrderChanged);
+        data.put( "sellerOrderChanged", sellerOrderChanged);
+        return ReturnUtil.success( data);
+    }
+
 }

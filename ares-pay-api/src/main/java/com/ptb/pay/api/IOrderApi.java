@@ -141,4 +141,13 @@ public interface IOrderApi {
      * @return
      */
     ResponseVo forceCompleteByAdmin(long adminId, long orderId, String reason);
+
+    /**
+     * 获取订单变化状态
+     * @param param userId 用户编号
+     *              sellerOrderLastVisitTime 卖家订单列表最后访问时间
+     *              buyerOrderLastVisitTime 买家订单列表最后访问时间
+     * @return
+     */
+    ResponseVo<Map<String, Object>> getOrderChangeStatus( Map<String, Object> param);
 }
