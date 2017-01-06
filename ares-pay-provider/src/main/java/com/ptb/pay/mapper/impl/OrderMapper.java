@@ -43,9 +43,9 @@ public interface OrderMapper extends MyMapper<Order> {
 
     @Select("select * from ptb_order where seller_id = #{userId} and last_modify_time BETWEEN #{beginDate} and #{endDate} and last_modifier_id != #{userId}")
     @ResultMap("BaseResultMap")
-    List<Order> getSellerOrderChangeList( Long userId, Date beginDate, Date endDate);
+    List<Order> getSellerOrderChangeList( @Param("userId") Long userId, @Param("beginDate")Date beginDate, @Param("endDate")Date endDate);
 
     @Select("select * from ptb_order where buyer_id = #{userId} and last_modify_time BETWEEN #{beginDate} and #{endDate} and last_modifier_id != #{userId}")
     @ResultMap("BaseResultMap")
-    List<Order> getBuyerOrderChangeList( Long userId, Date beginDate, Date endDate);
+    List<Order> getBuyerOrderChangeList(  @Param("userId") Long userId, @Param("beginDate")Date beginDate, @Param("endDate")Date endDate);
 }
